@@ -1,0 +1,135 @@
+body {
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+
+.bg-navy-950 {
+    background-color: #1b2d48;
+}
+
+.bg-navy-900 {
+    background-color: #31425a;
+}
+
+.bg-navy-800 {
+    background-color: #48566c;
+}
+
+.bg-navy-700 {
+    background-color: #5f6c7e;
+}
+
+.bg-navy-600 {
+    background-color: #768191;
+}
+
+.bg-navy-500 {
+    background-color: #8d96a3;
+}
+
+.bg-navy-400 {
+    background-color: #a3abb5;
+}
+
+.bg-navy-300 {
+    background-color: #bac0c8;
+}
+
+.bg-navy-200 {
+    background-color: #d1d5da;
+}
+
+.bg-navy-100 {
+    background-color: #e8eaec;
+}
+
+.bg-white {
+    color: #ffffff;
+}
+
+.text-navy-950 {
+    color: #1b2d48;
+}
+
+.text-navy-900 {
+    color: #31425a;
+}
+
+.text-navy-800 {
+    color: #48566c;
+}
+
+.text-navy-700 {
+    color: #5f6c7e;
+}
+
+.text-navy-600 {
+    color: #768191;
+}
+
+.text-navy-500 {
+    color: #8d96a3;
+}
+
+.text-navy-400 {
+    color: #a3abb5;
+}
+
+.text-navy-300 {
+    color: #bac0c8;
+}
+
+.text-navy-200 {
+    color: #d1d5da;
+}
+
+.text-navy-100 {
+    color: #e8eaec;
+}
+
+.text-white {
+    color: #ffffff;
+}
+
+.link-icon {
+    color: #31425a;
+}
+
+/* a.nav-link.active {
+        
+    } */
+.sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active, 
+.sidebar-light-primary .nav-sidebar>.nav-item>.nav-link.active {
+    background-color: #5f6c7e;
+    color: #fff;
+}
+
+[class*=sidebar-dark-] .nav-treeview>.nav-item>.nav-link.active, 
+[class*=sidebar-dark-] .nav-treeview>.nav-item>.nav-link.active:focus, 
+[class*=sidebar-dark-] .nav-treeview>.nav-item>.nav-link.active:hover {
+    background-color: #5f6c7e;
+    color: #fff;
+}
+
+    .customtooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+    }
+
+    .customtooltip .customtooltiptext {
+    visibility: hidden;
+    width: 500px;
+    background-color: black;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    }
+
+    .customtooltip:hover .customtooltiptext {
+    visibility: visible;
+    }
