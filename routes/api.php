@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\API\Auth\AuthController;
-use App\Http\Middleware\CheckAuth;
+use App\Http\Controllers\API\AuthController;
+use App\Http\Middleware\CheckAuthFrontend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,15 +28,16 @@ Route::get('/health-check', function (Request $request) {
 });
 
 Route::controller(AuthController::class)->group(function () {
-    Route::post('login', 'authenticate');
+    Route::post('login', 'doLogin');
 });
 
 // start checking auth
-Route::middleware([CheckAuth::class])->group(function () {
+Route::middleware([CheckAuthFrontend::class])->group(function () {
 
     // Profile
     Route::controller(AuthController::class)->group(function () {
-        Route::get('profile', 'getProfile');
+        Route::get('profile', 'profile');
+        Route::post('profile', 'profileUpdate');
         Route::post('profile/change-password', 'changePassword');
     });
 });
