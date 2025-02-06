@@ -27,7 +27,8 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->RespondErrorValidator($validator->errors());
+            Session::flash('error', $validator->errors()->first());
+            return redirect()->back();
         }
         $user = User::where('email', $request->email)->first();
 
