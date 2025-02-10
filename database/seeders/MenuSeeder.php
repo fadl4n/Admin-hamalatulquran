@@ -35,6 +35,25 @@ class MenuSeeder extends Seeder
                 'url' => '/users',
                 'sequence' => 2
             ],
+            [
+                'group_menu_id' => 1,
+                'name' => 'Data Santri',
+                'url' => '/santri',
+                'sequence' => 3
+            ],
+            [
+                'group_menu_id' => 1,
+                'name' => 'Data Kelas',
+                'url' => '/kelas',
+                'sequence' => 2
+            ],
+            [
+                'group_menu_id' => 1,
+                'name' => 'Data Pengajar',
+                'url' => '/pengajar',
+                'sequence' => 2
+            ],
+
         ]);
     }
 }
