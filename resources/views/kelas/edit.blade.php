@@ -11,9 +11,9 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-body">
-                            <form action="{{ url('kelas/'.$kelas->id_kelas.'/update') }}" method="POST">
+                            <form action="{{ route('kelas.update', $kelas->id_kelas) }}" method="POST">
                                 @csrf
-                                @method('PUT')
+                                @method('PUT') {{-- Ini harus ada agar sesuai dengan route di web.php --}}
                                 <div class="form-group">
                                     <label>Nama Kelas</label>
                                     <input type="text" name="nama_kelas" class="form-control" value="{{ $kelas->nama_kelas }}" required>

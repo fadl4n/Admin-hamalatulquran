@@ -11,9 +11,10 @@
                 <div class="col-md-8">
                     <div class="card card-primary">
                         <div class="card-body">
-                            <form action="{{ url('santri/' . $santri->id_santri) }}" method="POST">
+                            <form action="{{ route('santri.update', $santri->id_santri) }}" method="POST">
                                 @csrf
-                                @method('PUT')
+                                @method('PUT') {{-- Pakai PUT agar sesuai dengan route di web.php --}}
+
                                 <div class="form-group">
                                     <label>Nama</label>
                                     <input type="text" name="nama" class="form-control" value="{{ $santri->nama }}" required>

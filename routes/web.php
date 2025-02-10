@@ -8,6 +8,7 @@ use App\Http\Controllers\CMS\Configuration\MenuController;
 use App\Http\Controllers\CMS\User\UserController;
 use App\Http\Controllers\CMS\User\SantriController;
 use App\Http\Controllers\CMS\User\KelasController;
+use App\Http\Controllers\CMS\User\PengajarController;
 use App\Http\Controllers\CMS\User\RoleController;
 use App\Http\Controllers\CMS\Master\RoleController as RoleMaster;
 use App\Http\Controllers\SantriController as ControllersSantriController;
@@ -119,28 +120,40 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::get('fn-get-data', 'fnGetData');
         });
     });
-    Route::prefix('santri')->group(function () {
+    Route::prefix('santri')->name('santri.')->group(function () {
         Route::controller(SantriController::class)->group(function () {
-            Route::get('/', 'index'); // Menampilkan daftar santri
-            Route::get('create', 'create'); // Form tambah santri
-            Route::post('store', 'store'); // Menyimpan data santri
-            Route::get('edit/{id}', 'edit'); // Form edit santri
-            Route::post('update/{id}', 'update'); // Memperbarui data santri
-            Route::delete('delete/{id}', [SantriController::class, 'destroy']);
-            Route::get('fn-get-data', 'fnGetData'); // DataTables API
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('update/{id}', 'update')->name('update'); // Ubah dari POST ke PUT
+            Route::delete('delete/{id}', 'destroy')->name('destroy');
+            Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
         });
     });
-    Route::prefix('kelas')->group(function () {
-        Route::controller(KelasController::class)->group(function () {
-            Route::get('/', 'index'); // Menampilkan daftar santri
-            Route::get('create', 'create'); // Form tambah santri
-            Route::post('store', 'store'); // Menyimpan data santri
-            Route::get('edit/{id}', 'edit'); // Form edit santri
-            Route::post('update/{id}', 'update'); // Memperbarui data santri
-            Route::delete('delete/{id}', [KelasController::class, 'destroy']);
-            Route::get('fn-get-data', 'fnGetData'); // DataTables API
+    Route::prefix('kelas')->name('kelas.')->group(function () {
+    Route::controller(KelasController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('create', 'create')->name('create');
+        Route::post('store', 'store')->name('store');
+        Route::get('edit/{id}', 'edit')->name('edit');
+        Route::put('update/{id}', 'update')->name('update'); // Perbaiki route update
+        Route::delete('delete/{id}', 'destroy')->name('destroy');
+        Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+    });
+});
+    Route::prefix('pengajar')->name('pengajar.')->group(function () {
+        Route::controller(PengajarController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('update/{id}', 'update')->name('update'); // Pastikan PUT
+            Route::delete('delete/{id}', 'destroy')->name('destroy');
+            Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
         });
     });
+
 
 });
 // end checking auth
