@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
-use DataTables;
+use Yajra\DataTables\Facades\DataTables;
 use Validator;
 use App\Models\Role;
 use App\Models\Priviledge;
@@ -29,9 +29,9 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         $param = $request->only('name', 'description');
-        
+
         $data = Role::create($param);
-        
+
         if ($data) {
             $menus = Menu::all();
             foreach ($menus as $key => $menu) {
@@ -95,9 +95,9 @@ class RoleController extends Controller
     public function update(Request $request, $id)
     {
         $param = $request->only('name', 'description');
-        
+
         $data = Role::where('id', $id)->update($param);
-        
+
         if ($data) {
             $menus = Menu::all();
             foreach ($menus as $key => $menu) {
@@ -155,7 +155,7 @@ class RoleController extends Controller
     }
 
     public function fnGetData(Request $request, DataTables $datatable)
-    {   
+    {
         $edit = true;
         $delete = true;
         $page = ($request->start / $request->length) + 1;
@@ -197,7 +197,7 @@ class RoleController extends Controller
             ->rawColumns(['action'])
             ->make(true);
         }
-        
+
         return false;
     }
 }

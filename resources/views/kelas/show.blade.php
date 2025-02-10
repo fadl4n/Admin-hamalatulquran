@@ -1,0 +1,75 @@
+@extends('admin_template')
+
+@section('css')
+    <link rel="stylesheet" href="{{ asset('/bower_components/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+@endsection
+
+@section('title page')
+    Daftar Kelas
+@endsection
+
+@section('content')
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-end pb-2">
+                                <a href="{{ url('kelas/create') }}" class="btn btn-info">+ Tambah Kelas</a>
+                            </div>
+                            <table class="table table-bordered table-hover kelas-list">
+                                <thead class="bg-navy disabled">
+                                    <tr>
+                                        <th>ID Kelas</th>
+                                        <th>Nama Kelas</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+@endsection
+
+@section('script')
+<script>
+    var oDataList = $('.kelas-list').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{{ url('/kelas/fn-get-data') }}",
+        },
+        columns: [
+            { data: 'id_kelas', name: 'id_kelas' },
+            { data: 'nama_kelas', name: 'nama_kelas' },
+            { data: 'action', name: 'action', orderable: false, searchable: false }
+        ],
+    });
+
+    $('.kelas-list').on('click', '.btnDelete', function () {
+        let id = $(this).data('id');
+        if (confirm("Apakah Anda yakin ingin menghapus kelas ini?")) {
+            $.ajax({
+                url: "{{ url('/kelas/delete') }}/" + id,
+                type: "DELETE",
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    alert(response.success);
+                    oDataList.ajax.reload(); // Reload DataTables
+                },
+                error: function(xhr) {
+                    alert("Terjadi kesalahan! " + xhr.responseText);
+                }
+            });
+        }
+    });
+</script>
+@endsection

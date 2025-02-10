@@ -4,12 +4,11 @@ namespace App\Http\Controllers\CMS\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Hash;
-use DataTables;
+use Yajra\DataTables\Facades\DataTables;
 use File;
-use Validator;
 use App\Models\User;
 
 class UserController extends Controller
@@ -101,7 +100,7 @@ class UserController extends Controller
     }
 
     public function fnGetData(Request $request, DataTables $datatable)
-    {   
+    {
         $edit = true;
         $delete = true;
         $page = ($request->start / $request->length) + 1;
@@ -154,7 +153,7 @@ class UserController extends Controller
             ->rawColumns(['action', 'role_table'])
             ->make(true);
         }
-        
+
         return false;
     }
 }

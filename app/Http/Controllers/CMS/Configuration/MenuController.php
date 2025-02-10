@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
-use DataTables;
+use Yajra\DataTables\Facades\DataTables;
+
 use App\Models\GroupMenu;
 use App\Models\Menu;
 use App\Models\Role;
@@ -69,7 +70,7 @@ class MenuController extends Controller
     public function update(Request $request)
     {
         $param = $request->except('_token');
-        
+
         $data = Menu::where('id', $request->id)->update($param);
 
         if ($data) {
@@ -85,7 +86,7 @@ class MenuController extends Controller
     public function delete($id)
     {
         $data = Menu::where('id', $id)->delete();
-        
+
         if ($data) {
             Session::flash('success', 'Data Deleted');
             return redirect('/menu');
@@ -97,7 +98,7 @@ class MenuController extends Controller
     }
 
     public function fnGetData(Request $request, DataTables $datatable)
-    {   
+    {
         $edit = true;
         $delete = true;
         $page = ($request->start / $request->length) + 1;
@@ -139,7 +140,7 @@ class MenuController extends Controller
             ->rawColumns(['action'])
             ->make(true);
         }
-        
+
         return false;
     }
 }

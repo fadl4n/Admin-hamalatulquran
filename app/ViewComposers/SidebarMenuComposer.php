@@ -3,7 +3,7 @@
 namespace App\ViewComposers;
 
 use Illuminate\View\View;
-use Session;
+use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\Menu;
@@ -35,7 +35,7 @@ class SidebarMenuComposer
                     $menuItem['icon'] = $value->menu->groupMenu->icon;
                     $menuItem['menuItem'][$key]['name'] = $value->menu->name;
                     $menuItem['menuItem'][$key]['url'] = $value->menu->url;
-                    
+
                     $menu[$iter] = $menuItem;
                 }
             }

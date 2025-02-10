@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use \Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+
 use App\Models\User;
 
 class AuthController extends Controller
@@ -108,7 +109,7 @@ class AuthController extends Controller
             $filesizes[] = $file->getSize();
             $file->move(public_path('uploadedFile/image/user'), $name_original);
             $files = url('uploadedFile/image/user') . '/' . $name_original;
-            
+
             $param['image'] = $files;
         } else {
             $param['image'] = asset('assets/image/default-user.png');
@@ -132,7 +133,7 @@ class AuthController extends Controller
             ]);
 
             return redirect('/profile');
-        } 
+        }
 
         Session::flash('error', 'Data not updated');
 
