@@ -45,20 +45,27 @@ class MenuSeeder extends Seeder
                 'group_menu_id' => 1,
                 'name' => 'Data Kelas',
                 'url' => '/kelas',
-                'sequence' => 2
+                'sequence' => 4
             ],
             [
                 'group_menu_id' => 1,
                 'name' => 'Data Pengajar',
                 'url' => '/pengajar',
-                'sequence' => 2
+                'sequence' => 5
             ],
             [
                 'group_menu_id' => 1,
                 'name' => 'Data Keluarga',
                 'url' => '/keluarga',
-                'sequence' => 2
+                'sequence' => 6
             ],
+            [
+                'group_menu_id' => 1,
+                'name' => 'Data Surat',
+                'url' => '/surat',
+                'sequence' => 7
+            ],
+           
 
         ]);
     }

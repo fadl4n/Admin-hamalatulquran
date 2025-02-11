@@ -18,12 +18,15 @@ return new class extends Migration
             $table->date('tgl_lahir');
             $table->string('alamat');
             $table->string('angkatan');
-            $table->unsignedBigInteger('id_kelas'); // Perbaikan: Sesuai dengan id kelas
-            $table->foreign('id_kelas')->references('id')->on('kelas')->onDelete('set null'); // Tambah foreign key
+            $table->unsignedBigInteger('id_kelas')->nullable(); // Sesuaikan tipe dengan kelas.id_kelas
+            $table->foreign('id_kelas')->references('id_kelas')->on('kelas')->nullOnDelete();
             $table->integer('jenis_kelamin'); // 1 = Laki-laki, 2 = Perempuan
             $table->string('email');
             $table->integer('status'); // 1 = Aktif, 0 = Nonaktif
         });
+
+
+
     }
 
 

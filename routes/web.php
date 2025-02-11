@@ -10,6 +10,7 @@ use App\Http\Controllers\CMS\User\SantriController;
 use App\Http\Controllers\CMS\User\KelasController;
 use App\Http\Controllers\CMS\User\PengajarController;
 use App\Http\Controllers\CMS\User\KeluargaController;
+use App\Http\Controllers\CMS\User\SuratController;
 use App\Http\Controllers\CMS\User\RoleController;
 use App\Http\Controllers\CMS\Master\RoleController as RoleMaster;
 use App\Http\Controllers\SantriController as ControllersSantriController;
@@ -162,6 +163,17 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::get('edit/{keluarga}', 'edit')->name('edit'); // Gunakan {keluarga} untuk Route Model Binding
             Route::put('update/{keluarga}', 'update')->name('update');
             Route::delete('delete/{keluarga}', 'destroy')->name('destroy');
+            Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+        });
+    });
+    Route::prefix('surat')->name('surat.')->group(function () {
+        Route::controller(SuratController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
+            Route::get('edit/{surat}', 'edit')->name('edit'); // Gunakan {surat} untuk Route Model Binding
+            Route::put('update/{surat}', 'update')->name('update');
+            Route::delete('delete/{surat}', 'destroy')->name('destroy');
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
         });
     });
