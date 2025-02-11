@@ -9,6 +9,7 @@ use App\Http\Controllers\CMS\User\UserController;
 use App\Http\Controllers\CMS\User\SantriController;
 use App\Http\Controllers\CMS\User\KelasController;
 use App\Http\Controllers\CMS\User\PengajarController;
+use App\Http\Controllers\CMS\User\KeluargaController;
 use App\Http\Controllers\CMS\User\RoleController;
 use App\Http\Controllers\CMS\Master\RoleController as RoleMaster;
 use App\Http\Controllers\SantriController as ControllersSantriController;
@@ -153,7 +154,17 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
         });
     });
-
+    Route::prefix('keluarga')->name('keluarga.')->group(function () {
+        Route::controller(KeluargaController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
+            Route::get('edit/{keluarga}', 'edit')->name('edit'); // Gunakan {keluarga} untuk Route Model Binding
+            Route::put('update/{keluarga}', 'update')->name('update');
+            Route::delete('delete/{keluarga}', 'destroy')->name('destroy');
+            Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+        });
+    });
 
 });
 // end checking auth

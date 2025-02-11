@@ -12,7 +12,6 @@
                     <div class="card card-primary">
                         <div class="card-body">
                             <form action="{{ url('santri/store') }}" method="POST">
-
                                 @csrf
                                 <div class="form-group">
                                     <label>Nama</label>
@@ -33,6 +32,15 @@
                                 <div class="form-group">
                                     <label>Angkatan</label>
                                     <input type="text" name="angkatan" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>Kelas</label>
+                                    <select name="id_kelas" class="form-control">
+                                        <option value="">Pilih Kelas</option>
+                                        @foreach($kelas as $k)
+                                            <option value="{{ $k->id_kelas }}">{{ $k->nama_kelas }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <label>Jenis Kelamin</label>

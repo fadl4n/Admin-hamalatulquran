@@ -53,6 +53,12 @@ class MenuSeeder extends Seeder
                 'url' => '/pengajar',
                 'sequence' => 2
             ],
+            [
+                'group_menu_id' => 1,
+                'name' => 'Data Keluarga',
+                'url' => '/keluarga',
+                'sequence' => 2
+            ],
 
         ]);
     }

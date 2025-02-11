@@ -8,13 +8,20 @@
     <section class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-8">
-                    <div class="card card-primary">
+                <div class="col-12">
+                    <div class="card">
                         <div class="card-body">
+                            <div class="d-flex justify-content-end pb-2">
+                                <a href="{{ url('santri') }}" class="btn btn-secondary">Kembali</a>
+                            </div>
                             <form action="{{ route('santri.update', $santri->id_santri) }}" method="POST">
                                 @csrf
-                                @method('PUT') {{-- Pakai PUT agar sesuai dengan route di web.php --}}
+                                @method('PUT')
 
+                                <div class="form-group">
+                                    <label>ID Santri</label>
+                                    <input type="text" class="form-control" value="{{ $santri->id_santri }}" disabled>
+                                </div>
                                 <div class="form-group">
                                     <label>Nama</label>
                                     <input type="text" name="nama" class="form-control" value="{{ $santri->nama }}" required>
@@ -36,6 +43,17 @@
                                     <input type="text" name="angkatan" class="form-control" value="{{ $santri->angkatan }}">
                                 </div>
                                 <div class="form-group">
+                                    <label>Kelas</label>
+                                    <select name="id_kelas" class="form-control">
+                                        <option value="">Pilih Kelas</option>
+                                        @foreach($kelas as $k)
+                                            <option value="{{ $k->id_kelas }}" {{ $santri->id_kelas == $k->id_kelas ? 'selected' : '' }}>
+                                                {{ $k->nama_kelas }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
                                     <label>Jenis Kelamin</label>
                                     <select name="jenis_kelamin" class="form-control">
                                         <option value="1" {{ $santri->jenis_kelamin == 1 ? 'selected' : '' }}>Laki-laki</option>
@@ -49,6 +67,7 @@
                                         <option value="0" {{ $santri->status == 0 ? 'selected' : '' }}>Nonaktif</option>
                                     </select>
                                 </div>
+
                                 <button type="submit" class="btn btn-success">Simpan</button>
                                 <a href="{{ url('santri') }}" class="btn btn-secondary">Batal</a>
                             </form>

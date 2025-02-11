@@ -16,14 +16,16 @@ return new class extends Migration
             $table->string('nama');
             $table->integer('nisn')->unique();
             $table->date('tgl_lahir');
-            $table->string('alamat')->nullable();
-            $table->string('angkatan')->nullable();
-            $table->integer('id_kelas')->nullable();
+            $table->string('alamat');
+            $table->string('angkatan');
+            $table->unsignedBigInteger('id_kelas'); // Perbaikan: Sesuai dengan id kelas
+            $table->foreign('id_kelas')->references('id')->on('kelas')->onDelete('set null'); // Tambah foreign key
             $table->integer('jenis_kelamin'); // 1 = Laki-laki, 2 = Perempuan
-            $table->string('email')->nullable();
+            $table->string('email');
             $table->integer('status'); // 1 = Aktif, 0 = Nonaktif
         });
     }
+
 
     /**
      * Reverse the migrations.

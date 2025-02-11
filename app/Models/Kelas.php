@@ -13,4 +13,9 @@ class Kelas extends Model
     protected $fillable = [
         'id_kelas','nama_kelas'
     ];
+
+    public function santri()
+    {
+        return $this->hasMany(Santri::class, 'id_kelas', 'id_kelas'); // ✅ Sesuaikan foreign key dan primary key
+    }
 }
