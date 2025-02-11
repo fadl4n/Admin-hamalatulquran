@@ -70,7 +70,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
   </aside>
   <!-- /.control-sidebar -->
   {{-- @include('layout.footer') --}}
- 
 </div>
 <!-- ./wrapper -->
 @include('component.delete_modal')

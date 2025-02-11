@@ -19,6 +19,11 @@ class MenuSeeder extends Seeder
                 'name' => 'Master User',
                 'icon' => 'fas fa-user',
                 'sequence' => 1
+            ],
+            [
+                'name' => 'Master Role',
+                'icon' => 'fas fa-user',
+                'sequence' => 2
             ]
         ]);
 
@@ -36,37 +41,41 @@ class MenuSeeder extends Seeder
                 'sequence' => 2
             ],
             [
-                'group_menu_id' => 1,
+                'group_menu_id' => 2,
                 'name' => 'Data Santri',
                 'url' => '/santri',
                 'sequence' => 3
             ],
             [
-                'group_menu_id' => 1,
+                'group_menu_id' => 2,
                 'name' => 'Data Kelas',
                 'url' => '/kelas',
                 'sequence' => 4
             ],
             [
-                'group_menu_id' => 1,
+                'group_menu_id' => 2,
                 'name' => 'Data Pengajar',
                 'url' => '/pengajar',
                 'sequence' => 5
             ],
             [
-                'group_menu_id' => 1,
+                'group_menu_id' => 2,
                 'name' => 'Data Keluarga',
                 'url' => '/keluarga',
                 'sequence' => 6
             ],
             [
-                'group_menu_id' => 1,
+                'group_menu_id' => 2,
                 'name' => 'Data Surat',
                 'url' => '/surat',
                 'sequence' => 7
             ],
-           
-
+            [
+                'group_menu_id' => 2,
+                'name' => 'Artikel',
+                'url' => '/artikel',
+                'sequence' => 8
+            ],
         ]);
     }
 }

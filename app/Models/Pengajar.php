@@ -9,7 +9,7 @@ class Pengajar extends Model
 {
     use HasFactory;
 
-    protected $table = 'pengajar'; // Sesuai dengan nama tabel di database
+    protected $table = 'pengajars'; // Sesuai dengan nama tabel di database
     protected $primaryKey = 'id_pengajar';
     public $timestamps = false; // Jika tabel tidak memiliki created_at dan updated_at
 

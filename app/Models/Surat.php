@@ -9,7 +9,7 @@ class Surat extends Model
 {
     use HasFactory;
 
-    protected $table = 'surat'; // Nama tabel di database
+    protected $table = 'surats'; // Nama tabel di database
     protected $primaryKey = 'id_surat'; // Primary key tabel
 
     protected $fillable = [
