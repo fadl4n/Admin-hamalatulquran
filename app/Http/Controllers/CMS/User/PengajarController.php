@@ -49,8 +49,8 @@ class PengajarController extends Controller
 {
     $request->validate([
         'nama' => 'required|string|max:255',
-        'nip' => 'required|string|unique:pengajar,nip',
-        'email' => 'required|string|email|unique:pengajar,email',
+        'nip' => 'required|string|unique:pengajars,nip',
+        'email' => 'required|string|email|unique:pengajars,email',
         'no_telp' => 'required|string|max:20',
         'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
         'alamat' => 'required|string|max:255',
@@ -87,8 +87,8 @@ class PengajarController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'nip' => 'required|string|unique:pengajar,nip,'.$id.',id_pengajar',
-            'email' => 'required|string|email|unique:pengajar,email,'.$id.',id_pengajar',
+            'nip' => 'required|string|unique:pengajars,nip,'.$id.',id_pengajar',
+            'email' => 'required|string|email|unique:pengajars,email,'.$id.',id_pengajar',
             'no_telp' => 'required|string|max:20',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
             'alamat' => 'required|string|max:255',

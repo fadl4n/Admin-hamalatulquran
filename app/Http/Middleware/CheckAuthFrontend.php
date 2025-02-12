@@ -27,7 +27,8 @@ class CheckAuthFrontend
 
         try {
             $decode = JWT::decode($request->bearerToken(), new Key(env('JWT_SECRET'), 'HS256'));
-            
+
+
             $request->userData = isset($decode->data) ? $decode->data : [];
             if (!str_contains($request->url(), 'login') && empty($decode->data->id)) {
                 return response()->json([
@@ -37,15 +38,15 @@ class CheckAuthFrontend
             }
             return $next($request);
         }
-        
+
         // EXPIRED
         catch (\Firebase\JWT\ExpiredException $e) {
             return response()->json([
                 'message' => 'Expired access token.',
                 'success' => false,
             ], 401);
-        } 
-        
+        }
+
         // INVALID
         catch (\Firebase\JWT\SignatureInvalidException $e) {
             return response()->json([

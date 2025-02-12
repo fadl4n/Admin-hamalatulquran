@@ -32,7 +32,8 @@
                                     <select name="id_santri" class="form-control">
                                         <option value="">- Pilih Santri -</option>
                                         @foreach($santris as $santri)
-                                            <option value="{{ $santri->id_santri }}">{{ $santri->nama }}</option>
+                                        <option value="{{ $santri->id_santri }}">{{ $santri->nama }} | {{ $santri->nisn }}</option>
+
                                         @endforeach
                                     </select>
                                 </div>

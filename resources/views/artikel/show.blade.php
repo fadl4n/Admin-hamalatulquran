@@ -3,10 +3,11 @@
 @section('css')
     <link rel="stylesheet" href="{{ asset('/bower_components/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 @endsection
 
 @section('title page')
-    Daftar Santri
+    Daftar Artikel
 @endsection
 
 @section('content')
@@ -17,19 +18,16 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="d-flex justify-content-end pb-2">
-                                <a href="{{ url('santri/create') }}" class="btn btn-info">+ Tambah Santri</a>
+                                <a href="{{ route('artikel.create') }}" class="btn btn-info">+ Tambah Artikel</a>
                             </div>
-                            <table class="table table-bordered table-hover santri-list">
+                            <table class="table table-bordered table-hover artikel-list">
                                 <thead class="bg-navy disabled">
                                     <tr>
-                            
-                                        <th>Nama</th>
-                                        <th>NISN</th>
-                                        <th>Tanggal Lahir</th>
-                                        <th>Alamat</th>
-                                        <th>Angkatan</th>
-                                        <th>Jenis Kelamin</th>
-                                        <th>Nama Kelas</th> <!-- Tambahkan kolom kelas -->
+                                        <th>No</th>
+                                        <th>Judul</th>
+                                        <th>Deskripsi</th>
+                                        <th>Gambar</th>
+                                        <th>Tanggal Expired</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -45,31 +43,33 @@
 
 @section('script')
 <script>
-   var oDataList = $('.santri-list').DataTable({
-    processing: true,
-    serverSide: true,
-    ajax: {
-        url: "{{ url('/santri/fn-get-data') }}",
-    },
-    columns: [
-        { data: 'nama', name: 'nama' },
-        { data: 'nisn', name: 'nisn' },
-        { data: 'tgl_lahir', name: 'tgl_lahir' },
-        { data: 'alamat', name: 'alamat' },
-        { data: 'angkatan', name: 'angkatan' },
-        { data: 'jenis_kelamin', name: 'jenis_kelamin', render: function(data) {
-            return data == 1 ? "Laki-laki" : "Perempuan";
-        }},
-        { data: 'nama_kelas', name: 'nama_kelas' }, // ✅ Pastikan nama_kelas sesuai dengan controller
-        { data: 'action', name: 'action', orderable: false, searchable: false }
-    ],
-});
+    var oDataList = $('.artikel-list').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{{ url('/artikel/fn-get-data') }}",
+        },
+        columns: [
+            { data: 'id', name: 'id' },
+            { data: 'judul', name: 'judul' },
+            { data: 'deskripsi', name: 'deskripsi', render: function(data) {
+                return data ? data.substring(0, 100 )  : '-';
+            }},
+            { data: 'gambar', name: 'gambar', orderable: false, searchable: false, render: function(data) {
+                return data ? '<img src="' + data + '" width="100" alt="Gambar Artikel">' : '-';
+            }},
+            { data: 'expired_at', name: 'expired_at', render: function(data) {
+                return data ? moment(data).format('YYYY-MM-DD') : '-';
+            }},
+            { data: 'action', name: 'action', orderable: false, searchable: false }
+        ],
+    });
 
-    $('.santri-list').on('click', '.btnDelete', function () {
+    $('.artikel-list').on('click', '.btnDelete', function () {
         let id = $(this).data('id');
-        if (confirm("Apakah Anda yakin ingin menghapus santri ini?")) {
+        if (confirm("Apakah Anda yakin ingin menghapus artikel ini?")) {
             $.ajax({
-                url: "{{ url('/santri/delete') }}/" + id,
+                url: "{{ url('/artikel/delete') }}/" + id,
                 type: "DELETE",
                 headers: {
                     'X-CSRF-TOKEN': "{{ csrf_token() }}"

@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Str;
-use Session;
+use Illuminate\Support\Facades\Session;
 use App\Models\Priviledge;
 use App\Models\Menu;
 use Illuminate\Http\Request;

@@ -40,9 +40,10 @@ class SantriController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'nama' => 'required|string|max:255',
-            'nisn' => 'required|integer|unique:santris,nisn',
+           'nisn' => 'required|numeric|digits_between:1,10|unique:santris,nisn',
             'tgl_lahir' => 'required|date',
             'alamat' => 'nullable|string|max:255',
             'angkatan' => 'nullable|string|max:50',
@@ -52,6 +53,7 @@ class SantriController extends Controller
         ]);
 
         Santri::create($request->all());
+
 
         return redirect('santri')->with('success', 'Santri berhasil ditambahkan.');
     }

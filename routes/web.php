@@ -8,12 +8,12 @@ use App\Http\Controllers\CMS\Configuration\MenuController;
 use App\Http\Controllers\CMS\User\UserController;
 use App\Http\Controllers\CMS\User\SantriController;
 use App\Http\Controllers\CMS\User\KelasController;
+use App\Http\Controllers\CMS\User\ArtikelController;
 use App\Http\Controllers\CMS\User\PengajarController;
 use App\Http\Controllers\CMS\User\KeluargaController;
 use App\Http\Controllers\CMS\User\SuratController;
 use App\Http\Controllers\CMS\User\RoleController;
 use App\Http\Controllers\CMS\Master\RoleController as RoleMaster;
-use App\Http\Controllers\SantriController as ControllersSantriController;
 use App\Http\Middleware\CheckAuth;
 use App\Http\Middleware\CheckPriviledge;
 
@@ -177,6 +177,17 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
         });
     });
+
+    Route::prefix('artikel')->group(function () {
+        Route::get('/', [ArtikelController::class, 'index'])->name('artikel.index');
+        Route::get('/create', [ArtikelController::class, 'create'])->name('artikel.create');
+        Route::post('/store', [ArtikelController::class, 'store'])->name('artikel.store');
+        Route::get('/edit/{id}', [ArtikelController::class, 'edit'])->name('artikel.edit');
+        Route::put('/update/{id}', [ArtikelController::class, 'update'])->name('artikel.update');
+        Route::delete('/delete/{id}', [ArtikelController::class, 'destroy'])->name('artikel.destroy');
+        Route::get('/fn-get-data', [ArtikelController::class, 'fnGetData']);
+    });
+
 
 });
 // end checking auth

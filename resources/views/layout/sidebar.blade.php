@@ -1,5 +1,6 @@
 <!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
+<aside class="main-sidebar sidebar-dark-primary elevation-4" style="min-height: 130vh; overflow-y: auto;">
+
   <!-- Brand Logo -->
   <a href="{{url('/')}}" class="brand-link text-center">
     {{-- <img src="{{ asset ("/bower_components/admin-lte/dist/img/AdminLTELogo.png") }}" alt="AdminLTE Logo"

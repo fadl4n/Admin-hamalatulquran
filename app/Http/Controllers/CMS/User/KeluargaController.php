@@ -67,7 +67,7 @@ public function fnGetData()
             'no_telp' => 'required|string|max:15',
             'id_santri' => 'nullable|exists:santris,id_santri',
             'alamat' => 'required|string',
-            'email' => 'required|email|unique:keluarga,email',
+            'email' => 'required|email|unique:keluargas,email',
             'password' => 'required|string|min:6',
         ]);
 
@@ -101,7 +101,7 @@ public function fnGetData()
             'no_telp' => 'required|string|max:15',
             'id_santri' => 'nullable|exists:santris,id_santri',
             'alamat' => 'required|string',
-            'email' => 'required|email|unique:keluarga,email,' . $keluarga->id,
+            'email' => 'required|email|unique:keluargas,email,' . $keluarga->id,
             'password' => 'nullable|string|min:6',
         ]);
 
