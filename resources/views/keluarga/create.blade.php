@@ -32,8 +32,7 @@
                                     <select name="id_santri" class="form-control">
                                         <option value="">- Pilih Santri -</option>
                                         @foreach($santris as $santri)
-                                        <option value="{{ $santri->id_santri }}">{{ $santri->nama }} | {{ $santri->nisn }}</option>
-
+                                            <option value="{{ $santri->id_santri }}">{{ $santri->nama }} | {{ $santri->nisn }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -46,8 +45,12 @@
                                     <input type="email" name="email" class="form-control" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>Password</label>
-                                    <input type="password" name="password" class="form-control" required>
+                                    <label>Tempat Lahir</label>
+                                    <input type="text" name="tempat_lahir" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tanggal Lahir</label>
+                                    <input type="date" name="tgl_lahir" class="form-control" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Simpan</button>
                                 <a href="{{ route('keluarga.index') }}" class="btn btn-secondary">Batal</a>

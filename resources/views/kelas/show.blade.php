@@ -22,8 +22,9 @@
                             <table class="table table-bordered table-hover kelas-list">
                                 <thead class="bg-navy disabled">
                                     <tr>
-                                        <th>ID Kelas</th>
+                                        <th>No</th>  <!-- ✅ Menggunakan nomor urut -->
                                         <th>Nama Kelas</th>
+                                        <th>Jumlah Santri</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -46,10 +47,14 @@
             url: "{{ url('/kelas/fn-get-data') }}",
         },
         columns: [
-            { data: 'id_kelas', name: 'id_kelas' },
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false }, // ✅ Nomor urut otomatis
             { data: 'nama_kelas', name: 'nama_kelas' },
+            { data: 'santri_count', name: 'santri_count', defaultContent: '0' },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ],
+        columnDefs: [
+            { className: "text-center", targets: [0, 2, 3] } // ✅ Pusatkan teks di kolom tertentu
+        ]
     });
 
     $('.kelas-list').on('click', '.btnDelete', function () {

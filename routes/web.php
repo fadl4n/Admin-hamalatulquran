@@ -127,12 +127,20 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('create', 'create')->name('create');
             Route::post('store', 'store')->name('store');
+            Route::get('show/{id}', 'show')->name('show');
             Route::get('edit/{id}', 'edit')->name('edit');
-            Route::put('update/{id}', 'update')->name('update'); // Ubah dari POST ke PUT
+            Route::put('update/{id}', 'update')->name('update');
             Route::delete('delete/{id}', 'destroy')->name('destroy');
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+            Route::get('edit-orangtua/{id}', 'editOrangTua')->name('edit.orangtua');
+            Route::put('update-orangtua/{id}', 'updateOrangTua')->name('update.orangtua'); // Pastikan ini ada
+            Route::get('edit-wali/{id}', 'editWali')->name('edit.wali');
+            Route::put('update-wali/{id}', 'updateWali')->name('update.wali');
         });
     });
+
+
+
     Route::prefix('kelas')->name('kelas.')->group(function () {
     Route::controller(KelasController::class)->group(function () {
         Route::get('/', 'index')->name('index');
@@ -150,6 +158,7 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::get('create', 'create')->name('create');
             Route::post('store', 'store')->name('store');
             Route::get('edit/{id}', 'edit')->name('edit');
+            Route::get('show/{id}', 'show')->name('show');
             Route::put('update/{id}', 'update')->name('update'); // Pastikan PUT
             Route::delete('delete/{id}', 'destroy')->name('destroy');
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');

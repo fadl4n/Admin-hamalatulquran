@@ -11,6 +11,9 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-body">
+                            @if(session('error'))
+                                <p style="color: red;">{{ session('error') }}</p>
+                            @endif
                             <form action="{{ url('kelas/store') }}" method="POST">
                                 @csrf
                                 <div class="form-group">

@@ -4,7 +4,6 @@
     <link rel="stylesheet" href="{{ asset('/bower_components/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
 @endsection
 
 @section('title page')
@@ -25,12 +24,7 @@
                                 <thead class="bg-navy disabled">
                                     <tr>
                                         <th>No</th>
-                                        <th>Nama</th>
-                                        <th>Pekerjaan</th>
-                                        <th>Pendidikan</th>
-                                        <th>No. Telepon</th>
-                                        <th>Email</th>
-                                        <th>Santri</th>
+                                        <th>Nama Santri</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -54,15 +48,19 @@
         },
         columns: [
             { data: 'id', name: 'id' },
-            { data: 'nama', name: 'nama' },
-            { data: 'pekerjaan', name: 'pekerjaan' },
-            { data: 'pendidikan', name: 'pendidikan' },
-            { data: 'no_telp', name: 'no_telp' },
-            { data: 'email', name: 'email' },
             { data: 'nama_santri', name: 'nama_santri', render: function(data) {
-    return data ? data : '-';
-}},
-            { data: 'action', name: 'action', orderable: false, searchable: false }
+                return data ? data : '-';
+            }},
+            { data: 'action', name: 'action', orderable: false, searchable: false, render: function(data, type, row) {
+                return `
+                    <a href="{{ url('/keluarga/show/') }}/${row.id}" class="btn btn-primary btn-sm" title="Preview">
+                        <i class="fa fa-eye"></i>
+                    </a>
+                    <button class="btn btn-danger btn-sm btnDelete" data-id="${row.id}" title="Delete">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                `;
+            }}
         ],
     });
 

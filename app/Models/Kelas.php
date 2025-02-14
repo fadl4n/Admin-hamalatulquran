@@ -11,11 +11,16 @@ class Kelas extends Model
     public $timestamps = false; // Jika tabel tidak memiliki created_at dan updated_at
 
     protected $fillable = [
-        'id_kelas','nama_kelas'
+        'id_kelas','nama_kelas','jumlah_santri'
     ];
 
     public function santri()
     {
         return $this->hasMany(Santri::class, 'id_kelas', 'id_kelas'); // ✅ Sesuaikan foreign key dan primary key
+    }
+    public function updateJumlahSantri()
+    {
+        $this->jumlah_santri = $this->santri()->count();
+        $this->save();
     }
 }

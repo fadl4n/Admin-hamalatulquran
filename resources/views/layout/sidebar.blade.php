@@ -1,5 +1,5 @@
 <!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-dark-primary elevation-4" style="min-height: 130vh; overflow-y: auto;">
+<aside class="main-sidebar sidebar-dark-primary elevation-4" style="min-height: 140vh; overflow-y: auto;">
 
   <!-- Brand Logo -->
   <a href="{{url('/')}}" class="brand-link text-center">
