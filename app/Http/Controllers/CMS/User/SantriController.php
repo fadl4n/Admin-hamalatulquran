@@ -52,7 +52,7 @@ class SantriController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'nisn' => 'required|numeric|digits_between:1,10|unique:santris,nisn',
+            'nisn' => 'required|numeric|digits_between:1,10',
             'tempat_lahir' => 'required|string|max:255',
             'tgl_lahir' => 'required|date',
             'alamat' => 'nullable|string|max:255',
@@ -64,6 +64,15 @@ class SantriController extends Controller
             'password' => 'required|string|min:6',
             'foto_santri' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        // Pengecekan manual untuk NISN dan Email
+        if (Santri::where('nisn', $request->nisn)->exists()) {
+            return redirect()->back()->withInput()->with('error', 'NISN sudah digunakan.');
+        }
+
+        if (Santri::where('email', $request->email)->exists()) {
+            return redirect()->back()->withInput()->with('error', 'Email sudah digunakan.');
+        }
 
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
@@ -88,7 +97,7 @@ class SantriController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'nisn' => 'required|integer|unique:santris,nisn,' . $id . ',id_santri',
+            'nisn' => 'required|numeric|digits_between:1,10',
             'tempat_lahir' => 'required|string|max:255',
             'tgl_lahir' => 'required|date',
             'email' => 'nullable|string|max:255',
@@ -104,6 +113,15 @@ class SantriController extends Controller
         $santri = Santri::findOrFail($id);
         $data = $request->except('password', 'foto_santri');
 
+        // Pengecekan manual untuk NISN dan Email
+        if (Santri::where('nisn', $request->nisn)->where('id_santri', '!=', $santri->id_santri)->exists()) {
+            return redirect()->back()->withInput()->with('error', 'NISN sudah digunakan oleh santri lain.');
+        }
+
+        if (Santri::where('email', $request->email)->where('id_santri', '!=', $santri->id_santri)->exists()) {
+            return redirect()->back()->withInput()->with('error', 'Email sudah digunakan oleh santri lain.');
+        }
+
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
@@ -118,6 +136,7 @@ class SantriController extends Controller
         $santri->update($data);
         return redirect()->route('santri.show', $santri->id_santri)->with('success', 'Santri berhasil diperbarui.');
     }
+
 
     public function destroy($id)
     {
@@ -181,11 +200,21 @@ class SantriController extends Controller
             'tgl_lahir_ibu' => 'nullable|date',
         ]);
 
+        // Cek email ayah dan ibu apakah sudah terdaftar di keluarga lain
+        if (Keluarga::where('email', $request->email_ayah)->where('id_santri', '!=', $santri->id_santri)->exists()) {
+            return redirect()->back()->withInput()->with('error', 'Email ayah sudah digunakan.');
+        }
+
+        if (Keluarga::where('email', $request->email_ibu)->where('id_santri', '!=', $santri->id_santri)->exists()) {
+            return redirect()->back()->withInput()->with('error', 'Email ibu sudah digunakan.');
+        }
+
         $this->updateKeluarga($santri->id_santri, 1, $validated, 'ayah');
         $this->updateKeluarga($santri->id_santri, 2, $validated, 'ibu');
 
         return redirect()->route('santri.show', $id_santri)->with('success', 'Data Orang Tua berhasil diperbarui!');
     }
+
 
     public function editWali($id_santri)
     {
@@ -210,10 +239,16 @@ class SantriController extends Controller
             'tgl_lahir_wali' => 'nullable|date',
         ]);
 
+        // Cek email wali apakah sudah terdaftar di keluarga lain
+        if (Keluarga::where('email', $request->email_wali)->where('id_santri', '!=', $santri->id_santri)->exists()) {
+            return redirect()->back()->withInput()->with('error', 'Email wali sudah digunakan.');
+        }
+
         $this->updateKeluarga($santri->id_santri, 3, $validated, 'wali');
 
         return redirect()->route('santri.show', $id_santri)->with('success', 'Data Wali berhasil diperbarui!');
     }
+
 
     private function updateKeluarga($id_santri, $hubungan, $data, $prefix)
     {

@@ -76,6 +76,7 @@ class MenuSeeder extends Seeder
                 'url' => '/artikel',
                 'sequence' => 8
             ],
+            
         ]);
     }
 }

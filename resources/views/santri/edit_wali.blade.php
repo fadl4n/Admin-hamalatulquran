@@ -102,7 +102,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary">Simpan</button>
-                    <a href="{{ url('santri/'.$santri->id_santri) }}" class="btn btn-secondary">Batal</a>
+                    <a href="{{ url('santri/show/'.$santri->id_santri) }}" class="btn btn-secondary">Batal</a>
                 </form>
             </div>
         </div>

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('no_telp');
             $table->unsignedBigInteger('id_santri')->nullable(); // Foreign key
             $table->string('alamat');
-            $table->string('email')->unique();
+            $table->string('email');
             $table->string('password')->nullable(); // Password bisa kosong
             $table->timestamps();
 

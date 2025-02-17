@@ -11,6 +11,7 @@ use App\Http\Controllers\CMS\User\KelasController;
 use App\Http\Controllers\CMS\User\ArtikelController;
 use App\Http\Controllers\CMS\User\PengajarController;
 use App\Http\Controllers\CMS\User\KeluargaController;
+use App\Http\Controllers\CMS\User\SetoranController;
 use App\Http\Controllers\CMS\User\SuratController;
 use App\Http\Controllers\CMS\User\RoleController;
 use App\Http\Controllers\CMS\Master\RoleController as RoleMaster;
@@ -183,6 +184,17 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::get('edit/{surat}', 'edit')->name('edit'); // Gunakan {surat} untuk Route Model Binding
             Route::put('update/{surat}', 'update')->name('update');
             Route::delete('delete/{surat}', 'destroy')->name('destroy');
+            Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+        });
+    });
+    Route::prefix('setoran')->name('setoran.')->group(function () {
+        Route::controller(SetoranController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
+            Route::get('edit/{setoran}', 'edit')->name('edit');
+            Route::put('update/{setoran}', 'update')->name('update');
+            Route::delete('delete/{setoran}', 'destroy')->name('destroy');
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
         });
     });

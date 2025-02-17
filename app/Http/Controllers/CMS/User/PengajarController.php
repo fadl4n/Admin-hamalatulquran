@@ -50,8 +50,8 @@ class PengajarController extends Controller
 {
     $request->validate([
         'nama' => 'required|string|max:255',
-        'nip' => 'required|numeric|digits_between:1,15|unique:pengajars,nip',
-        'email' => 'required|string|email|unique:pengajars,email',
+        'nip' => 'required|numeric|digits_between:1,15',
+        'email' => 'required|string|email',
         'tempat_lahir' => 'required|string|max:255',
         'tgl_lahir' => 'required|date',
         'foto_pengajar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -59,15 +59,17 @@ class PengajarController extends Controller
         'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
         'alamat' => 'required|string|max:255',
         'password' => 'required|string|min:6'
- ]);
-// Cek jika NIP atau Email sudah ada di database
-if (Pengajar::where('nip', $request->nip)->exists()) {
-    return redirect()->back()->withInput()->with('error', 'NIP sudah digunakan. Silakan gunakan NIP lain.');
-}
+    ]);
 
-if (Pengajar::where('email', $request->email)->exists()) {
-    return redirect()->back()->withInput()->with('error', 'Email sudah digunakan. Silakan gunakan email lain.');
-}
+    // Pengecekan manual untuk NIP
+    if (Pengajar::where('nip', $request->nip)->exists()) {
+        return redirect()->back()->withInput()->with('error', 'NIP sudah digunakan. Silakan gunakan NIP lain.');
+    }
+
+    // Pengecekan manual untuk Email
+    if (Pengajar::where('email', $request->email)->exists()) {
+        return redirect()->back()->withInput()->with('error', 'Email sudah digunakan. Silakan gunakan email lain.');
+    }
 
     $fotoPath = null;
     if ($request->hasFile('foto_pengajar')) {
@@ -89,6 +91,7 @@ if (Pengajar::where('email', $request->email)->exists()) {
 
     return redirect()->route('pengajar.index')->with('success', 'Pengajar berhasil ditambahkan.');
 }
+
 
 
     /**
@@ -113,54 +116,61 @@ if (Pengajar::where('email', $request->email)->exists()) {
      * Mengupdate data pengajar di database.
      */
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'nip' => 'required|numeric|digits_between:1,15|unique:pengajars,nip,' . $id . ',id_pengajar',
-            'email' => 'required|string|email|unique:pengajars,email,' . $id . ',id_pengajar',
-            'no_telp' => 'required|string|max:20',
-            'tempat_lahir' => 'required|string|max:255',
-            'tgl_lahir' => 'required|date',
-            'foto_pengajar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
-            'alamat' => 'required|string|max:255',
-            'password' => 'nullable|string|min:6',
-        ], [
-            'nip.unique' => 'NIP sudah digunakan oleh pengajar lain.',
-            'email.unique' => 'Email sudah digunakan oleh pengajar lain.',
-        ]);
+{
+    $request->validate([
+        'nama' => 'required|string|max:255',
+        'nip' => 'required|numeric|digits_between:1,15',
+        'email' => 'required|string|email',
+        'no_telp' => 'required|string|max:20',
+        'tempat_lahir' => 'required|string|max:255',
+        'tgl_lahir' => 'required|date',
+        'foto_pengajar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+        'alamat' => 'required|string|max:255',
+        'password' => 'nullable|string|min:6',
+    ]);
 
-        $pengajar = Pengajar::findOrFail($id);
-
-        if ($request->hasFile('foto_pengajar')) {
-            if ($pengajar->foto_pengajar) {
-                Storage::disk('public')->delete($pengajar->foto_pengajar);
-            }
-            $fotoPath = $request->file('foto_pengajar')->store('pengajar', 'public');
-        } else {
-            $fotoPath = $pengajar->foto_pengajar;
-        }
-
-        $data = [
-            'nama' => $request->nama,
-            'nip' => $request->nip,
-            'email' => $request->email,
-            'tempat_lahir' => $request->tempat_lahir,
-            'tgl_lahir' => $request->tgl_lahir,
-            'foto_pengajar' => $fotoPath,
-            'no_telp' => $request->no_telp,
-            'jenis_kelamin' => $request->jenis_kelamin,
-            'alamat' => $request->alamat,
-        ];
-
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
-        }
-
-        $pengajar->update($data);
-
-        return redirect()->route('pengajar.index')->with('success', 'Pengajar berhasil diperbarui.');
+    // Pengecekan manual untuk NIP
+    $pengajar = Pengajar::findOrFail($id);
+    if (Pengajar::where('nip', $request->nip)->where('id_pengajar', '!=', $id)->exists()) {
+        return redirect()->back()->withInput()->with('error', 'NIP sudah digunakan oleh pengajar lain.');
     }
+
+    // Pengecekan manual untuk Email
+    if (Pengajar::where('email', $request->email)->where('id_pengajar', '!=', $id)->exists()) {
+        return redirect()->back()->withInput()->with('error', 'Email sudah digunakan oleh pengajar lain.');
+    }
+
+    if ($request->hasFile('foto_pengajar')) {
+        if ($pengajar->foto_pengajar) {
+            Storage::disk('public')->delete($pengajar->foto_pengajar);
+        }
+        $fotoPath = $request->file('foto_pengajar')->store('pengajar', 'public');
+    } else {
+        $fotoPath = $pengajar->foto_pengajar;
+    }
+
+    $data = [
+        'nama' => $request->nama,
+        'nip' => $request->nip,
+        'email' => $request->email,
+        'tempat_lahir' => $request->tempat_lahir,
+        'tgl_lahir' => $request->tgl_lahir,
+        'foto_pengajar' => $fotoPath,
+        'no_telp' => $request->no_telp,
+        'jenis_kelamin' => $request->jenis_kelamin,
+        'alamat' => $request->alamat,
+    ];
+
+    if ($request->filled('password')) {
+        $data['password'] = Hash::make($request->password);
+    }
+
+    $pengajar->update($data);
+
+    return redirect()->route('pengajar.index')->with('success', 'Pengajar berhasil diperbarui.');
+}
+
 
 
     /**
