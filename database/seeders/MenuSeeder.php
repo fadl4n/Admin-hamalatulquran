@@ -76,7 +76,13 @@ class MenuSeeder extends Seeder
                 'url' => '/artikel',
                 'sequence' => 8
             ],
-            
+            [
+                'group_menu_id' => 2,
+                'name' => 'Setoran hafalan',
+                'url' => '/setoran',
+                'sequence' => 8
+            ],
+
         ]);
     }
 }
