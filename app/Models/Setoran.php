@@ -20,6 +20,7 @@ class Setoran extends Model
         'id_kelas',
         'keterangan',
         'id_surat',
+        'id_pengajar',
         'jumlah_ayat_start',
         'jumlah_ayat_end'
 
@@ -41,5 +42,9 @@ class Setoran extends Model
     public function surat()
     {
         return $this->belongsTo(Surat::class, 'id_surat', 'id_surat');
+    }
+    public function pengajar()
+    {
+        return $this->belongsTo(Pengajar::class, 'id_pengajar');
     }
 }

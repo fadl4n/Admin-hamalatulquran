@@ -111,6 +111,22 @@
                                 <span class="text-danger">Keterangan wajib diisi.</span>
                             @enderror
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_pengajar">Pengajar</label>
+                                <select name="id_pengajar" id="id_pengajar" class="form-control">
+                                    <option value="">Pilih Pengajar</option>
+                                    @foreach($pengajars as $pengajar)
+                                        <option value="{{ $pengajar->id_pengajar }}" {{ old('id_pengajar') == $pengajar->id_pengajar ? 'selected' : '' }}>
+                                            {{ $pengajar->nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('id_pengajar')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
 
                         <button type="submit" class="btn btn-primary">Simpan</button>
                         <a href="{{ route('setoran.index') }}" class="btn btn-secondary">Batal</a>

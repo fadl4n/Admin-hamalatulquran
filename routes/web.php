@@ -12,6 +12,7 @@ use App\Http\Controllers\CMS\User\ArtikelController;
 use App\Http\Controllers\CMS\User\PengajarController;
 use App\Http\Controllers\CMS\User\KeluargaController;
 use App\Http\Controllers\CMS\User\SetoranController;
+use App\Http\Controllers\CMS\User\HistoriController;
 use App\Http\Controllers\CMS\User\SuratController;
 use App\Http\Controllers\CMS\User\RoleController;
 use App\Http\Controllers\CMS\Master\RoleController as RoleMaster;
@@ -207,6 +208,12 @@ Route::middleware([CheckAuth::class])->group(function () {
         Route::put('/update/{id}', [ArtikelController::class, 'update'])->name('artikel.update');
         Route::delete('/delete/{id}', [ArtikelController::class, 'destroy'])->name('artikel.destroy');
         Route::get('/fn-get-data', [ArtikelController::class, 'fnGetData']);
+    });
+    Route::prefix('histori')->name('histori.')->group(function () {
+        Route::controller(HistoriController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+        });
     });
 
 

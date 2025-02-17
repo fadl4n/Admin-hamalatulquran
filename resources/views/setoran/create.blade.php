@@ -77,46 +77,69 @@
                                         <div class="form-group">
                                             <label for="jumlah_ayat_start">Ayat Mulai</label>
                                             <input type="number" name="jumlah_ayat_start" id="jumlah_ayat_start"
-                                                class="form-control" required>
+                                                class="form-control @error('jumlah_ayat_start') is-invalid @enderror"
+                                                required>
+                                            @error('jumlah_ayat_start')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                     </div>
-
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="jumlah_ayat_end">Ayat Akhir</label>
                                             <input type="number" name="jumlah_ayat_end" id="jumlah_ayat_end"
-                                                class="form-control" required>
+                                                class="form-control @error('jumlah_ayat_end') is-invalid @enderror"
+                                                value="{{ old('jumlah_ayat_end') }}" required>
+                                            @error('jumlah_ayat_end')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+
+
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="status">Status</label>
+                                            <select name="status" id="status" class="form-control" required>
+                                                <option value="1">Selesai</option>
+                                                <option value="0">Proses</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
-
-
-
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="status">Status</label>
-                                        <select name="status" id="status" class="form-control" required>
-                                            <option value="1">Selesai</option>
-                                            <option value="0">Proses</option>
+                                        <label for="id_pengajar">Pengajar</label>
+                                        <select name="id_pengajar" id="id_pengajar" class="form-control">
+                                            <option value="">Pilih Pengajar</option>
+                                            @foreach($pengajars as $pengajar)
+                                                <option value="{{ $pengajar->id_pengajar }}" {{ old('id_pengajar') == $pengajar->id_pengajar ? 'selected' : '' }}>
+                                                    {{ $pengajar->nama }}
+                                                </option>
+                                            @endforeach
                                         </select>
+                                        @error('id_pengajar')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
                                     </div>
                                 </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="keterangan">Keterangan</label>
-                            <textarea name="keterangan" id="keterangan" rows="3" class="form-control" placeholder="Masukkan keterangan..."></textarea>
-                        </div>
+                                <div class="form-group">
+                                    <label for="keterangan">Keterangan</label>
+                                    <textarea name="keterangan" id="keterangan" rows="3" class="form-control" placeholder="Masukkan keterangan..."></textarea>
+                                </div>
 
-                        <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-success">Simpan Setoran</button>
-                            <a href="{{ route('setoran.index') }}" class="btn btn-secondary ml-2">Batal</a>
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-success">Simpan Setoran</button>
+                                    <a href="{{ route('setoran.index') }}" class="btn btn-secondary ml-2">Batal</a>
+                                </div>
+                            </form>
                         </div>
-                        </form>
                     </div>
                 </div>
             </div>
-        </div>
         </div>
     </section>
 @endsection

@@ -80,7 +80,13 @@ class MenuSeeder extends Seeder
                 'group_menu_id' => 2,
                 'name' => 'Setoran hafalan',
                 'url' => '/setoran',
-                'sequence' => 8
+                'sequence' => 9
+            ],
+            [
+                'group_menu_id' => 2,
+                'name' => 'Hisotri',
+                'url' => '/histori',
+                'sequence' =>  10
             ],
 
         ]);

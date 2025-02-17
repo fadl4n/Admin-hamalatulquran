@@ -3,6 +3,7 @@
 @section('css')
     <link rel="stylesheet" href="{{ asset('/bower_components/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 @endsection
 
 @section('title page')
@@ -39,6 +40,7 @@
 @endsection
 
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     var oDataList = $('.kelas-list').DataTable({
         processing: true,
@@ -59,22 +61,32 @@
 
     $('.kelas-list').on('click', '.btnDelete', function () {
         let id = $(this).data('id');
-        if (confirm("Apakah Anda yakin ingin menghapus kelas ini?")) {
-            $.ajax({
-                url: "{{ url('/kelas/delete') }}/" + id,
-                type: "DELETE",
-                headers: {
-                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                },
-                success: function(response) {
-                    alert(response.success);
-                    oDataList.ajax.reload(); // Reload DataTables
-                },
-                error: function(xhr) {
-                    alert("Terjadi kesalahan! " + xhr.responseText);
-                }
-            });
-        }
+
+        Swal.fire({
+            title: "Konfirmasi",
+            text: "Apakah Anda yakin ingin menghapus kelas ini?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya, hapus!",
+            cancelButtonText: "Batal"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{ url('/kelas/delete') }}/" + id,
+                    type: "DELETE",
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        Swal.fire("Berhasil!", response.success, "success");
+                        oDataList.ajax.reload(); // Reload DataTables
+                    },
+                    error: function(xhr) {
+                        Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus data!", "error");
+                    }
+                });
+            }
+        });
     });
 </script>
 @endsection
