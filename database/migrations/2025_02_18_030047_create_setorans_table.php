@@ -18,13 +18,19 @@ return new class extends Migration
             $table->integer('status');
             $table->unsignedBigInteger('id_kelas');
             $table->text('keterangan')->nullable();
-            $table->unsignedBigInteger('id_surat');
+            $table->unsignedBigInteger('id_surat')->nullable();
+            $table->unsignedBigInteger('id_target');
+            $table->unsignedBigInteger('id_pengajar')->nullable();
+            $table->integer('jumlah_ayat_start');
+            $table->integer('jumlah_ayat_end'); // Menambahkan kolom id_pengajar
             $table->timestamps();
 
             // Foreign keys
             $table->foreign('id_santri')->references('id_santri')->on('santris')->onDelete('cascade');
             $table->foreign('id_kelas')->references('id_kelas')->on('kelas')->onDelete('cascade');
-            $table->foreign('id_surat')->references('id_surat')->on('surats')->onDelete('cascade');
+            $table->foreign('id_surat')->references('id_surat')->on('surats')->onDelete('set null');
+            $table->foreign('id_pengajar')->references('id_pengajar')->on('pengajars')->onDelete('cascade');
+            $table->foreign('id_target')->references('id_target')->on('targets')->onDelete('cascade'); //
         });
     }
 

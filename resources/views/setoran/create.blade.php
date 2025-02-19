@@ -25,13 +25,15 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="santri">Nama Santri</label>
-                                            <select name="id_santri" class="form-control" required>
+                                            <select name="id_santri" id="id_santri" class="form-control" required>
                                                 <option value="">- Pilih Santri -</option>
                                                 @foreach ($santris as $santri)
-                                                    <option value="{{ $santri->id_santri }}">{{ $santri->nama }} |
-                                                        {{ $santri->nisn }}</option>
+                                                    <option value="{{ $santri->id_santri }}">{{ $santri->nama }} | {{ $santri->nisn }}</option>
                                                 @endforeach
                                             </select>
+                                            @error('id_santri')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                     </div>
 
@@ -41,8 +43,7 @@
                                             <select name="id_kelas" class="form-control" required>
                                                 <option value="">- Pilih Kelas -</option>
                                                 @foreach ($kelas as $kelass)
-                                                    <option value="{{ $kelass->id_kelas }}">{{ $kelass->nama_kelas }}
-                                                    </option>
+                                                    <option value="{{ $kelass->id_kelas }}">{{ $kelass->nama_kelas }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -53,51 +54,47 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="tgl_setoran">Tanggal Setoran</label>
-                                            <input type="date" name="tgl_setoran" id="tgl_setoran" class="form-control"
-                                                required>
+                                            <input type="date" name="tgl_setoran" id="tgl_setoran" class="form-control" required>
                                         </div>
                                     </div>
 
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="surat">Surat</label>
-                                            <select name="id_surat" class="form-control" required>
-                                                <option value="">- Pilih Surat -</option>
-                                                @foreach ($surats as $surat)
-                                                    <option value="{{ $surat->id_surat }}">{{ $surat->nama_surat }}</option>
-                                                @endforeach
+                                            <label for="id_group">Target</label>
+                                            <select name="id_group" id="id_group" class="form-control" required>
+                                                <option value="">- Pilih Target -</option>
                                             </select>
+                                            @error('id_group')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Formulir HTML dengan penyesuaian -->
+                                <div class="form-group">
+                                    <label for="nama_surat">Nama Surat</label>
+                                    <select name="nama_surat" id="nama_surat" class="form-control" required>
+                                        <option value="">- Pilih Nama Surat -</option>
+                                    </select>
+                                    @error('nama_surat')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="jumlah_ayat_start">Ayat Mulai</label>
-                                            <input type="number" name="jumlah_ayat_start" id="jumlah_ayat_start"
-                                                class="form-control @error('jumlah_ayat_start') is-invalid @enderror"
-                                                required>
-                                            @error('jumlah_ayat_start')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
+                                            <input type="number" name="jumlah_ayat_start" id="jumlah_ayat_start" class="form-control" required>
                                         </div>
                                     </div>
+
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="jumlah_ayat_end">Ayat Akhir</label>
-                                            <input type="number" name="jumlah_ayat_end" id="jumlah_ayat_end"
-                                                class="form-control @error('jumlah_ayat_end') is-invalid @enderror"
-                                                value="{{ old('jumlah_ayat_end') }}" required>
-                                            @error('jumlah_ayat_end')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
+                                            <input type="number" name="jumlah_ayat_end" id="jumlah_ayat_end" class="form-control" required>
                                         </div>
                                     </div>
-
-
-
 
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -109,20 +106,16 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="id_pengajar">Pengajar</label>
                                         <select name="id_pengajar" id="id_pengajar" class="form-control">
                                             <option value="">Pilih Pengajar</option>
                                             @foreach($pengajars as $pengajar)
-                                                <option value="{{ $pengajar->id_pengajar }}" {{ old('id_pengajar') == $pengajar->id_pengajar ? 'selected' : '' }}>
-                                                    {{ $pengajar->nama }}
-                                                </option>
+                                                <option value="{{ $pengajar->id_pengajar }}">{{ $pengajar->nama }}</option>
                                             @endforeach
                                         </select>
-                                        @error('id_pengajar')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
                                     </div>
                                 </div>
 
@@ -146,54 +139,64 @@
 
 @section('script')
     <script src="{{ asset('/bower_components/admin-lte/plugins/select2/js/select2.full.min.js') }}"></script>
-    <script src="{{ asset('/bower_components/admin-lte/plugins/moment/moment.min.js') }}"></script>
-    <script src="{{ asset('/bower_components/admin-lte/plugins/daterangepicker/daterangepicker.js') }}"></script>
     <script>
-        // Inisialisasi Select2
-        $('.select2').select2();
+        $(document).ready(function() {
+            // Inisialisasi Select2
+            $('.select2').select2();
 
-        // Fungsi untuk memeriksa dan memperbarui input jumlah ayat
-        function updateJumlahAyat() {
-            var suratId = $('#surat').val();
-            if (suratId) {
-                $.ajax({
-                    url: "{{ url('/surats') }}/" + suratId,
-                    method: 'GET',
-                    success: function(response) {
-                        let totalAyat = response.jumlah_ayat;
-                        $('#jumlah_ayat_end').attr('max', totalAyat); // Menyesuaikan maksimal jumlah ayat
-                    }
-                });
-            } else {
-                $('#jumlah_ayat_start').val('');
-                $('#jumlah_ayat_end').val('');
-            }
+            // Ketika santri dipilih, update target yang terkait
+            $('#id_santri').on('change', function() {
+                var santriId = $(this).val();
+
+                // Kosongkan dropdown target dan nama surat
+                $('#id_target').empty().append('<option value="">- Pilih Target -</option>');
+                $('#nama_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
+
+                if (santriId) {
+                    // Ambil target berdasarkan id_santri
+                    $.ajax({
+    url: "{{ route('setoran.getSantriTargets', ':santri_id') }}".replace(':santri_id', santriId),
+    type: 'GET',
+    success: function(data) {
+        // Update dropdown target dengan data yang diperoleh
+        if (data.targets.length > 0) {
+            data.targets.forEach(function(target) {
+                $('#id_target').append('<option value="' + target.id_target + '" data-group="' + target.id_group + '">' + target.keterangan + '</option>');
+            });
+        } else {
+            $('#id_target').append('<option value="">- Tidak ada target -</option>');
         }
+    }
+});
 
-        // Event listener untuk perubahan pada dropdown surat
-        $('#surat').on('change', function() {
-            updateJumlahAyat();
-        });
+                }
+            });
 
-        // Event listener untuk perubahan pada input jumlah ayat
-        $('#jumlah_ayat_end').on('input', function() {
-            var startAyat = $('#jumlah_ayat_start').val();
-            var endAyat = $(this).val();
-            var suratId = $('#surat').val();
+            // Ketika target dipilih, update nama surat yang terkait
+            $('#id_target').on('change', function() {
+                var targetId = $(this).val();
+                var groupId = $(this).find(':selected').data('group');
 
-            if (suratId) {
-                $.ajax({
-                    url: "{{ url('/surats') }}/" + suratId,
-                    method: 'GET',
-                    success: function(response) {
-                        let totalAyat = response.jumlah_ayat;
-                        if (endAyat > totalAyat) {
-                            alert('Jumlah ayat dalam surat ini adalah ' + totalAyat + '.');
-                            $('#jumlah_ayat_end').val('');
+                // Kosongkan dropdown nama surat
+                $('#nama_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
+
+                if (targetId && groupId) {
+                    // Ambil nama surat berdasarkan id_target dan id_group
+                    $.ajax({
+                        url: "{{ url('get-nama-surat') }}",  // Endpoint untuk ambil nama surat
+                        type: 'GET',
+                        data: { target_id: targetId, group_id: groupId },
+                        success: function(data) {
+                            // Update dropdown nama surat dengan data yang diperoleh
+                            data.surats.forEach(function(surat) {
+                                $('#nama_surat').append('<option value="' + surat.id_surat + '">' + surat.nama_surat + '</option>');
+                            });
                         }
-                    }
-                });
-            }
+                    });
+                }
+            });
         });
     </script>
+
+
 @endsection

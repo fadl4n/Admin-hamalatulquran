@@ -33,5 +33,10 @@ class Santri extends Model
 {
     return $this->hasMany(Keluarga::class, 'id_santri', 'id_santri');
 }
+public function targets()
+{
+    return $this->belongsToMany(Target::class);
+}
+
 
 }

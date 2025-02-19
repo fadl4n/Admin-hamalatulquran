@@ -48,6 +48,9 @@ class HistoriController extends Controller
         ->addColumn('kelas', function ($setoran) {
             return $setoran->kelas->nama_kelas ?? '-';
         })
+        ->addColumn('Juz', function ($setoran) {
+            return $setoran->surat->juz ?? '-';
+        })
         ->addColumn('nama_surat', function ($setoran) {
             return $setoran->surat->nama_surat ?? '-';
         })

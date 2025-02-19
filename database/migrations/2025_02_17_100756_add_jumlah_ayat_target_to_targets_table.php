@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('setorans', function (Blueprint $table) {
-            $table->integer('jumlah_ayat_start');
-            $table->integer('jumlah_ayat_end');
+        Schema::table('targets', function (Blueprint $table) {
+            $table->integer('jumlah_ayat_target');
         });
     }
 
@@ -22,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('setorans', function (Blueprint $table) {
-            $table->dropColumn(['jumlah_ayat_start','jumlah_ayat_end']);
+        Schema::table('targets', function (Blueprint $table) {
+            $table->dropColumn(['jumlah_ayat_target']);
         });
     }
 };

@@ -7,6 +7,7 @@ use App\Models\Setoran;
 use App\Models\Santri;
 use App\Models\Kelas;
 use App\Models\Surat;
+use App\Models\Target;
 use App\Models\Pengajar;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class SetoranController extends Controller
 {
     public function index()
     {
-        $setorans = Setoran::with(['santri', 'kelas', 'surat','pengajar'])->get();
+        $setorans = Setoran::with(['santri', 'kelas','pengajar','targets','surat'])->get();
 
         return view('setoran.show', compact('setorans'));
     }
@@ -26,7 +27,8 @@ class SetoranController extends Controller
         $kelas = Kelas::all();
         $surats = Surat::all();
         $pengajars = Pengajar::all();
-        return view('setoran.create', compact('santris', 'kelas', 'surats','pengajars'));
+        $targets = Target::all(); // Ambil data target
+        return view('setoran.create', compact('santris', 'kelas', 'pengajars', 'targets', 'surats'));
     }
 
     public function store(Request $request)
@@ -37,21 +39,32 @@ class SetoranController extends Controller
             'tgl_setoran' => 'required|date',
             'status' => 'required',
             'id_kelas' => 'required',
-            'id_surat' => 'required',
+            'id_target' => 'required',
             'id_pengajar' => 'required',
             'jumlah_ayat_start' => 'required|numeric',
             'jumlah_ayat_end' => 'required|numeric',
         ]);
 
-        // Ambil data surat yang dipilih
-        $surat = Surat::find($request->id_surat);
-        if (!$surat) {
-            return redirect()->back()->withErrors(['surat' => 'Surat tidak ditemukan.']);
+        // Ambil data santri dan target berdasarkan id_santri
+        $santri = Santri::find($request->id_santri);
+        $target = Target::find($request->id_target);
+
+        if (!$santri) {
+            return redirect()->back()->withErrors(['id_santri' => 'Santri tidak ditemukan.']);
+        }
+
+        if (!$target) {
+            return redirect()->back()->withErrors(['id_target' => 'Target tidak ditemukan.']);
+        }
+
+        // Validasi apakah target ini relevan dengan santri
+        if (!$santri->targets->contains($target->id)) {
+            return redirect()->back()->withErrors(['id_target' => 'Santri ini tidak terdaftar di target yang dipilih.']);
         }
 
         // Validasi apakah jumlah_ayat_end lebih besar dari jumlah ayat surat
-        if ($request->jumlah_ayat_end > $surat->jumlah_ayat) {
-            return redirect()->back()->withErrors(['jumlah_ayat_end' => 'Jumlah ayat dalam surat '. $surat->nama_surat . ' adalah ' . $surat->jumlah_ayat . '.']);
+        if ($request->jumlah_ayat_end > $target->jumlah_ayat_target) {
+            return redirect()->back()->withErrors(['jumlah_ayat_end' => 'Jumlah target ayat anda dalam surat ' . $target->surat->nama_surat . ' adalah ' . $target->jumlah_ayat_target . '.']);
         }
 
         // Validasi apakah jumlah_ayat_start lebih besar dari jumlah_ayat_end
@@ -65,7 +78,7 @@ class SetoranController extends Controller
             'tgl_setoran' => $request->tgl_setoran,
             'status' => $request->status,
             'id_kelas' => $request->id_kelas,
-            'id_surat' => $request->id_surat,
+            'id_target' => $request->id_target,
             'id_pengajar' => $request->id_pengajar,
             'jumlah_ayat_start' => $request->jumlah_ayat_start,
             'jumlah_ayat_end' => $request->jumlah_ayat_end,
@@ -78,13 +91,15 @@ class SetoranController extends Controller
 
 
 
+
     public function edit(Setoran $setoran)
     {
         $santris = Santri::all();
         $kelas = Kelas::all();
-        $surats = Surat::all();
+        $surats = Surat ::all();
         $pengajars = Pengajar::all();
-        return view('setoran.edit', compact('setoran', 'santris', 'kelas', 'surats','pengajars'));
+        $targets = Target::all(); // Ambil data target
+        return view('setoran.edit', compact('setoran', 'santris', 'kelas','pengajars','targets'));
     }
 
     public function update(Request $request, Setoran $setoran)
@@ -94,8 +109,8 @@ class SetoranController extends Controller
             'tgl_setoran' => 'required|date',
             'status' => 'required',
             'id_kelas' => 'required',
+            'id_target' => 'required',
             'id_pengajar' => 'required',
-            'id_surat' => 'required'
         ]);
 
         $setoran->update($request->all());
@@ -110,7 +125,7 @@ class SetoranController extends Controller
 
     public function fnGetData()
     {
-        $setorans = Setoran::with(['santri', 'kelas', 'surat'])->get();
+        $setorans = Setoran::with(['santri', 'kelas','targets','pengajar'])->get();
         return DataTables::of($setorans)
             ->addIndexColumn()
             ->addColumn('santri', function ($row) {
@@ -119,16 +134,19 @@ class SetoranController extends Controller
             ->addColumn('kelas', function ($row) {
                 return $row->kelas->nama_kelas ?? '-';
             })
-            ->addColumn('surat', function ($row) {
+            ->addColumn('target', function ($row) {
                 // Menggunakan nama_surat dan jumlah_ayat dari relasi surat
-                return $row->surat->nama_surat ?? '-';  // Menggunakan hanya nama_surat saja
+                return $row->target->surat->nama_surat ?? '-';  // Menggunakan hanya nama_surat saja
             })
             ->addColumn('pengajar', function ($row) {
                 return $row->pengajar->nama ?? '-';
             })
+            ->addColumn('target', function ($row) {
+                return $row->target->keterangan ?? '-';
+            })
             ->addColumn('jumlah_ayat', function ($row) {
                 // Menampilkan jumlah_ayat dari relasi surat
-                return $row->surat->jumlah_ayat ?? '-';
+                return $row->target->jumlah_ayat_target ?? '-';
             })
             ->addColumn('jumlah_ayat_start', function ($row) {
                 return $row->jumlah_ayat_start ?? '-';

@@ -2,32 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Setoran extends Model
+class Target extends Model
 {
     use HasFactory;
 
-    protected $table = 'setorans';
-    protected $primaryKey = 'id_setoran';
+    protected $table = 'targets';
+    protected $primaryKey = 'id_target';
     public $timestamps = true;
 
     protected $fillable = [
         'id_santri',
-        'tgl_setoran',
-        'status',
+        'tgl_mulai',
+        'tgl_target',
         'id_kelas',
-        'keterangan',
+        'id_group',
+        'jumlah_ayat_target',
+        'jumlah_ayat_target_awal',
         'id_surat',
         'id_pengajar',
-        'id_target',
-        'jumlah_ayat_start',
-        'jumlah_ayat_end'
 
     ];
 
-    // Relasi ke Santri
     public function santri()
     {
         return $this->belongsTo(Santri::class, 'id_santri', 'id_santri');
@@ -39,20 +37,19 @@ class Setoran extends Model
         return $this->belongsTo(Kelas::class, 'id_kelas', 'id_kelas');
     }
 
-    // Relasi ke Surat
-    public function surat()
-    {
-        return $this->belongsTo(Surat::class, 'id_surat', 'id_surat');
-    }
+ public function surat()
+{
+    return $this->belongsTo(Surat::class, 'id_surat', 'id_surat');
+}
+
     public function pengajar()
     {
         return $this->belongsTo(Pengajar::class, 'id_pengajar');
     }
-   // Model Setoran
-  // Di model Santri
-public function targets()
+    // Model Target
+public function setoran()
 {
-    return $this->hasMany(Target::class, 'santri_id');
+    return $this->hasMany(Setoran::class, 'id_target');
 }
 
 }

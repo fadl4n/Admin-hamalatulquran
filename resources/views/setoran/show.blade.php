@@ -20,6 +20,7 @@
                                     <th>Kelas</th>
                                     <th>Tanggal Setoran</th>
                                     <th>Nama Pengajar</th>
+                                    <th>Target</th>
                                     <th>Surat</th>
                                     <th>Jumlah Ayat</th>
                                     <th>Status</th>
@@ -35,7 +36,8 @@
                                         <td>{{ $setoran->kelas->nama_kelas }}</td>
                                         <td>{{ $setoran->tgl_setoran }}</td>
                                         <td>{{ $setoran->pengajar ? $setoran->pengajar->nama : ' ' }}</td>
-                                        <td>{{ $setoran->surat->nama_surat }}</td>
+                                        <td>{{ $setoran->targets->keterangan }}</td>
+                                        <td>{{ $setoran->targets->surat->nama_surat }}</td>
                                         <td>{{ $setoran->jumlah_ayat_start }} - {{ $setoran->jumlah_ayat_end }}</td>
                                         <td>{{ $setoran->status == 1 ? 'Selesai' : 'Proses' }}</td>
                                         <td>{{ $setoran->keterangan }}</td>

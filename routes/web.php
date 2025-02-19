@@ -12,6 +12,7 @@ use App\Http\Controllers\CMS\User\ArtikelController;
 use App\Http\Controllers\CMS\User\PengajarController;
 use App\Http\Controllers\CMS\User\KeluargaController;
 use App\Http\Controllers\CMS\User\SetoranController;
+use App\Http\Controllers\CMS\User\TargetController;
 use App\Http\Controllers\CMS\User\HistoriController;
 use App\Http\Controllers\CMS\User\SuratController;
 use App\Http\Controllers\CMS\User\RoleController;
@@ -197,8 +198,28 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::put('update/{setoran}', 'update')->name('update');
             Route::delete('delete/{setoran}', 'destroy')->name('destroy');
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+            Route::get('get-santri-targets/{id_santri}', 'getSantriTargets')->name('getSantriTargets');
+            Route::get('get-nama-surat', 'getNamaSuratByGroup')->name('getNamaSuratByGroup'); // Menambahkan rute untuk nama surat
         });
     });
+
+    Route::prefix('target')->name('target.')->group(function () {
+        Route::controller(TargetController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'create')->name('create.post'); // Tambahkan POST untuk 'create'
+            Route::post('store', 'store')->name('store');
+            Route::get('edit/{target}', 'edit')->name('edit');
+            Route::put('update/{target}', 'update')->name('update');
+            Route::delete('delete/{id_santri}/{id_group}', 'destroy')->name('destroy');
+            Route::delete('delete/{id_target}', 'destroyByIdTarget')->name('destroyByIdTarget'); // Route untuk hapus berdasarkan id_target
+            Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+            Route::get('detail/{id_group}', 'detail')->name('detail');
+        });
+    });
+
+
+
 
     Route::prefix('artikel')->group(function () {
         Route::get('/', [ArtikelController::class, 'index'])->name('artikel.index');

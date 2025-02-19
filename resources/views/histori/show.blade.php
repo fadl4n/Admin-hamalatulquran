@@ -20,7 +20,7 @@
                                 <div class="col-md-4">
                                     <label for="filterSantri">Pilih Nama Santri:</label>
                                     <select id="filterSantri" class="form-control">
-                                        <option value="">Semua Sant ri</option>
+                                        <option value="">Semua Santri</option>
                                         @foreach ($santris as $santri)
                                             <option value="{{ $santri->id_santri }}">{{ $santri->nama }} | {{$santri->nisn}} </option>
                                         @endforeach
@@ -32,6 +32,7 @@
                                     <tr>
                                         <th>Nama Santri</th>
                                         <th>Kelas</th>
+                                        <th>Juz</th>
                                         <th>Nama Surat</th>
                                         <th>Jumlah Ayat</th>
                                     </tr>
@@ -61,6 +62,7 @@
         columns: [
             { data: 'nama', name: 'nama' },
             { data: 'kelas', name: 'kelas' },
+            { data: 'Juz', name: 'Juz' },
             { data: 'nama_surat', name: 'nama_surat' },
             { data: 'jumlah_ayat', name: 'jumlah_ayat' }
         ]
