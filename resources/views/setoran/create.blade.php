@@ -22,13 +22,16 @@
                             <form action="{{ route('setoran.store') }}" method="POST">
                                 @csrf
                                 <div class="row">
+                                    <!-- Nama Santri -->
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="santri">Nama Santri</label>
                                             <select name="id_santri" id="id_santri" class="form-control" required>
                                                 <option value="">- Pilih Santri -</option>
                                                 @foreach ($santris as $santri)
-                                                    <option value="{{ $santri->id_santri }}">{{ $santri->nama }} | {{ $santri->nisn }}</option>
+                                                    <option value="{{ $santri->id_santri }}">
+                                                        {{ $santri->nama }} | {{ $santri->nisn }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                             @error('id_santri')
@@ -37,6 +40,7 @@
                                         </div>
                                     </div>
 
+                                    <!-- Kelas -->
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="kelas">Kelas</label>
@@ -51,6 +55,7 @@
                                 </div>
 
                                 <div class="row">
+                                    <!-- Tanggal Setoran -->
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="tgl_setoran">Tanggal Setoran</label>
@@ -58,6 +63,7 @@
                                         </div>
                                     </div>
 
+                                    <!-- Target -->
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="id_group">Target</label>
@@ -71,54 +77,75 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label for="nama_surat">Nama Surat</label>
-                                    <select name="nama_surat" id="nama_surat" class="form-control" required>
-                                        <option value="">- Pilih Nama Surat -</option>
-                                    </select>
-                                    @error('nama_surat')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
                                 <div class="row">
+                                    <!-- Nama Surat -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="jumlah_ayat_start">Ayat Mulai</label>
-                                            <input type="number" name="jumlah_ayat_start" id="jumlah_ayat_start" class="form-control" required>
+                                            <label for="id_surat">Nama Surat</label>
+                                            <select name="id_surat" id="id_surat" class="form-control" required>
+                                                <option value="">- Pilih Nama Surat -</option>
+                                                @foreach($surats as $s)
+                                                    <option value="{{ $s->id_surat }}">{{ $s->nama_surat }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('id_surat')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                     </div>
 
+                                    <!-- Pengajar -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="jumlah_ayat_end">Ayat Akhir</label>
-                                            <input type="number" name="jumlah_ayat_end" id="jumlah_ayat_end" class="form-control" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="status">Status</label>
-                                            <select name="status" id="status" class="form-control" required>
-                                                <option value="1">Selesai</option>
-                                                <option value="0">Proses</option>
+                                            <label for="id_pengajar">Pengajar</label>
+                                            <select name="id_pengajar" id="id_pengajar" class="form-control">
+                                                <option value="">Pilih Pengajar</option>
+                                                @foreach ($pengajars as $pengajar)
+                                                    <option value="{{ $pengajar->id_pengajar }}">{{ $pengajar->nama }}</option>
+                                                @endforeach
                                             </select>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="id_pengajar">Pengajar</label>
-                                        <select name="id_pengajar" id="id_pengajar" class="form-control">
-                                            <option value="">Pilih Pengajar</option>
-                                            @foreach($pengajars as $pengajar)
-                                                <option value="{{ $pengajar->id_pengajar }}">{{ $pengajar->nama }}</option>
-                                            @endforeach
-                                        </select>
+                                <div class="row">
+                                    <!-- Ayat Mulai -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="jumlah_ayat_start">Ayat Mulai</label>
+                                            <input type="number" name="jumlah_ayat_start" id="jumlah_ayat_start" class="form-control" required value="{{ old('jumlah_ayat_start') }}">
+                                            @if ($errors->has('jumlah_ayat_start'))
+                                                <div class="text-danger">{{ $errors->first('jumlah_ayat_start') }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <!-- Ayat Akhir -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="jumlah_ayat_end">Ayat Akhir</label>
+                                            <input type="number" name="jumlah_ayat_end" id="jumlah_ayat_end" class="form-control" required value="{{ old('jumlah_ayat_end') }}">
+                                            @if ($errors->has('jumlah_ayat_end'))
+                                                <div class="text-danger">{{ $errors->first('jumlah_ayat_end') }}</div>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
 
+                                <!-- Nilai -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="nilai">Nilai</label>
+                                            <input type="number" name="nilai" id="nilai" class="form-control" required value="{{ old('nilai') }}">
+                                            @if ($errors->has('nilai'))
+                                                <div class="text-danger">{{ $errors->first('nilai') }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Keterangan -->
                                 <div class="form-group">
                                     <label for="keterangan">Keterangan</label>
                                     <textarea name="keterangan" id="keterangan" rows="3" class="form-control" placeholder="Masukkan keterangan..."></textarea>
@@ -137,66 +164,142 @@
     </section>
 @endsection
 
-@section('script')
-    <script src="{{ asset('/bower_components/admin-lte/plugins/select2/js/select2.full.min.js') }}"></script>
-    <script>
-        $(document).ready(function() {
-            // Inisialisasi Select2
-            $('.select2').select2();
 
-            // Ketika santri dipilih, update target yang terkait
-            $('#id_santri').on('change', function() {
-                var santriId = $(this).val();
 
-                // Kosongkan dropdown target dan nama surat
-                $('#id_target').empty().append('<option value="">- Pilih Target -</option>');
-                $('#nama_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
 
-                if (santriId) {
-                    // Ambil target berdasarkan id_santri
-                    $.ajax({
-    url: "{{ route('setoran.getSantriTargets', ':santri_id') }}".replace(':santri_id', santriId),
-    type: 'GET',
-    success: function(data) {
-        // Update dropdown target dengan data yang diperoleh
-        if (data.targets.length > 0) {
-            data.targets.forEach(function(target) {
-                $('#id_target').append('<option value="' + target.id_target + '" data-group="' + target.id_group + '">' + target.keterangan + '</option>');
+
+    @section('script')
+        <script src="{{ asset('/bower_components/admin-lte/plugins/select2/js/select2.full.min.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+                // Inisialisasi Select2
+                $('.select2').select2();
+
+                $('#id_santri').on('change', function() {
+        var santriId = $(this).val();
+        $('#id_group').empty().append('<option value="">- Pilih Target -</option>');
+        $('#id_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
+
+        if (santriId) {
+            $.ajax({
+                url: "{{ route('setoran.getTargetsBySantri', ':santri_id') }}".replace(':santri_id', santriId),
+                type: 'GET',
+                success: function(data) {
+                    console.log("Data target diterima:", data);
+
+                    let uniqueGroups = new Set();
+                    if (data.targets.length > 0) {
+                        data.targets.forEach(function(target) {
+                            if (!uniqueGroups.has(target.id_group)) {
+                                uniqueGroups.add(target.id_group);
+                                $('#id_group').append('<option value="' + target.id_group + '">Target ' + target.id_group + '</option>');
+                            }
+                        });
+                    } else {
+                        $('#id_group').append('<option value="">- Tidak ada target -</option>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error mengambil target:", error);
+                }
             });
-        } else {
-            $('#id_target').append('<option value="">- Tidak ada target -</option>');
         }
+    });
+// Ketika target dipilih, update nama surat yang terkait
+$('#id_group').on('change', function() {
+    var groupId = $(this).val();
+    var santriId = $('#id_santri').val(); // Ambil ID Santri yang dipilih
+
+    // Kosongkan dropdown id_surat (bukan nama_surat lagi)
+    $('#id_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
+
+    if (groupId && santriId) {
+        $.ajax({
+            url: "{{ url('get-nama-surat') }}",
+            type: 'GET',
+            data: {
+                group_id: groupId,
+                santri_id: santriId
+            },
+            success: function(data) {
+                console.log("Surat yang diterima:", data); // Debugging
+
+                let uniqueSurats = new Set();
+
+                if (data.surats && data.surats.length > 0) {
+                    data.surats.forEach(function(surat) {
+                        if (surat.id_surat && !uniqueSurats.has(surat.id_surat)) {
+                            uniqueSurats.add(surat.id_surat);
+                            $('#id_surat').append('<option value="' + surat.id_surat + '">' + surat.nama_surat + '</option>');
+                        }
+                    });
+                } else {
+                    $('#id_surat').append('<option value="">- Tidak ada surat -</option>');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error mengambil surat:", error);
+            }
+        });
     }
 });
 
-                }
+
+                // Ketika nama surat dipilih, lakukan validasi jumlah ayat
+                $('#nama_surat').on('change', function() {
+                    var idSurat = $(this).val();
+                    var idSantri = $('#id_santri').val();
+                    var idGroup = $('#id_group').val();
+
+                    if (idSurat && idSantri && idGroup) {
+                        $.ajax({
+                            url: "{{ url('get-ayats-validation') }}",
+                            type: 'GET',
+                            data: {
+                                id_surat: idSurat,
+                                id_santri: idSantri,
+                                id_group: idGroup
+                            },
+                            success: function(data) {
+                                console.log("Validasi target diterima:", data); // Debugging
+
+                                if (data.success) {
+                                    var jumlahAyatTargetAwal = data.jumlah_ayat_target_awal;
+                                    var jumlahAyatTarget = data.jumlah_ayat_target;
+
+                                    // Validasi input jumlah ayat start
+                                    $('#jumlah_ayat_start').on('input', function() {
+                                        var jumlahAyatStart = $(this).val();
+                                        if (jumlahAyatStart < jumlahAyatTargetAwal ||
+                                            jumlahAyatStart > jumlahAyatTarget) {
+                                            alert('Jumlah ayat start tidak boleh lebih kecil dari ' +
+                                                jumlahAyatTargetAwal +
+                                                ' dan tidak boleh lebih besar dari ' +
+                                                jumlahAyatTarget + '.');
+                                        }
+                                    });
+
+                                    // Validasi input jumlah ayat end
+                                    $('#jumlah_ayat_end').on('input', function() {
+                                        var jumlahAyatEnd = $(this).val();
+                                        if (jumlahAyatEnd < jumlahAyatTargetAwal ||
+                                            jumlahAyatEnd > jumlahAyatTarget) {
+                                            alert('Jumlah ayat end tidak boleh lebih kecil dari ' +
+                                                jumlahAyatTargetAwal +
+                                                ' dan tidak boleh lebih besar dari ' +
+                                                jumlahAyatTarget + '.');
+                                        }
+                                    });
+                                } else {
+                                    alert(data.message); // Menampilkan pesan kesalahan dari server
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Error validasi target:", error);
+                            }
+                        });
+                    }
+                });
             });
-
-            // Ketika target dipilih, update nama surat yang terkait
-            $('#id_target').on('change', function() {
-                var targetId = $(this).val();
-                var groupId = $(this).find(':selected').data('group');
-
-                // Kosongkan dropdown nama surat
-                $('#nama_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
-
-                if (targetId && groupId) {
-                    // Ambil nama surat berdasarkan id_target dan id_group
-                    $.ajax({
-                        url: "{{ url('get-nama-surat') }}",  // Endpoint untuk ambil nama surat
-                        type: 'GET',
-                        data: { target_id: targetId, group_id: groupId },
-                        success: function(data) {
-                            // Update dropdown nama surat dengan data yang diperoleh
-                            data.surats.forEach(function(surat) {
-                                $('#nama_surat').append('<option value="' + surat.id_surat + '">' + surat.nama_surat + '</option>');
-                            });
-                        }
-                    });
-                }
-            });
-        });
-    </script>
-
-
-@endsection
+        </script>
+    @endsection

@@ -26,7 +26,7 @@
                                         <th>No</th>
                                         <th>Nama Surat</th>
                                         <th>Jumlah Ayat</th>
-                                        <th>Juz</th>
+
                                         <th>Deskripsi</th>
                                         <th>Aksi</th>
                                     </tr>
@@ -54,7 +54,6 @@
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false }, // ✅ Nomor urut otomatis
             { data: 'nama_surat', name: 'nama_surat' },
             { data: 'jumlah_ayat', name: 'jumlah_ayat' },
-            { data: 'juz', name: 'juz' },
             { data: 'deskripsi', name: 'deskripsi', render: function(data) {
                 return data ? data : '-'; // ✅ Menampilkan '-' jika deskripsi kosong
             }},

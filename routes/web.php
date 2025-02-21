@@ -196,12 +196,17 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::post('store', 'store')->name('store');
             Route::get('edit/{setoran}', 'edit')->name('edit');
             Route::put('update/{setoran}', 'update')->name('update');
-            Route::delete('delete/{setoran}', 'destroy')->name('destroy');
+            Route::delete('delete-target/{idGroup}', 'destroyByTarget')->name('destroyByTarget'); // Gunakan idGroup
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
             Route::get('get-santri-targets/{id_santri}', 'getSantriTargets')->name('getSantriTargets');
-            Route::get('get-nama-surat', 'getNamaSuratByGroup')->name('getNamaSuratByGroup'); // Menambahkan rute untuk nama surat
+            Route::get('get-nama-surat', 'getNamaSuratByGroup')->name('getNamaSuratByGroup');
+            Route::delete('destroy/{idSetoran}', 'destroy')->name('destroy');
+            // Rute untuk halaman detail setoran
+            Route::get('detail/{groupKey}', 'show')->name('show');
         });
     });
+
+
 
     Route::prefix('target')->name('target.')->group(function () {
         Route::controller(TargetController::class)->group(function () {
@@ -236,6 +241,15 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
         });
     });
+
+    // web.php
+Route::get('/setoran/targets/{santri_id}', [SetoranController::class, 'getTargetsBySantri'])->name('setoran.getTargetsBySantri');
+Route::get('/get-nama-surat', [SetoranController::class, 'getNamaSurat']);
+Route::get('get-target-detail-by-surat', [TargetController::class, 'getTargetDetailBySurat']);
+Route::get('get-ayats-validation', [SetoranController::class, 'validateAyat']);
+Route::get('/get-id-target', [SetoranController::class, 'getIdTarget'])->name('setoran.getIdTarget');
+
+
 
 
 });

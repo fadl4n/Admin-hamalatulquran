@@ -32,7 +32,6 @@
                                     <tr>
                                         <th>Nama Santri</th>
                                         <th>Kelas</th>
-                                        <th>Juz</th>
                                         <th>Nama Surat</th>
                                         <th>Jumlah Ayat</th>
                                     </tr>
@@ -62,7 +61,7 @@
         columns: [
             { data: 'nama', name: 'nama' },
             { data: 'kelas', name: 'kelas' },
-            { data: 'Juz', name: 'Juz' },
+
             { data: 'nama_surat', name: 'nama_surat' },
             { data: 'jumlah_ayat', name: 'jumlah_ayat' }
         ]

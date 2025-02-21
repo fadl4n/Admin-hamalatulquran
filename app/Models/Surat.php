@@ -15,7 +15,6 @@ class Surat extends Model
     protected $fillable = [
         'nama_surat',
         'jumlah_ayat',
-        'juz',
         'deskripsi',
     ];
 
