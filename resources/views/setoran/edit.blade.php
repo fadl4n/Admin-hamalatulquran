@@ -54,7 +54,6 @@
                                     @error('tgl_setoran')<span class="text-danger">{{ $message }}</span>@enderror
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Pengajar</label>
@@ -74,9 +73,24 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
+                                    <label>Group</label>
+                                    <select name="id_group" class="form-control @error('id_group') is-invalid @enderror" required>
+                                        @foreach($targets as $target)
+                                            <option value="{{ $target->id_group }}" {{ old('id_group', $setoran->id_target) == $target->id_group ? 'selected' : '' }}>
+                                                {{ $target->id_group }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('id_group')<span class="text-danger">{{ $message }}</span>@enderror
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-6">
+                                <div class="form-group">
                                     <label>Surat</label>
                                     <select name="id_surat" class="form-control @error('id_surat') is-invalid @enderror" required>
-                                        @foreach ($surats as $surat)
+                                        @foreach($surats as $surat)
                                             <option value="{{ $surat->id_surat }}" {{ old('id_surat', $setoran->id_surat) == $surat->id_surat ? 'selected' : '' }}>
                                                 {{ $surat->nama_surat }}
                                             </option>
@@ -87,8 +101,6 @@
                             </div>
                         </div>
 
-
-
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -97,7 +109,6 @@
                                     @error('jumlah_ayat_start')<span class="text-danger">{{ $message }}</span>@enderror
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Ayat Akhir</label>
@@ -107,14 +118,14 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label>Status</label>
-                            <select name="status" class="form-control @error('status') is-invalid @enderror" required>
-                                <option value="1" {{ old('status', $setoran->status) == '1' ? 'selected' : '' }}>Selesai</option>
-                                <option value="0" {{ old('status', $setoran->status) == '0' ? 'selected' : '' }}>Proses</option>
-                            </select>
-                            @error('status')<span class="text-danger">{{ $message }}</span>@enderror
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Nilai</label>
+                                <input type="number" name="nilai" class="form-control @error('nilai') is-invalid @enderror" value="{{ old('nilai', $setoran->nilai) }}" required>
+                                @error('nilai')<span class="text-danger">{{ $message }}</span>@enderror
+                            </div>
                         </div>
+
 
                         <div class="form-group">
                             <label>Keterangan</label>

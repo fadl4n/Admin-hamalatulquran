@@ -50,6 +50,7 @@
                                     <tr>
                                         <th>Ayat</th>
                                         <th>Nilai</th>
+                                        <th>Pengajar</th>
                                         <th>Keterangan</th>
                                         <th>Aksi</th>
                                     </tr>
@@ -61,6 +62,7 @@
                                                 {{ $setoran->jumlah_ayat_start == $setoran->jumlah_ayat_end ? $setoran->jumlah_ayat_start : $setoran->jumlah_ayat_start . ' - ' . $setoran->jumlah_ayat_end }}
                                             </td>
                                             <td>{{ number_format($setoran->nilai) }}</td>
+                                            <td>{{$setoran->pengajar->nama}}
                                             <td>{{ $setoran->keterangan }}</td>
                                             <td class="text-center">
                                                 <a href="{{ url('setoran/edit/' . $setoran->id_setoran) }}" class="btn btn-warning btn-sm">
@@ -70,7 +72,7 @@
                                                 <button class="btn btn-danger btn-sm btnDelete" data-id_setoran="{{ $setoran->id_setoran }}">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>
-                                            </td>   
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>

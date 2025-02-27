@@ -22,7 +22,7 @@
                                     <select id="filterSantri" class="form-control">
                                         <option value="">Semua Santri</option>
                                         @foreach ($santris as $santri)
-                                            <option value="{{ $santri->id_santri }}">{{ $santri->nama }} | {{$santri->nisn}} </option>
+                                            <option value="{{ $santri->id_santri }}">{{ $santri->nama }} | {{$santri->nisn}}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -33,7 +33,11 @@
                                         <th>Nama Santri</th>
                                         <th>Kelas</th>
                                         <th>Nama Surat</th>
-                                        <th>Jumlah Ayat</th>
+                                        <th>Ayat</th>
+                                        <th>Persentase</th>
+                                        <th>Status</th>
+                                        <th>Nilai</th>
+                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -44,6 +48,33 @@
             </div>
         </div>
     </section>
+
+    <!-- Modal untuk input/edit nilai -->
+    <div class="modal fade" id="nilaiModal" tabindex="-1" aria-labelledby="nilaiModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nilaiModalLabel">Input/Edit Nilai</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="nilaiForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="histori_id" name="histori_id">
+                        <div class="form-group">
+                            <label for="nilai">Nilai:</label>
+                            <input type="number" id="nilai" name="nilai" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
@@ -51,7 +82,7 @@
     var oDataList = $('.histori-list').DataTable({
         processing: true,
         serverSide: true,
-        searching: false,  // Nonaktifkan fitur pencarian
+        searching: false,
         ajax: {
             url: "{{ route('histori.fnGetData') }}",
             data: function (d) {
@@ -61,9 +92,15 @@
         columns: [
             { data: 'nama', name: 'nama' },
             { data: 'kelas', name: 'kelas' },
-
             { data: 'nama_surat', name: 'nama_surat' },
-            { data: 'jumlah_ayat', name: 'jumlah_ayat' }
+            { data: 'ayat', name: 'ayat' },
+            { data: 'persentase', name: 'persentase' },
+            { data: 'status', name: 'status' },
+            { data: 'nilai', name: 'nilai' },
+            { data: 'aksi', name: 'aksi', orderable: false, searchable: false, render: function(data, type, row) {
+    return `<button class="btn btn-primary btn-sm edit-nilai" data-id="${row.id_target}" data-nilai="${row.nilai}"><i class="fas fa-edit"></i></button>`;
+}}
+
         ]
     });
 
@@ -71,5 +108,33 @@
     $('#filterSantri').change(function () {
         oDataList.ajax.reload();
     });
+
+    // Tampilkan modal edit nilai
+    $(document).on('click', '.edit-nilai', function() {
+        var id = $(this).data('id');
+        var nilai = $(this).data('nilai');
+        $('#histori_id').val(id);
+        $('#nilai').val(nilai);
+        $('#nilaiModal').modal('show');
+    });
+
+    $('#nilaiForm').submit(function(e) {
+    e.preventDefault();
+    var id_target = $('#histori_id').val(); // Ambil id_target
+    var nilai = $('#nilai').val();
+    $.ajax({
+        url: `/histori/update-nilai/${id_target}`, // Kirim id_target
+        method: 'POST',
+        data: { nilai: nilai, _token: '{{ csrf_token() }}' },
+        success: function(response) {
+            $('#nilaiModal').modal('hide');
+            oDataList.ajax.reload();
+        },
+        error: function(error) {
+            alert('Gagal menyimpan nilai');
+        }
+    });
+});
+
 </script>
 @endsection

@@ -13,6 +13,8 @@ class SuratController extends Controller
     {
         if ($request->ajax()) {
             $data = Surat::all();
+
+            // Pastikan format yang dikirim benar
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
@@ -37,7 +39,6 @@ class SuratController extends Controller
         $request->validate([
             'nama_surat' => 'required|string|max:255',
             'jumlah_ayat' => 'required|integer|min:1',
-            'juz' => 'required|integer|min:1',
             'deskripsi' => 'nullable|string',
         ]);
 
@@ -56,7 +57,7 @@ class SuratController extends Controller
         $request->validate([
             'nama_surat' => 'required|string|max:255',
             'jumlah_ayat' => 'required|integer|min:1',
-            'juz' => 'required|integer|min:1',
+
             'deskripsi' => 'nullable|string',
         ]);
 

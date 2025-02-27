@@ -3,61 +3,114 @@
 namespace App\Http\Controllers\CMS\User;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Setoran;
+use App\Models\Histori;
 use App\Models\Santri;
-use App\Models\Kelas;
-use App\Models\Surat;
+use App\Models\Setoran; // Pastikan Anda mengimpor model Setoran
+use Illuminate\Http\Request;
 
 class HistoriController extends Controller
 {
-    /**
-     * Tampilkan halaman histori dengan filter santri.
-     */
-    public function index(Request $request)
+    public function index()
     {
-        $santris = Santri::select('id_santri', 'nama','nisn')->get();
-        return view('histori.show', compact('santris'));
+        // Ambil semua data histori dengan relasi yang diperlukan
+        $histori = Histori::with(['santri', 'surat'])->get();
+
+        // Ambil daftar santri untuk filter
+        $santris = Santri::all();
+
+        return view('histori.show', compact('histori', 'santris'));
     }
 
     /**
      * Ambil data histori dengan filter.
      */
     public function fnGetData(Request $request)
-{
-    $query = Setoran::with(['santri', 'kelas', 'surat'])
-        ->where('setorans.status', 1) // Tambahkan filter status selesai
-        ->selectRaw('
-            setorans.id_santri,
-            setorans.id_kelas,
-            setorans.id_surat,
-            MIN(setorans.jumlah_ayat_start) as ayat_awal,
-            MAX(setorans.jumlah_ayat_end) as ayat_akhir
-        ')
-        ->groupBy('setorans.id_santri', 'setorans.id_kelas', 'setorans.id_surat');
+    {
+        $query = Histori::with(['santri', 'surat', 'target'])
+            ->select('historis.*');
 
-    // Filter berdasarkan santri jika ada
-    if ($request->has('id_santri') && !empty($request->id_santri)) {
-        $query->where('setorans.id_santri', $request->id_santri);
+        // Filter berdasarkan santri jika ada
+        if ($request->filled('id_santri')) {
+            $query->whereHas('santri', function ($q) use ($request) {
+                $q->where('id_santri', $request->id_santri);
+            });
+        }
+
+        return datatables()->eloquent($query)
+            ->addColumn('nama', fn($histori) => $histori->santri->nama ?? '-')
+            ->addColumn('kelas', fn($histori) => $histori->santri->kelas->nama_kelas ?? '-')
+            ->addColumn('nama_surat', fn($histori) => $histori->surat->nama_surat ?? '-')
+            ->addColumn('jumlah_ayat_start', fn($histori) => $histori->target->setoran()->min('jumlah_ayat_start') ?? 0)
+            ->addColumn('jumlah_ayat_end', fn($histori) => $histori->target->setoran()->max('jumlah_ayat_end') ?? 0)
+            ->addColumn('ayat', fn($histori) => $histori->target->setoran()->min('jumlah_ayat_start') . ' - ' . $histori->target->setoran()->max('jumlah_ayat_end'))
+            ->addColumn('status', fn($histori) => $histori->status)
+            ->addColumn('persentase', function ($histori) {
+                $totalAyat = max(1, $histori->target->jumlah_ayat_target - $histori->target->jumlah_ayat_target_awal + 1);
+                $ayatEnd = $histori->target->setoran()->max('jumlah_ayat_end');
+                return round(($ayatEnd / $totalAyat) * 100) . '%';
+            })
+            ->addColumn('nilai', fn($histori) => $histori->nilai)
+            ->make(true);
     }
 
-    return datatables()->eloquent($query)
-        ->addColumn('nama', function ($setoran) {
-            return $setoran->santri->nama ?? '-';
-        })
-        ->addColumn('kelas', function ($setoran) {
-            return $setoran->kelas->nama_kelas ?? '-';
-        })
-        ->addColumn('Juz', function ($setoran) {
-            return $setoran->surat->juz ?? '-';
-        })
-        ->addColumn('nama_surat', function ($setoran) {
-            return $setoran->surat->nama_surat ?? '-';
-        })
-        ->addColumn('jumlah_ayat', function ($setoran) {
-            return $setoran->ayat_awal . ' - ' . $setoran->ayat_akhir;
-        })
-        ->make(true);
+    public function updateHistori(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|string',
+        'persentase' => 'required|numeric',
+        'nilai' => 'required|numeric',
+        'id_setoran' => 'required|array',
+    ]);
+
+    $histori = Histori::findOrFail($id);
+    $target = $histori->target;
+    $jumlahAyatTarget = $target->jumlah_ayat_target;
+    $totalAyatDisetorkan = 0;
+    $setoranIds = [];
+    $tglSetoranTerakhir = null;
+
+    foreach ($request->id_setoran as $idSetoran) {
+        $setoran = Setoran::findOrFail($idSetoran);
+        $totalAyatDisetorkan += ($setoran->jumlah_ayat_end - $setoran->jumlah_ayat_start + 1);
+        $setoranIds[] = $setoran->id_setoran;
+        if (!$tglSetoranTerakhir || $setoran->tgl_setoran > $tglSetoranTerakhir) {
+            $tglSetoranTerakhir = $setoran->tgl_setoran;
+        }
+    }
+
+    $status = ($totalAyatDisetorkan >= $jumlahAyatTarget) ? 'Selesai' : (($tglSetoranTerakhir > $target->tgl_target) ? 'Terlambat' : 'Proses');
+    $persentaseBaru = number_format(($totalAyatDisetorkan / $jumlahAyatTarget) * 100, 2);
+
+    Histori::updateOrCreate(
+        ['id_target' => $target->id_target, 'id_santri' => $histori->id_santri],
+        [
+            'status' => $status,
+            'persentase' => $persentaseBaru,
+            'nilai' => $request->nilai,
+            'id_setoran' => json_encode($setoranIds),
+            'tgl_setoran' => $tglSetoranTerakhir,
+        ]
+    );
+
+    return redirect()->route('histori.index')->with('success', 'Histori berhasil diperbarui');
 }
+public function updateNilai(Request $request, $id_target)
+{
+    $request->validate([
+        'nilai' => 'required|numeric',
+    ]);
+
+    // Cari histori berdasarkan id_target
+    $histori = Histori::where('id_target', $id_target)->firstOrFail();
+
+    // Update nilai
+    $histori->update([
+        'nilai' => $request->nilai
+    ]);
+
+    return response()->json(['success' => true, 'message' => 'Nilai berhasil diperbarui!']);
+}
+
+
 
 }

@@ -89,6 +89,12 @@ class MenuSeeder extends Seeder
                 'url' => '/histori',
                 'sequence' =>  10
             ],
+            [
+                'group_menu_id' => 2,
+                'name' => 'Nilai',
+                'url' => '/nilai',
+                'sequence' =>  11
+            ],
 
 
         ]);

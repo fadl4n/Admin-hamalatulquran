@@ -11,7 +11,7 @@ class Target extends Model
 
     protected $table = 'targets';
     protected $primaryKey = 'id_target';
-    public $timestamps = true;
+    public $timestamps = false;
 
     protected $fillable = [
         'id_santri',

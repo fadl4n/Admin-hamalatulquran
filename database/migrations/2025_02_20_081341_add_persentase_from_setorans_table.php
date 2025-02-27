@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::table('setorans', function (Blueprint $table) {
             // Menambahkan kolom persentase (jika perlu)
-            $table->decimal('persentase', 5, 2)->default(0)->after('keterangan'); // Menambahkan kolom persentase dengan default 0
+            $table->decimal('persentase', 5, 2)->nullable()->after('keterangan');
+
         });
     }
 

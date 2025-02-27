@@ -26,7 +26,6 @@
                                         <th>No</th>
                                         <th>Nama Surat</th>
                                         <th>Jumlah Ayat</th>
-
                                         <th>Deskripsi</th>
                                         <th>Aksi</th>
                                     </tr>
@@ -44,54 +43,66 @@
 @section('script')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    var oDataList = $('.surat-list').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: "{{ route('surat.index') }}",
-        },
-        columns: [
-            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false }, // ✅ Nomor urut otomatis
-            { data: 'nama_surat', name: 'nama_surat' },
-            { data: 'jumlah_ayat', name: 'jumlah_ayat' },
-            { data: 'deskripsi', name: 'deskripsi', render: function(data) {
-                return data ? data : '-'; // ✅ Menampilkan '-' jika deskripsi kosong
-            }},
-            { data: 'action', name: 'action', orderable: false, searchable: false }
-        ],
-        columnDefs: [
-            { className: "text-center", targets: [0, 2, 3, 5] } // ✅ Pusatkan teks pada beberapa kolom
-        ]
-    });
+    $(document).ready(function() {
+        var oDataList = $('.surat-list').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('surat.index') }}",
+                type: 'GET',
+                dataSrc: function (json) {
+                    // Menambahkan pengecekan agar DataTables menerima data dengan benar
+                    console.log("Data diterima:", json);
+                    return json.data;
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                    console.error("Response:", xhr.responseText);
+                    Swal.fire("Terjadi Kesalahan!", "Gagal memuat data!", "error");
+                }
+            },
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'nama_surat', name: 'nama_surat' },
+                { data: 'jumlah_ayat', name: 'jumlah_ayat' },
+                { data: 'deskripsi', name: 'deskripsi', render: function(data) { return data ? data : '-'; }},
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ],
+            columnDefs: [
+                { className: "text-center", targets: [0, 2, 3, 4] }
+            ]
+        });
 
-    $('.surat-list').on('click', '.btnDelete', function () {
-        let id = $(this).data('id');
-
-        Swal.fire({
-            title: "Konfirmasi",
-            text: "Apakah Anda yakin ingin menghapus surat ini?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Ya, hapus!",
-            cancelButtonText: "Batal"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "{{ url('/surat') }}/" + id,
-                    type: "DELETE",
-                    headers: {
-                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                    },
-                    success: function(response) {
-                        Swal.fire("Berhasil!", response.success, "success");
-                        oDataList.ajax.reload(); // ✅ Reload DataTables setelah hapus
-                    },
-                    error: function(xhr) {
-                        Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus data!", "error");
-                    }
-                });
-            }
+        // Konfirmasi Hapus Surat
+        $('.surat-list').on('click', '.btnDelete', function () {
+            let id = $(this).data('id');
+            Swal.fire({
+                title: "Konfirmasi",
+                text: "Apakah Anda yakin ingin menghapus surat ini?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Ya, hapus!",
+                cancelButtonText: "Batal"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ url('/surat') }}/" + id,
+                        type: "DELETE",
+                        headers: {
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+                            Swal.fire("Berhasil!", response.success, "success");
+                            oDataList.ajax.reload(); // Reload DataTable setelah hapus
+                        },
+                        error: function(xhr) {
+                            Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus data!", "error");
+                        }
+                    });
+                }
+            });
         });
     });
 </script>
 @endsection
+    

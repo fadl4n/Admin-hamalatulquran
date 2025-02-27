@@ -12,6 +12,7 @@ use App\Http\Controllers\CMS\User\ArtikelController;
 use App\Http\Controllers\CMS\User\PengajarController;
 use App\Http\Controllers\CMS\User\KeluargaController;
 use App\Http\Controllers\CMS\User\SetoranController;
+use App\Http\Controllers\CMS\User\NilaiController;
 use App\Http\Controllers\CMS\User\TargetController;
 use App\Http\Controllers\CMS\User\HistoriController;
 use App\Http\Controllers\CMS\User\SuratController;
@@ -196,15 +197,21 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::post('store', 'store')->name('store');
             Route::get('edit/{setoran}', 'edit')->name('edit');
             Route::put('update/{setoran}', 'update')->name('update');
-            Route::delete('delete-target/{idGroup}', 'destroyByTarget')->name('destroyByTarget'); // Gunakan idGroup
+            Route::delete('delete-target/{id_santri}/{idGroup}', 'destroyByTarget')->name('destroyByTarget'); // Gunakan id_santri dan idGroup
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
             Route::get('get-santri-targets/{id_santri}', 'getSantriTargets')->name('getSantriTargets');
             Route::get('get-nama-surat', 'getNamaSuratByGroup')->name('getNamaSuratByGroup');
             Route::delete('destroy/{idSetoran}', 'destroy')->name('destroy');
-            // Rute untuk halaman detail setoran
             Route::get('detail/{groupKey}', 'show')->name('show');
         });
     });
+
+
+    Route::prefix('nilai')->name('nilai.')->group(function () {
+        Route::get('/', [NilaiController::class, 'index'])->name('index');
+        Route::get('/{idSantri}/{idGroup}', [NilaiController::class, 'show'])->name('show');
+    });
+
 
 
 
@@ -223,9 +230,6 @@ Route::middleware([CheckAuth::class])->group(function () {
         });
     });
 
-
-
-
     Route::prefix('artikel')->group(function () {
         Route::get('/', [ArtikelController::class, 'index'])->name('artikel.index');
         Route::get('/create', [ArtikelController::class, 'create'])->name('artikel.create');
@@ -239,8 +243,11 @@ Route::middleware([CheckAuth::class])->group(function () {
         Route::controller(HistoriController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+            Route::post('update-nilai/{id_target}', 'updateNilai')->name('updateNilai'); // Update berdasarkan id_target
         });
     });
+
+
 
     // web.php
 Route::get('/setoran/targets/{santri_id}', [SetoranController::class, 'getTargetsBySantri'])->name('setoran.getTargetsBySantri');

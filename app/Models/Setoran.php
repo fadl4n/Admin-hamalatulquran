@@ -22,6 +22,7 @@ class Setoran extends Model
         'id_surat',
         'id_pengajar',
         'id_target',
+        'persentase',
         'jumlah_ayat_start',
         'jumlah_ayat_end',
         'nilai',
@@ -56,6 +57,11 @@ class Setoran extends Model
     {
         return $this->hasMany(Target::class, 'id_target', 'id_target');
     }
+    public function histori()
+    {
+        return $this->hasOne(Histori::class, 'id_setoran');
+    }
+
 
     public function getPersentaseAttribute()
     {
@@ -66,47 +72,56 @@ class Setoran extends Model
             return 0; // Jika tidak ada target, persentase 0%
         }
 
-        // Totalkan jumlah ayat dari semua target
-        $total_target = 0;
-        $ayat_dicapai = 0;
+        // Cek semua target dengan id_santri dan id_group yang sama di tabel targets
+        $matchingTargets = Target::where('id_santri', $targets->first()->id_santri)
+            ->where('id_group', $targets->first()->id_group)
+            ->get();
 
-        foreach ($targets as $target) {
+        // Hitung total ayat yang perlu dicapai
+        $total_target = 0;
+        foreach ($matchingTargets as $target) {
             $jumlah_ayat_target = $target->jumlah_ayat_target;
             $jumlah_ayat_target_awal = $target->jumlah_ayat_target_awal;
 
             if ($jumlah_ayat_target && $jumlah_ayat_target_awal) {
+                // Menghitung jumlah ayat yang perlu dicapai per target
                 $total_target += ($jumlah_ayat_target - $jumlah_ayat_target_awal + 1);
             }
         }
 
-        // Ambil jumlah ayat start terkecil dan jumlah ayat end terbesar dari tabel setorans dengan id_target yang sama
-        $setoranData = Setoran::whereIn('id_target', $targets->pluck('id_target'))
-            ->selectRaw('MIN(jumlah_ayat_start) as min_ayat, MAX(jumlah_ayat_end) as max_ayat')
-            ->first();
+        // Jumlahkan ayat yang sudah tercatat dalam tabel setoran
+        $ayat_dicapai = 0;
+        $totalProgress = 0; // Variabel untuk menghitung total progres
 
-        if ($setoranData && $setoranData->min_ayat && $setoranData->max_ayat) {
-            $ayat_dicapai = $setoranData->max_ayat - $setoranData->min_ayat + 1;
+        foreach ($matchingTargets as $target) {
+            $setoranData = Setoran::where('id_target', $target->id_target)
+                ->selectRaw('SUM(jumlah_ayat_end - jumlah_ayat_start + 1) as total_ayat_dicapai')
+                ->first();
+
+            if ($setoranData && $setoranData->total_ayat_dicapai) {
+                $ayat_dicapai += $setoranData->total_ayat_dicapai;
+
+                // Tentukan progres untuk target ini (dari 0 sampai 1)
+                $targetTotalAyat = $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1;
+                $targetProgress = $setoranData->total_ayat_dicapai / $targetTotalAyat;
+
+                // Jumlahkan progres untuk target ini
+                $totalProgress += $targetProgress;
+            }
         }
 
-        // Hitung persentase
-        if ($total_target > 0) {
-            $persentase = ($ayat_dicapai / $total_target) * 100;
-        } else {
-            return 0; // Jika tidak ada target ayat yang valid
+        // Hitung persentase berdasarkan total progres
+        $persentase = 0;
+        $totalTargets = $matchingTargets->count();
+
+        if ($totalTargets > 0) {
+            // Persentase dihitung berdasarkan total progres
+            $persentase = ($totalProgress / $totalTargets) * 100;
         }
 
-        // Periksa apakah status harus berubah
-        if ($persentase >= 100) {
-            // Ubah status menjadi 'Selesai'
-            $this->status = 1;
-            $this->save();
-        } elseif ($persentase > 0 && $persentase < 100) {
-            // Status tetap 'Proses' jika persentase antara 0% dan 100%
-            $this->status = 0;
-            $this->save();
-        }
+        // Pastikan persentase tidak lebih dari 100%
+        $persentase = min(100, $persentase);
 
         return round($persentase); // Dibulatkan ke angka bulat terdekat
     }
-
 }
