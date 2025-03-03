@@ -13,7 +13,7 @@
             <div class="card-body">
                 <h4>Hafalan</h4>
                 <table class="table table-bordered">
-                    <thead class="bg-navy text-white">
+                    <thead class="bg-navy disabled">
                         <tr>
                             <th>Surat</th>
                             <th>Nilai</th>

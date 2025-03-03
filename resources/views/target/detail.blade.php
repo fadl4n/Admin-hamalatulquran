@@ -16,7 +16,7 @@
                                 <p class="text-center text-danger">Data tidak ditemukan.</p>
                             @else
                                 <table class="table table-bordered">
-                                    <thead class="bg-light">
+                                    <thead class="bg-navy disabled">
                                         <tr>
                                             <th>Nama Surat</th>
                                             <th>Ayat</th>

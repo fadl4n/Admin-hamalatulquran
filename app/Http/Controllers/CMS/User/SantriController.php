@@ -77,7 +77,7 @@ class SantriController extends Controller
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
 
-        $data['foto_santri'] = asset('assets/image/default-user.png'); // Gambar default
+        $data['foto_santri'] = asset('assets/image/default.png'); // Gambar default
 
         if ($request->hasFile('foto_santri')) {
             $file = $request->file('foto_santri');

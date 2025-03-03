@@ -43,7 +43,7 @@ Route::middleware([CheckAuthFrontend::class])->group(function () {
 });
 
 
-Route::prefix('api/kelas')->name('kelas.')->group(function () {
+Route::middleware('api/kelas')->name('kelas.')->group(function () {
     Route::controller(KelasController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('store', 'store')->name('store');

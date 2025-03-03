@@ -46,7 +46,7 @@
 
                             <!-- Tabel Setoran Detail berdasarkan id_surat -->
                             <table class="table table-bordered">
-                                <thead class="bg-navy text-white">
+                                <thead class="bg-navy disabled">
                                     <tr>
                                         <th>Ayat</th>
                                         <th>Nilai</th>
