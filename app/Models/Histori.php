@@ -22,8 +22,6 @@ class Histori extends Model
         'id_kelas',
         'nilai',
         'persentase',
-
-
     ];
 
     // Relasi ke Target
@@ -48,9 +46,27 @@ class Histori extends Model
     {
         return $this->belongsTo(Surat::class, 'id_surat', 'id_surat');
     }
+
+    // Relasi ke Setoran
     public function setoran()
     {
-        return $this->belongsTo(Kelas::class, 'id_setoran', 'id_setoran');
+        return $this->belongsTo(Setoran::class, 'id_setoran', 'id_setoran');
     }
 
+    // Method untuk menentukan status berdasarkan setoran
+    public static function determineStatus($totalAyatDisetorkan, $jumlahAyatTarget, $tgl_target,$persentase)
+    {
+        $today = now()->toDateString(); // Ambil tanggal hari ini (format: Y-m-d)
+
+        if ($persentase == 0) {
+            return 0; // Status belum mulai
+        }
+        if ($totalAyatDisetorkan >= $jumlahAyatTarget) {
+            return 2; // Status selesai
+        } elseif ($tgl_target < $today) {
+            return 3; // Status terlambat
+        } else {
+            return 1; // Status proses
+        }
+    }
 }

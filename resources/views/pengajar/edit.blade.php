@@ -111,20 +111,26 @@
                             @enderror
                         </div>
 
-                        <!-- Input Foto -->
                         <div class="form-group">
-                            <label>Foto Pengajar</label>
-                            <input type="file" name="foto_pengajar" class="form-control @error('foto_pengajar') is-invalid @enderror" accept="image/*">
+                            <label for="foto_pengajar">Foto Pengajar</label>
+                            <input type="file" name="foto_pengajar" id="foto_pengajar"
+                                class="form-control @error('foto_pengajar') is-invalid @enderror"
+                                accept="image/png, image/jpeg"
+                                onchange="previewImage(event)">
+
                             <small class="text-muted">Kosongkan jika tidak ingin mengubah foto.</small>
+
                             @error('foto_pengajar')
                                 <span class="text-danger">Format gambar tidak valid atau ukuran terlalu besar.</span>
                             @enderror
-                            @if ($pengajar->foto_pengajar)
-                                <div class="mt-2">
-                                    <img src="{{ asset('storage/' . $pengajar->foto_pengajar) }}" alt="Foto Pengajar"
-                                        class="img-thumbnail" width="150">
-                                </div>
-                            @endif
+
+                            <!-- Pratinjau Gambar -->
+                            <div class="mt-2">
+                                <img id="preview"
+                                    src="{{ $pengajar->foto_pengajar ? asset('uploadedFile/image/pengajar/' . basename($pengajar->foto_pengajar)) : asset('assets/image/default-user.png') }}"
+                                    alt="Foto Pengajar"
+                                    class="img-thumbnail" width="150">
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary">Simpan</button>
@@ -134,4 +140,14 @@
             </div>
         </div>
     </section>
+    <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function(){
+                var output = document.getElementById('preview');
+                output.src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
 @endsection

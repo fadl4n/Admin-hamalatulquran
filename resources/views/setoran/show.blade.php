@@ -24,7 +24,7 @@
 
                             <!-- 📊 TABEL SETORAN -->
                             <table class="table table-bordered table-hover setoran-list">
-                                <thead class="bg-navy text-white">
+                                <thead class="bg-navy disabled">
                                     <tr>
                                         <th>No</th>
                                         <th>Santri</th>

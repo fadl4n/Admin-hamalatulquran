@@ -87,4 +87,44 @@ class NilaiController extends Controller
 
         return view('nilai.detail', compact('hafalan', 'murojaah', 'idGroup', 'santri'));
     }
+    public function fnGetData(Request $request)
+    {
+        $santris = Santri::with('kelas');
+
+        // If there's a search input
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+
+            $santris->where(function ($query) use ($search) {
+                $query->where('nama', 'like', "%$search%")
+                    ->orWhere('nisn', 'like', "%$search%")
+                    ->orWhereHas('kelas', function ($kelasQuery) use ($search) {
+                        $kelasQuery->where('nama_kelas', 'like', "%$search%");
+                    });
+            });
+        }
+
+        // Paginate the results
+        $santris = $santris->paginate(10); // Adjust the number per page as needed
+
+        // Map the result into the correct format for DataTable
+        $data = $santris->items();
+
+        $data = array_map(function ($santri) {
+            return [
+                'nama' => $santri->nama,
+                'nisn' => $santri->nisn,
+                'kelas' => $santri->kelas->nama_kelas ?? '-',
+                'action' => '<a href="' . route('nilai.show', ['idSantri' => $santri->id_santri, 'idGroup' => 1]) . '" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></a>',
+            ];
+        }, $data);
+
+        return response()->json([
+            'data' => $data,
+            'recordsTotal' => $santris->total(),  // Total records without filter
+            'recordsFiltered' => $santris->total() // Total records after filter
+        ]);
+    }
+
+
 }

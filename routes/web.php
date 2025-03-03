@@ -210,8 +210,10 @@ Route::middleware([CheckAuth::class])->group(function () {
     Route::prefix('nilai')->name('nilai.')->group(function () {
         Route::get('/', [NilaiController::class, 'index'])->name('index');
         Route::get('/{idSantri}/{idGroup}', [NilaiController::class, 'show'])->name('show');
-    });
 
+        // Route untuk mendapatkan data menggunakan AJAX
+        Route::get('/fn-get-data', [NilaiController::class, 'fnGetData'])->name('fn-get-data');
+    });
 
 
 

@@ -108,10 +108,19 @@
                             @enderror
                         </div>
 
-                        <!-- Input Foto -->
                         <div class="form-group">
-                            <label>Foto Pengajar</label>
-                            <input type="file" name="foto_pengajar" class="form-control-file @error('foto_pengajar') is-invalid @enderror" accept="image/*">
+                            <label for="foto_pengajar">Foto Pengajar</label>
+                            <input type="file" name="foto_pengajar" id="foto_pengajar"
+                                class="form-control-file @error('foto_pengajar') is-invalid @enderror"
+                                accept="image/png, image/jpeg"
+                                onchange="previewImage(event)">
+
+                            <!-- Pratinjau Gambar -->
+                            <div class="mt-2">
+                                <img id="preview" src="{{ asset('assets/image/default-user.png') }}"
+                                    alt="Preview Gambar" class="img-thumbnail" width="150">
+                            </div>
+
                             @error('foto_pengajar')
                                 <span class="text-danger">Format gambar tidak valid atau ukuran terlalu besar.</span>
                             @enderror
@@ -125,4 +134,15 @@
             </div>
         </div>
     </section>
+    <!-- JavaScript untuk Pratinjau Gambar -->
+<script>
+    function previewImage(event) {
+        var reader = new FileReader();
+        reader.onload = function(){
+            var output = document.getElementById('preview');
+            output.src = reader.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
 @endsection

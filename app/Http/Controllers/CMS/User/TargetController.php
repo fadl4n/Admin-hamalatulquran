@@ -119,7 +119,7 @@ class TargetController extends Controller
             'id_kelas'=>$target->id_kelas,
             'persentase'=> 0.00,
 
-            'status' => 'Belum Mulai',  // Status default yang bisa kamu sesuaikan
+            'status' => 0,  // Status default yang bisa kamu sesuaikan
             'id_target' => $target->id_target,  // Menghubungkan histori dengan target
             'nilai' => 0,  // Nilai default, bisa disesuaikan jika diperlukan
         ]);
@@ -202,47 +202,28 @@ class TargetController extends Controller
             return back()->withErrors(['jumlah_ayat_target_awal' => 'Jumlah ayat target awal tidak boleh lebih dari jumlah ayat target.'])->withInput();
         }
 
-        // Validasi agar jumlah_ayat_target tidak melebihi jumlah_ayat surat
         if ($request->jumlah_ayat_target > $surat->jumlah_ayat) {
             return back()->withErrors(['jumlah_ayat_target' => 'Jumlah ayat target tidak boleh lebih dari jumlah ayat surat.'])->withInput();
         }
-          // Ambil setoran sebelumnya untuk validasi tumpang tindih
-          $targets = Target::where('id_target','!=')
-          ->orderBy('jumlah_ayat_target_awal') // Urutkan berdasarkan jumlah_ayat_start
-          ->get();
 
-      // Periksa apakah jumlah_ayat_start yang diinputkan valid
-      $valid = false;
-      $previousEnd = 0; // Nilai sebelumnya untuk perbandingan
-
-      foreach ($targets as $targetItem) {
-          // Cek apakah ayat yang diminta tidak tumpang tindih dengan setoran yang ada
-          if ($request->jumlah_ayat_target_awal >= $previousEnd && $request->jumlah_ayat_target_awal < $targetItem->jumlah_ayat_target_awal) {
-              $valid = true;
-              break;
-          }
-          $previousEnd = $targetItem->jumlah_ayat_target;
-      }
-
-      // Cek apakah ayat terakhir berada setelah setoran terakhir
-      if (!$valid && $request->jumlah_ayat_target_awal > $previousEnd && $request->jumlah_ayat_target_awal ) {
-          $valid = true; // jika itu ayat terakhir
-      }
-
-      // Ambil jumlah ayat akhir pada setoran sebelumnya untuk digunakan dalam pesan error
-      $previousEndAyat = $previousEnd; // Nilai sebelumnya untuk ayat akhir
-
-      if (!$valid) {
-          return redirect()->back()->withErrors([
-              'jumlah_ayat_target_awal' => 'Jumlah ayat mulai tidak boleh lebih kecil dari jumlah ayat akhir pada setoran sebelumnya (ayat akhir sebelumnya: ' . $previousEndAyat . '), dan harus berada di rentang yang kosong antara setoran-setoran yang ada.'
-          ]);
-      }
-
-
+        // Update target
         $target->update($request->all());
+
+        // Setelah update target, perbarui histori yang terkait
+        $histori = Histori::where('id_target', $target->id_target)->first();
+        if ($histori) {
+            // Update histori sesuai dengan target yang baru
+            $histori->update([
+                'id_santri' => $target->id_santri, // Sesuaikan dengan id_santri yang baru
+                'id_surat' => $target->id_surat,   // Sesuaikan dengan id_surat yang baru jika perlu
+                'jumlah_ayat_target' => $target->jumlah_ayat_target, // Sesuaikan jumlah ayat target
+                'tgl_target' => $target->tgl_target, // Sesuaikan tanggal target jika diperlukan
+            ]);
+        }
 
         return redirect()->route('target.index')->with('success', 'Target berhasil diperbarui!');
     }
+
 
     public function destroy($id_santri, $id_group)
     {

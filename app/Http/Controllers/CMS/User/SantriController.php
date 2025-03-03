@@ -77,9 +77,28 @@ class SantriController extends Controller
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
 
+        $data['foto_santri'] = asset('assets/image/default-user.png'); // Gambar default
+
         if ($request->hasFile('foto_santri')) {
-            $data['foto_santri'] = $request->file('foto_santri')->store('santri', 'public');
+            $file = $request->file('foto_santri');
+            $allowedFileTypes = ['png', 'jpg', 'jpeg'];
+            $extension = $file->getClientOriginalExtension();
+
+            // Validasi tipe file
+            if (!in_array($extension, $allowedFileTypes)) {
+                return redirect()->back()->with('error', 'File type not allowed. Only png and jpg files are allowed.');
+            }
+
+            // Buat nama file unik
+            $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
+
+            // Simpan file ke folder public
+            $file->move(public_path('uploadedFile/image/santri'), $name_original);
+
+            // Simpan path gambar
+            $data['foto_santri'] = url('uploadedFile/image/santri') . '/' . $name_original;
         }
+
 
         Santri::create($data);
 
@@ -88,9 +107,16 @@ class SantriController extends Controller
 
     public function edit($id)
     {
-        $santri = Santri::findOrFail($id);
+        $santri = Santri::with(['keluarga'])->findOrFail($id);
+
+        // Ambil data keluarga berdasarkan hubungan
+        $ayah = $santri->keluarga->firstWhere('hubungan', 1);
+        $ibu = $santri->keluarga->firstWhere('hubungan', 2);
+        $wali = $santri->keluarga->firstWhere('hubungan', 3);
+
         $kelas = Kelas::all();
-        return view('santri.edit', compact('santri', 'kelas'));
+
+        return view('santri.edit', compact('santri', 'ayah', 'ibu', 'wali', 'kelas'));
     }
 
     public function update(Request $request, $id)
@@ -108,6 +134,30 @@ class SantriController extends Controller
             'status' => 'required|integer|in:0,1',
             'password' => 'nullable|string|min:6',
             'foto_santri' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'nama_ayah' => 'nullable|string|max:255',
+            'pekerjaan_ayah' => 'nullable|string|max:255',
+            'pendidikan_ayah' => 'nullable|string|max:255',
+            'no_telp_ayah' => 'nullable|string|max:20',
+            'alamat_ayah' => 'nullable|string',
+            'email_ayah' => 'nullable|email|max:255',
+            'tempat_lahir_ayah' => 'nullable|string|max:255',
+            'tgl_lahir_ayah' => 'nullable|date',
+            'nama_ibu' => 'nullable|string|max:255',
+            'pekerjaan_ibu' => 'nullable|string|max:255',
+            'pendidikan_ibu' => 'nullable|string|max:255',
+            'no_telp_ibu' => 'nullable|string|max:20',
+            'alamat_ibu' => 'nullable|string',
+            'email_ibu' => 'nullable|email|max:255',
+            'tempat_lahir_ibu' => 'nullable|string|max:255',
+            'tgl_lahir_ibu' => 'nullable|date',
+            'nama_wali' => 'nullable|string|max:255',
+            'pekerjaan_wali' => 'nullable|string|max:255',
+            'pendidikan_wali' => 'nullable|string|max:255',
+            'no_telp_wali' => 'nullable|string|max:20',
+            'alamat_wali' => 'nullable|string',
+            'email_wali' => 'nullable|email|max:255',
+            'tempat_lahir_wali' => 'nullable|string|max:255',
+            'tgl_lahir_wali' => 'nullable|date',
         ]);
 
         $santri = Santri::findOrFail($id);
@@ -122,20 +172,68 @@ class SantriController extends Controller
             return redirect()->back()->withInput()->with('error', 'Email sudah digunakan oleh santri lain.');
         }
 
+        // Handle password update
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
 
+        // Handle foto santri upload
         if ($request->hasFile('foto_santri')) {
-            if ($santri->foto_santri) {
-                Storage::disk('public')->delete($santri->foto_santri);
+            $file = $request->file('foto_santri');
+            $allowedFileTypes = ['png', 'jpg', 'jpeg'];
+
+            // Validasi tipe file
+            $extension = $file->getClientOriginalExtension();
+            if (!in_array($extension, $allowedFileTypes)) {
+                return redirect()->back()->with('error', 'File type not allowed. Only PNG, JPG, and JPEG files are allowed.');
             }
-            $data['foto_santri'] = $request->file('foto_santri')->store('santri', 'public');
+
+            // Hapus file lama jika ada
+            if ($santri->foto_santri && file_exists(public_path('uploadedFile/image/santri/' . basename($santri->foto_santri)))) {
+                unlink(public_path('uploadedFile/image/santri/' . basename($santri->foto_santri)));
+            }
+
+            // Simpan file gambar baru dengan nama unik
+            $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploadedFile/image/santri'), $name_original);
+
+            // Simpan path gambar baru ke dalam data
+            $data['foto_santri'] = 'uploadedFile/image/santri/' . $name_original;
         }
 
+        // Update data keluarga (ayah, ibu, wali)
+        $this->updateKeluarga($santri->id_santri, 1, $request->all(), 'ayah');
+        $this->updateKeluarga($santri->id_santri, 2, $request->all(), 'ibu');
+        $this->updateKeluarga($santri->id_santri, 3, $request->all(), 'wali');
+
+        // Update data santri
         $santri->update($data);
+
         return redirect()->route('santri.show', $santri->id_santri)->with('success', 'Santri berhasil diperbarui.');
     }
+
+    private function updateKeluarga($id_santri, $hubungan, $data, $prefix)
+    {
+        // Set default values as null if not present
+        $keluargaData = [
+            'nama' => $data['nama_' . $prefix] ?? null,
+            'pekerjaan' => $data['pekerjaan_' . $prefix] ?? null,
+            'pendidikan' => $data['pendidikan_' . $prefix] ?? null,
+            'no_telp' => $data['no_telp_' . $prefix] ?? null,
+            'alamat' => $data['alamat_' . $prefix] ?? null,
+            'email' => $data['email_' . $prefix] ?? null,
+            'tempat_lahir' => $data['tempat_lahir_' . $prefix] ?? null,
+            'tgl_lahir' => $data['tgl_lahir_' . $prefix] ?? null,
+        ];
+
+        Keluarga::updateOrCreate(
+            ['id_santri' => $id_santri, 'hubungan' => $hubungan],
+            $keluargaData
+        );
+    }
+
+
+
 
 
     public function destroy($id)
@@ -161,6 +259,9 @@ class SantriController extends Controller
                 return '<a href="' . url('santri/show/' . $santri->id_santri) . '" class="btn btn-primary btn-sm" title="Preview">
                             <i class="fa fa-eye"></i>
                         </a>
+                        <a href="' . url('santri/edit/' . $santri->id_santri) . '" class="btn btn-warning btn-sm" title="Edit">
+                            <i class="fa fa-edit"></i>
+                        </a>
                         <button class="btn btn-danger btn-sm btnDelete" data-id="' . $santri->id_santri . '" title="Hapus">
                             <i class="fas fa-trash"></i>
                         </button>';
@@ -168,102 +269,8 @@ class SantriController extends Controller
             ->rawColumns(['action'])
             ->make(true);
     }
-    public function editOrangTua($id_santri)
-    {
-        $santri = Santri::findOrFail($id_santri);
-        $ayah = $santri->keluarga->firstWhere('hubungan', 1);
-        $ibu = $santri->keluarga->firstWhere('hubungan', 2);
-
-        return view('santri.edit_orangtua', compact('santri', 'ayah', 'ibu'));
-    }
-
-    public function updateOrangTua(Request $request, $id_santri)
-    {
-        $santri = Santri::findOrFail($id_santri);
-
-        $validated = $request->validate([
-            'nama_ayah' => 'required|string|max:255',
-            'pekerjaan_ayah' => 'nullable|string|max:255',
-            'pendidikan_ayah' => 'nullable|string|max:255',
-            'no_telp_ayah' => 'nullable|string|max:20',
-            'alamat_ayah' => 'nullable|string',
-            'email_ayah' => 'nullable|email|max:255',
-            'tempat_lahir_ayah' => 'nullable|string|max:255',
-            'tgl_lahir_ayah' => 'nullable|date',
-            'nama_ibu' => 'required|string|max:255',
-            'pekerjaan_ibu' => 'nullable|string|max:255',
-            'pendidikan_ibu' => 'nullable|string|max:255',
-            'no_telp_ibu' => 'nullable|string|max:20',
-            'alamat_ibu' => 'nullable|string',
-            'email_ibu' => 'nullable|email|max:255',
-            'tempat_lahir_ibu' => 'nullable|string|max:255',
-            'tgl_lahir_ibu' => 'nullable|date',
-        ]);
-
-        // Cek email ayah dan ibu apakah sudah terdaftar di keluarga lain
-        if (Keluarga::where('email', $request->email_ayah)->where('id_santri', '!=', $santri->id_santri)->exists()) {
-            return redirect()->back()->withInput()->with('error', 'Email ayah sudah digunakan.');
-        }
-
-        if (Keluarga::where('email', $request->email_ibu)->where('id_santri', '!=', $santri->id_santri)->exists()) {
-            return redirect()->back()->withInput()->with('error', 'Email ibu sudah digunakan.');
-        }
-
-        $this->updateKeluarga($santri->id_santri, 1, $validated, 'ayah');
-        $this->updateKeluarga($santri->id_santri, 2, $validated, 'ibu');
-
-        return redirect()->route('santri.show', $id_santri)->with('success', 'Data Orang Tua berhasil diperbarui!');
-    }
 
 
-    public function editWali($id_santri)
-    {
-        $santri = Santri::findOrFail($id_santri);
-        $wali = $santri->keluarga->firstWhere('hubungan', 3);
-
-        return view('santri.edit_wali', compact('santri', 'wali'));
-    }
-
-    public function updateWali(Request $request, $id_santri)
-    {
-        $santri = Santri::findOrFail($id_santri);
-
-        $validated = $request->validate([
-            'nama_wali' => 'required|string|max:255',
-            'pekerjaan_wali' => 'nullable|string|max:255',
-            'pendidikan_wali' => 'nullable|string|max:255',
-            'no_telp_wali' => 'nullable|string|max:20',
-            'alamat_wali' => 'nullable|string',
-            'email_wali' => 'nullable|email|max:255',
-            'tempat_lahir_wali' => 'nullable|string|max:255',
-            'tgl_lahir_wali' => 'nullable|date',
-        ]);
-
-        // Cek email wali apakah sudah terdaftar di keluarga lain
-        if (Keluarga::where('email', $request->email_wali)->where('id_santri', '!=', $santri->id_santri)->exists()) {
-            return redirect()->back()->withInput()->with('error', 'Email wali sudah digunakan.');
-        }
-
-        $this->updateKeluarga($santri->id_santri, 3, $validated, 'wali');
-
-        return redirect()->route('santri.show', $id_santri)->with('success', 'Data Wali berhasil diperbarui!');
-    }
-
-
-    private function updateKeluarga($id_santri, $hubungan, $data, $prefix)
-    {
-        Keluarga::updateOrCreate(
-            ['id_santri' => $id_santri, 'hubungan' => $hubungan],
-            [
-                'nama' => $data['nama_' . $prefix],
-                'pekerjaan' => $data['pekerjaan_' . $prefix] ?? null,
-                'pendidikan' => $data['pendidikan_' . $prefix] ?? null,
-                'no_telp' => $data['no_telp_' . $prefix] ?? null,
-                'alamat' => $data['alamat_' . $prefix] ?? null,
-                'email' => $data['email_' . $prefix] ?? null,
-                'tempat_lahir' => $data['tempat_lahir_' . $prefix] ?? null,
-                'tgl_lahir' => $data['tgl_lahir_' . $prefix] ?? null,
-            ]
-        );
-    }
 }
+
+

@@ -21,9 +21,6 @@ class HistoriController extends Controller
         return view('histori.show', compact('histori', 'santris'));
     }
 
-    /**
-     * Ambil data histori dengan filter.
-     */
     public function fnGetData(Request $request)
     {
         $query = Histori::with(['santri', 'surat', 'target'])
@@ -33,6 +30,22 @@ class HistoriController extends Controller
         if ($request->filled('id_santri')) {
             $query->whereHas('santri', function ($q) use ($request) {
                 $q->where('id_santri', $request->id_santri);
+            });
+        }
+
+        // Menambahkan pencarian berdasarkan search_value
+        if ($request->has('search_value') && $request->search_value != '') {
+            $searchValue = $request->search_value;
+            $query->where(function ($query) use ($searchValue) {
+                $query->whereHas('santri', function ($q) use ($searchValue) {
+                    $q->where('nama', 'like', "%$searchValue%");
+                })
+                ->orWhereHas('surat', function ($q) use ($searchValue) {
+                    $q->where('nama_surat', 'like', "%$searchValue%");
+                })
+                ->orWhereHas('target', function ($q) use ($searchValue) {
+                    $q->where('id_group', 'like', "%$searchValue%");
+                });
             });
         }
 
@@ -63,7 +76,7 @@ class HistoriController extends Controller
     ]);
 
     $histori = Histori::findOrFail($id);
-    $target = $histori->target;
+    $target = $histori->target;  // Mengambil target terkait histori
     $jumlahAyatTarget = $target->jumlah_ayat_target;
     $totalAyatDisetorkan = 0;
     $setoranIds = [];
@@ -78,13 +91,25 @@ class HistoriController extends Controller
         }
     }
 
-    $status = ($totalAyatDisetorkan >= $jumlahAyatTarget) ? 'Selesai' : (($tglSetoranTerakhir > $target->tgl_target) ? 'Terlambat' : 'Proses');
+    // **Cek apakah sudah melewati tgl_target**
+    $today = now()->toDateString(); // Ambil tanggal hari ini (format: Y-m-d)
+    $status = 1; // Default status = Proses (1)
+
+    if ($totalAyatDisetorkan >= $jumlahAyatTarget) {
+        $status = 2; // Selesai (2)
+    } elseif ($target->tgl_target < $today) {
+        $status = 3; // Terlambat (3) jika tgl_target sudah lewat
+    }
+
     $persentaseBaru = number_format(($totalAyatDisetorkan / $jumlahAyatTarget) * 100, 2);
 
+    // Pastikan id_santri terbaru sesuai target yang baru
+    $santriId = $target->id_santri;
+
     Histori::updateOrCreate(
-        ['id_target' => $target->id_target, 'id_santri' => $histori->id_santri],
+        ['id_target' => $target->id_target, 'id_santri' => $santriId],
         [
-            'status' => $status,
+            'status' => $status, // Menggunakan status integer
             'persentase' => $persentaseBaru,
             'nilai' => $request->nilai,
             'id_setoran' => json_encode($setoranIds),
@@ -94,6 +119,7 @@ class HistoriController extends Controller
 
     return redirect()->route('histori.index')->with('success', 'Histori berhasil diperbarui');
 }
+
 public function updateNilai(Request $request, $id_target)
 {
     $request->validate([

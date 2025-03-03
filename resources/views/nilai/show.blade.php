@@ -1,57 +1,53 @@
 @extends('admin_template')
 
-@section('title page', 'Daftar Santri')
+@section('title page', 'Daftar Nilai Santri')
 
 @section('content')
 <section class="content">
     <div class="container-fluid">
         <div class="card">
             <div class="card-body">
-                {{-- Search Bar diposisikan ke kiri dengan ukuran lebih besar --}}
-                <form action="{{ route('nilai.index') }}" method="GET" class="mb-3">
-                    <div class="d-flex">
-                        <div class="input-group" style="width: 350px;">
-                            <input type="text" name="search" class="form-control py-2 fs-5" placeholder="search" value="{{ request('search') }}">
-                            <div class="input-group-append">
-                                <button class="btn btn-primary py-2 fs-5" type="submit">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-
-                {{-- Tabel Data Santri --}}
-                <table class="table table-bordered">
-                    <thead class="bg-navy text-white">
+                <table class="table table-bordered" id="santriTable">
+                    <thead class="bg-navy disabled">
                         <tr>
                             <th>Nama</th>
                             <th>NISN</th>
                             <th>Kelas</th>
-                            <th>Target </th>
-                            <th>Aksi</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($santris as $santri)
-                            @foreach ($santri->targets->groupBy('id_group') as $idGroup => $targets)
-                                <tr>
-                                    <td>{{ $santri->nama }}</td>
-                                    <td>{{ $santri->nisn }}</td>
-                                    <td>{{ $santri->kelas->nama_kelas ?? '-' }}</td>
-                                    <td>Target {{ $idGroup }}</td>
-                                    <td>
-                                        <a href="{{ route('nilai.show', ['idSantri' => $santri->id_santri, 'idGroup' => $idGroup]) }}" class="btn btn-primary btn-sm">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </section>
+@endsection
+
+@section('script')
+<script>
+    $(document).ready(function() {
+        var table = $('#santriTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('nilai.fn-get-data') }}", // URL untuk mendapatkan data
+                data: function(d) {
+                    d.search = $('input[type="search"]').val();  // Mengirimkan input search dari DataTable ke server
+                }
+            },
+            columns: [
+                { data: 'nama', name: 'nama' },
+                { data: 'nisn', name: 'nisn' },
+                { data: 'kelas', name: 'kelas' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ],
+            columnDefs: [
+                { className: "text-center", targets: [3] } // Menyenter aksi
+            ],
+
+        });
+    });
+</script>
 @endsection

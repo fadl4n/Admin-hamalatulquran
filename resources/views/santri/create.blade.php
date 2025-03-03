@@ -135,12 +135,25 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Foto Santri</label>
-                                    <input type="file" name="foto_santri" class="form-control-file @error('foto_santri') is-invalid @enderror"
-                                           accept="image/*">
+                                    <label for="foto_santri">Foto Santri</label>
+                                    <input type="file" name="foto_santri" id="foto_santri"
+                                        class="form-control @error('foto_santri') is-invalid @enderror"
+                                        accept="image/png, image/jpeg"
+                                        onchange="previewImage(event)">
+
+                                    <small class="text-muted">Kosongkan jika tidak ingin mengunggah foto.</small>
+
                                     @error('foto_santri')
                                         <span class="text-danger">Format gambar tidak valid atau ukuran terlalu besar.</span>
                                     @enderror
+
+                                    <!-- Pratinjau Gambar -->
+                                    <div class="mt-2">
+                                        <img id="preview"
+                                            src="{{ asset('assets/image/default-user.png') }}"
+                                            alt="Foto Santri"
+                                            class="img-thumbnail" width="150">
+                                    </div>
                                 </div>
 
                                 <button type="submit" class="btn btn-success">Simpan</button>
@@ -152,4 +165,14 @@
             </div>
         </div>
     </section>
+    <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function(){
+                var output = document.getElementById('preview');
+                output.src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
 @endsection

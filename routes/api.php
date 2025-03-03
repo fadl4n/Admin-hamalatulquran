@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Middleware\CheckAuthFrontend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CMS\User\KelasController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,7 +34,6 @@ Route::controller(AuthController::class)->group(function () {
 
 // start checking auth
 Route::middleware([CheckAuthFrontend::class])->group(function () {
-
     // Profile
     Route::controller(AuthController::class)->group(function () {
         Route::get('profile', 'profile');
@@ -41,4 +41,17 @@ Route::middleware([CheckAuthFrontend::class])->group(function () {
         Route::post('profile/change-password', 'changePassword');
     });
 });
+
+
+Route::prefix('api/kelas')->name('kelas.')->group(function () {
+    Route::controller(KelasController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('store', 'store')->name('store');
+        Route::get('edit/{id}', 'edit')->name('edit');
+        Route::put('update/{id}', 'update')->name('update');
+        Route::delete('delete/{id}', 'destroy')->name('destroy');
+        Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+    });
+});
+
 // end checking auth

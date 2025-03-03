@@ -55,7 +55,7 @@
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ],
         columnDefs: [
-            { className: "text-center", targets: [0, 2, 3] } // ✅ Pusatkan teks di kolom tertentu
+            { className: "text-center", targets: [0,1, 2, 3] } // ✅ Pusatkan teks di kolom tertentu
         ]
     });
 

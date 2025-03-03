@@ -13,8 +13,9 @@
                             <a href="{{ url('pengajar/create') }}" class="btn btn-info">+ Tambah Pengajar</a>
                         </div>
                         <table class="table table-bordered table-hover pengajar-list">
-                            <thead class="bg-navy text-white">
+                            <thead class="bg-navy disabled">
                                 <tr>
+                                    <th>No</th>  <!-- ✅ Nomor urut otomatis -->
                                     <th>Nama</th>
                                     <th>NIP</th>
                                     <th>Email</th>
@@ -32,6 +33,8 @@
 @endsection
 
 @section('css')
+    <link rel="stylesheet" href="{{ asset('/bower_components/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 @endsection
 
@@ -43,11 +46,15 @@
         serverSide: true,
         ajax: "{{ url('/pengajar/fn-get-data') }}",
         columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false }, // ✅ Menambahkan nomor urut
             { data: 'nama', name: 'nama' },
             { data: 'nip', name: 'nip' },
             { data: 'email', name: 'email' },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ],
+        columnDefs: [
+            { className: "text-center", targets: [0, 2, 3, 4] } // ✅ Pusatkan teks di kolom tertentu
+        ]
     });
 
     $('.pengajar-list').on('click', '.btnDelete', function () {
@@ -70,7 +77,7 @@
                     },
                     success: function(response) {
                         Swal.fire("Berhasil!", response.success, "success");
-                        oDataList.ajax.reload();
+                        oDataList.ajax.reload(); // Reload DataTables
                     },
                     error: function(xhr) {
                         Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus data!", "error");

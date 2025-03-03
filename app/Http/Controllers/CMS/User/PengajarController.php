@@ -71,10 +71,28 @@ class PengajarController extends Controller
         return redirect()->back()->withInput()->with('error', 'Email sudah digunakan. Silakan gunakan email lain.');
     }
 
-    $fotoPath = null;
+    $fotoPath = asset('assets/image/default-user.png'); // Gambar default
+
     if ($request->hasFile('foto_pengajar')) {
-        $fotoPath = $request->file('foto_pengajar')->store('pengajar', 'public');
+        $file = $request->file('foto_pengajar');
+        $allowedFileTypes = ['png', 'jpg', 'jpeg'];
+        $extension = $file->getClientOriginalExtension();
+
+        // Validasi tipe file
+        if (!in_array($extension, $allowedFileTypes)) {
+            return redirect()->back()->with('error', 'File type not allowed. Only png and jpg files are allowed.');
+        }
+
+        // Buat nama file unik
+        $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
+
+        // Simpan file ke folder public
+        $file->move(public_path('uploadedFile/image/pengajar'), $name_original);
+
+        // Simpan path gambar
+        $fotoPath = url('uploadedFile/image/pengajar') . '/' . $name_original;
     }
+
 
     Pengajar::create([
         'nama' => $request->nama,
@@ -142,13 +160,21 @@ class PengajarController extends Controller
     }
 
     if ($request->hasFile('foto_pengajar')) {
-        if ($pengajar->foto_pengajar) {
-            Storage::disk('public')->delete($pengajar->foto_pengajar);
+        $file = $request->file('foto_pengajar');
+        $allowedFileTypes = ['png', 'jpg', 'jpeg'];
+        $extension = $file->getClientOriginalExtension();
+
+        if (!in_array($extension, $allowedFileTypes)) {
+            return redirect()->back()->with('error', 'File type not allowed. Only png and jpg files are allowed.');
         }
-        $fotoPath = $request->file('foto_pengajar')->store('pengajar', 'public');
+
+        $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
+        $file->move(public_path('uploadedFile/image/pengajar'), $name_original);
+        $fotoPath = url('uploadedFile/image/pengajar') . '/' . $name_original;
     } else {
-        $fotoPath = $pengajar->foto_pengajar;
+        $fotoPath = asset('assets/image/default-user.png');
     }
+
 
     $data = [
         'nama' => $request->nama,
@@ -190,10 +216,14 @@ class PengajarController extends Controller
     {
         $pengajar = Pengajar::select(['id_pengajar', 'nama', 'nip', 'email']);
         return DataTables::of($pengajar)
+        ->addIndexColumn() 
             ->addColumn('action', function ($pengajar) {
                 return '
                      <a href="' . url('pengajar/show/' . $pengajar->id_pengajar) . '" class="btn btn-info btn-sm" title="Detail">
                             <i class="fas fa-eye"></i>
+                    </a>
+                      <a href="' . url('pengajar/edit/' . $pengajar->id_pengajar) . '" class="btn btn-warning btn-sm" title="Edit">
+                            <i class="fas fa-edit"></i>
                         </a>
                     <button class="btn btn-danger btn-sm btnDelete" data-id="' . $pengajar->id_pengajar . '" title="Hapus">
                         <i class="fas fa-trash"></i>

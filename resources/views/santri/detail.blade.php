@@ -12,18 +12,10 @@
                     <div class="card">
                         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                             <h3 class="card-title mb-0">Data Pribadi :</h3>
-                            <a href="{{ url('santri/edit/' . $santri->id_santri) }}" class="btn btn-light btn-sm">
-                                Ubah Bagian Ini
-                            </a>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-8">
-
-
-
-
-
                                     <table class="table table-bordered">
                                         <tr>
                                             <th width="40%">Nama</th>
@@ -64,12 +56,13 @@
                                     </table>
                                 </div>
                                 <div class="col-md-4 text-center">
-                                    <img src="{{ asset('storage/' . $santri->foto_santri ?? 'default-image.jpg') }}" alt="Foto Santri" class="img-fluid rounded" width="150">
+                                    <img src="{{ $santri->foto_santri ? asset('uploadedFile/image/santri/' . basename($santri->foto_santri)) : asset('assets/image/default-user.png') }}"
+                                        alt="Foto Santri" class="img-fluid rounded" width="150">
                                 </div>
+
                             </div>
                             <div class="mt-4 d-flex justify-content-between align-items-center">
                                 <h4>Data Orang Tua:</h4>
-                                <a href="{{ route('santri.edit.orangtua', $santri->id_santri) }}" class="btn btn-primary">Ubah</a>
                             </div>
 
                             @php
@@ -141,7 +134,6 @@
                             <!-- Bagian Data Wali -->
                             <div class="mt-4 d-flex justify-content-between align-items-center">
                                 <h4>Data Wali:</h4>
-                                <a href="{{ route('santri.edit.wali', $santri->id_santri) }}" class="btn btn-primary">Ubah</a>
                             </div>
 
                             <table class="table table-bordered">
