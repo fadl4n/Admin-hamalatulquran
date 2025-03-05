@@ -11,17 +11,33 @@ class Santri extends Model
 
     protected $table = 'santris';
     protected $primaryKey = 'id_santri';
-    public $timestamps = false; // Tambahkan ini untuk menonaktifkan timestamps
+    public $timestamps = false;
 
-    protected $fillable = ['nama', 'nisn', 'tgl_lahir', 'alamat', 'angkatan', 'id_kelas', 'jenis_kelamin', 'status'];
+    protected $fillable = [
+        'nama', 'nisn', 'tempat_lahir', 'password', 'foto_santri','email',
+        'tgl_lahir', 'alamat', 'angkatan', 'id_kelas', 'jenis_kelamin', 'status'
+    ];
 
+    /**
+     * Relasi Many-to-One dengan model Kelas.
+     */
     public function kelas()
     {
-        return $this->belongsTo(Kelas::class, 'id_kelas', 'id_kelas'); // ✅ Sesuaikan foreign key dan primary key
+        return $this->belongsTo(Kelas::class, 'id_kelas', 'id_kelas');
     }
+
+    /**
+     * Relasi One-to-Many dengan model Keluarga.
+     */
     public function keluarga()
-    {
-        return $this->belongsTo(Kelas::class, 'id_santri', 'id_santri'); // ✅ Sesuaikan foreign key dan primary key
-    }
+{
+    return $this->hasMany(Keluarga::class, 'id_santri', 'id_santri');
+}
+public function targets()
+{
+    return $this->hasMany(Target::class, 'id_santri'); // Relasi ke target berdasarkan id_santri
 }
 
+
+
+}

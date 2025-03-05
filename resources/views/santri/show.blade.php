@@ -22,14 +22,10 @@
                             <table class="table table-bordered table-hover santri-list">
                                 <thead class="bg-navy disabled">
                                     <tr>
-                            
                                         <th>Nama</th>
                                         <th>NISN</th>
-                                        <th>Tanggal Lahir</th>
-                                        <th>Alamat</th>
+                                        <th>Nama Kelas</th>
                                         <th>Angkatan</th>
-                                        <th>Jenis Kelamin</th>
-                                        <th>Nama Kelas</th> <!-- Tambahkan kolom kelas -->
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -43,7 +39,13 @@
     </section>
 @endsection
 
+@section('css')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+@endsection
+
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
    var oDataList = $('.santri-list').DataTable({
     processing: true,
@@ -54,35 +56,40 @@
     columns: [
         { data: 'nama', name: 'nama' },
         { data: 'nisn', name: 'nisn' },
-        { data: 'tgl_lahir', name: 'tgl_lahir' },
-        { data: 'alamat', name: 'alamat' },
+        { data: 'nama_kelas', name: 'nama_kelas' },
         { data: 'angkatan', name: 'angkatan' },
-        { data: 'jenis_kelamin', name: 'jenis_kelamin', render: function(data) {
-            return data == 1 ? "Laki-laki" : "Perempuan";
-        }},
-        { data: 'nama_kelas', name: 'nama_kelas' }, // ✅ Pastikan nama_kelas sesuai dengan controller
         { data: 'action', name: 'action', orderable: false, searchable: false }
     ],
 });
 
     $('.santri-list').on('click', '.btnDelete', function () {
         let id = $(this).data('id');
-        if (confirm("Apakah Anda yakin ingin menghapus santri ini?")) {
-            $.ajax({
-                url: "{{ url('/santri/delete') }}/" + id,
-                type: "DELETE",
-                headers: {
-                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                },
-                success: function(response) {
-                    alert(response.success);
-                    oDataList.ajax.reload();
-                },
-                error: function(xhr) {
-                    alert("Terjadi kesalahan! " + xhr.responseText);
-                }
-            });
-        }
+
+        Swal.fire({
+            title: "Konfirmasi",
+            text: "Apakah Anda ingin menghapus santri ini?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya, hapus!",
+            cancelButtonText: "Batal"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{ url('/santri/delete') }}/" + id,
+                    type: "DELETE",
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        Swal.fire("Berhasil!", response.success, "success");
+                        oDataList.ajax.reload();
+                    },
+                    error: function(xhr) {
+                        Swal.fire("Gagal!", "Terjadi kesalahan!", "error");
+                    }
+                });
+            }
+        });
     });
 </script>
 @endsection

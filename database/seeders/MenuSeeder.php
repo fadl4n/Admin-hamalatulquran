@@ -58,24 +58,45 @@ class MenuSeeder extends Seeder
                 'url' => '/pengajar',
                 'sequence' => 5
             ],
-            [
-                'group_menu_id' => 2,
-                'name' => 'Data Keluarga',
-                'url' => '/keluarga',
-                'sequence' => 6
-            ],
+
             [
                 'group_menu_id' => 2,
                 'name' => 'Data Surat',
                 'url' => '/surat',
-                'sequence' => 7
+                'sequence' => 6
             ],
             [
                 'group_menu_id' => 2,
                 'name' => 'Artikel',
                 'url' => '/artikel',
-                'sequence' => 8
+                'sequence' => 7
             ],
+            [
+                'group_menu_id' => 2,
+                'name' => 'Target',
+                'url' => '/target',
+                'sequence' =>  8
+            ],
+            [
+                'group_menu_id' => 2,
+                'name' => 'Setoran hafalan',
+                'url' => '/setoran',
+                'sequence' => 9
+            ],
+            [
+                'group_menu_id' => 2,
+                'name' => 'Hisotri',
+                'url' => '/histori',
+                'sequence' =>  10
+            ],
+            [
+                'group_menu_id' => 2,
+                'name' => 'Nilai',
+                'url' => '/nilai',
+                'sequence' =>  11
+            ],
+
+
         ]);
     }
 }

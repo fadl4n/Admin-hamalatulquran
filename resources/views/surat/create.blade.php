@@ -18,10 +18,6 @@
                     <input type="number" name="jumlah_ayat" class="form-control" required min="1">
                 </div>
                 <div class="form-group">
-                    <label>Juz</label>
-                    <input type="number" name="juz" class="form-control" required min="1">
-                </div>
-                <div class="form-group">
                     <label>Deskripsi</label>
                     <textarea name="deskripsi" class="form-control"></textarea>
                 </div>

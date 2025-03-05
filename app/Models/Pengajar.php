@@ -15,6 +15,6 @@ class Pengajar extends Model
 
     protected $fillable = [
         'nama', 'nip', 'email', 'alamat',
-        'no_telp', 'password', 'jenis_kelamin',
+        'no_telp', 'password', 'jenis_kelamin','tempat_lahir','tgl_lahir','foto_pengajar'   
     ];
 }

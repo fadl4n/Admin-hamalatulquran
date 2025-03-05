@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('keluarga', function (Blueprint $table) {
             $table->id(); // Primary Key
-            $table->string('nama');
-            $table->string('pekerjaan');
-            $table->string('pendidikan');
-            $table->string('no_telp');
+            $table->string('nama')->nullable();
+            $table->string('pekerjaan')->nullable();
+            $table->string('pendidikan')->nullable();
+            $table->string('no_telp')->nullable();
             $table->unsignedBigInteger('id_santri')->nullable(); // Foreign key
-            $table->string('alamat');
-            $table->string('email')->unique();
+            $table->string('alamat')->nullable();
+            $table->string('email')->nullable();
             $table->string('password')->nullable(); // Password bisa kosong
             $table->timestamps();
 

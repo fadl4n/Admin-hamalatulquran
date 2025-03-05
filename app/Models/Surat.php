@@ -15,9 +15,13 @@ class Surat extends Model
     protected $fillable = [
         'nama_surat',
         'jumlah_ayat',
-        'juz',
         'deskripsi',
     ];
 
     public $timestamps = true; // Menggunakan created_at & updated_at
+
+    public function targets()
+    {
+        return $this->hasMany(Target::class, 'id_surat');
+    }
 }
