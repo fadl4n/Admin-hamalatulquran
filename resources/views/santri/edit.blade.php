@@ -140,7 +140,7 @@
                             <div class="form-group">
                                 <label>Nama Ayah</label>
                                 <input type="text" name="nama_ayah" class="form-control"
-                                    value="{{ old('nama_ayah', $ayah->nama ?? '') }}" required>
+                                    value="{{ old('nama_ayah', $ayah->nama ?? '') }}" >
                             </div>
                             <div class="form-group">
                                 <label>Pekerjaan</label>
@@ -186,7 +186,7 @@
                             <div class="form-group">
                                 <label>Nama Ibu</label>
                                 <input type="text" name="nama_ibu" class="form-control"
-                                    value="{{ old('nama_ibu', $ibu->nama ?? '') }}" required>
+                                    value="{{ old('nama_ibu', $ibu->nama ?? '') }}" >
                             </div>
                             <div class="form-group">
                                 <label>Pekerjaan</label>
@@ -231,7 +231,7 @@
                                 <label>Nama Wali</label>
                                 <input type="text" name="nama_wali"
                                        class="form-control @error('nama_wali') is-invalid @enderror"
-                                       value="{{ old('nama_wali', $wali->nama ?? '') }}" required>
+                                       value="{{ old('nama_wali', $wali->nama ?? '') }}" >
                                 @error('nama_wali')
                                     <span class="text-danger">Nama wali wajib diisi.</span>
                                 @enderror
