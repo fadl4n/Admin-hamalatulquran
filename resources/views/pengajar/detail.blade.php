@@ -8,16 +8,17 @@
             <div class="row">
                 <div class="col-md-8 offset-md-2">
                     <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            <h3 class="card-title">Detail Pengajar</h3>
+                        <div class="card-header">
+                            <h3 class="card-title">Informasi Pengajar</h3>
                         </div>
+
                         <div class="card-body">
                             <div class="row">
+                                <!-- Gambar Pengajar -->
                                 <div class="col-md-4 text-center">
-                                    <img src="{{ $pengajar->foto_pengajar ? asset('uploadedFile/image/pengajar/' . basename($pengajar->foto_pengajar)) : asset('assets/image/default-user.png') }}"
-                                        alt="Foto Pengajar" class="img-fluid rounded" width="150">
+                                    <img src="{{ $pengajar->foto_pengajar ? $pengajar->foto_pengajar : asset('assets/image/default.png') }}"
+                                        alt="Foto Pengajar" class="img-fluid rounded-circle border" width="150">
                                 </div>
-
                                 <div class="col-md-8">
                                     <table class="table table-bordered">
                                         <tr>

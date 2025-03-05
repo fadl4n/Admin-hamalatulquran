@@ -11,6 +11,7 @@ use App\Models\Kelas;
 use App\Models\Surat;
 use App\Models\Histori;
 use Yajra\DataTables\Facades\DataTables;
+use Carbon\Carbon;
 
 use Illuminate\Http\Request;
 
@@ -98,6 +99,22 @@ class TargetController extends Controller
         if ($overlapTarget) {
             return back()->withErrors(['jumlah_ayat_target' => 'Rentang jumlah ayat tumpang tindih dengan target yang sudah ada.'])->withInput();
         }
+          // Cek apakah ada target yang sama dengan id_santri, id_surat, id_group tetapi berbeda tgl_mulai dan tgl_target
+          $existingTargetDates = Target::where('id_santri', $request->id_santri)
+          ->where('id_surat', $request->id_surat)
+          ->where('id_group', $request->id_group)
+          ->where(function ($query) use ($request) {
+              $query->where('tgl_mulai', '!=', $request->tgl_mulai)
+                    ->orWhere('tgl_target', '!=', $request->tgl_target);
+          })
+          ->first();
+
+      if ($existingTargetDates) {
+          return back()->withErrors([
+              'tgl_mulai' => 'Sudah ada target untuk santri ini dengan tanggal mulai ' . Carbon::parse($existingTargetDates->tgl_mulai)->format('d-m-Y') . '.',
+              'tgl_target' => 'Sudah ada target untuk santri ini dengan tanggal target ' . Carbon::parse($existingTargetDates->tgl_target)->format('d-m-Y') . '.'
+          ])->withInput();
+      }
 
         // Simpan data target ke database
         $target = Target::create([
