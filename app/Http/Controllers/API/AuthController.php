@@ -8,16 +8,20 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use \Firebase\JWT\JWT;
+use \Firebase\JWT\Key;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\Santri;
+use App\Models\Pengajar;
 
 class AuthController extends Controller
 {
     public function doLogin(Request $request)
     {
+        // dd($request->all());
         $validator = Validator::make($request->all(), [
-            'email'  =>  'required',
+            'identifier' => 'required',
             'password' => 'required',
         ]);
 
@@ -27,53 +31,100 @@ class AuthController extends Controller
                 'message' => $validator->errors()->first(),
             ], 400);
         }
-        $data = User::where('email', $request->email)->first();
 
-        if ($data) {
-            // CHECK PASSWORD
-            if (Hash::check($request->password, $data->password)) {
+        // Cek apakah identifier itu NIP (Pengajar) atau NISN (Santri)
+        $pengajar = Pengajar::where('nip', $request->identifier)->first();
+        $santri = Santri::where('nisn', $request->identifier)->first();
 
-                // TOKEN PAYLOAD
-                $payload = [
-                    'iss' => "member-service", // Issuer of the token
-                    'sub' => $data->id, // Subject of the token
-                    'iat' => time(), // Time when JWT was issued.
-                    'exp' => time() + 60 * 60 * 24,
-                    'scope' => 'development',
-                    'platform' => 'frontend',
-                    'data' => [
-                        'id' => $data->id,
-                        'scope' => 'development',
-                        'platform' => 'frontend',
-                    ]
-                ];
-                $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
+        $user = $pengajar ?: $santri;
+        $role = $pengajar ? 'pengajar' : ($santri ? 'santri' : null);
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Login success',
-                    'data' => $data,
-                    'token' => $token,
-                ], 200);
-            }
+        if ($user && Hash::check($request->password, $user->password)) {
+            // TOKEN PAYLOAD
+            $payload = [
+                'iss' => "hamalatulquran-app", // Issuer
+                'sub' => $user->id, // User ID
+                'role' => $role, // Role
+                'iat' => time(), // Issued at
+                'exp' => time() + 60 * 60 * 24, // Expiration (24 jam)
+            ];
+
+            // Encode token dengan secret key dari .env
+            $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Login success',
+                'data' => [
+                    'id' => $user->{$pengajar ? 'id_pengajar' : 'id_santri'},
+                    'nama' => $user->nama,
+                    'role' => $role,
+                ],
+                'token' => $token,
+            ], 200);
         }
 
         return response()->json([
             'success' => false,
-            'message' => 'Invalid email or password',
-            'data' => (object) array(),
+            'message' => 'Invalid identifier or password',
         ], 400);
     }
 
-    public function profile(Request $request) {
-        $data = User::where('id', $request->userData->id)->first();
+    public function profile($identifier)
+    {
+        if (!$identifier) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Identifier diperlukan'
+            ], 400); // 400 Bad Request
+        }
 
+        // Cek di tabel Pengajar (pakai NIP)
+        $pengajar = Pengajar::where('id_pengajar', $identifier)->orWhere('nip', $identifier)->first();
+        if ($pengajar) {
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'id' => $pengajar->id_pengajar,
+                    'identifier' => $identifier,
+                    'nama' => $pengajar->nama,
+                    'nip' => $pengajar->nip,
+                    'tempat_tanggal_lahir' => $pengajar->tempat_lahir . ', ' . date('d M Y', strtotime($pengajar->tgl_lahir)),
+                    'jenis_kelamin' => $pengajar->jenis_kelamin,
+                    'no_telp' => $pengajar->no_telp,
+                    'alamat' => $pengajar->alamat,
+                    'role' => 'pengajar'
+                ]
+            ]);
+        }
+
+        // Cek di tabel Santri (pakai NISN)
+        $santri = Santri::where('id_santri', $identifier)->orWhere('nisn', $identifier)->first();
+        if ($santri) {
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'id' => $santri->id_santri,
+                    'identifier' => $identifier,
+                    'nama' => $santri->nama,
+                    'nisn' => $santri->nisn,
+                    'tempat_tanggal_lahir' => $santri->tempat_lahir . ', ' . date('d M Y', strtotime($santri->tgl_lahir)),
+                    'jenis_kelamin' => $santri->jenis_kelamin,
+                    'no_telp' => $santri->no_telp,
+                    'alamat' => $santri->alamat,
+                    'kelas' => $santri->id_kelas,
+                    'role' => 'santri'
+                ]
+            ]);
+        }
+
+        // Kalau user gak ditemukan
         return response()->json([
-            'success' => true,
-            'message' => 'Success',
-            'data' => $data,
-        ], 200);
+            'status' => 'error',
+            'message' => 'User tidak ditemukan'
+        ], 404);
     }
+
 
     public function profileUpdate(Request $request)
     {
@@ -100,7 +151,7 @@ class AuthController extends Controller
                 return redirect()->back()->with('error', 'File type not allowed. Only png and jpg files are allowed.');
             }
 
-            $name_original = date('YmdHis').'_'.$file->getClientOriginalName();
+            $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
             $filenames[] = $name_original;
             $filesizes[] = $file->getSize();
             $file->move(public_path('uploadedFile/image/user'), $name_original);

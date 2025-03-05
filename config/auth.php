@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'api' => [
+            'driver' => 'token', // Kalau pakai Firebase JWT bisa custom
+            'provider' => 'users',
+            'hash' => false,
+        ],
     ],
 
     /*

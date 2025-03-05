@@ -4,6 +4,9 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Middleware\CheckAuthFrontend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Pengajar;
+use App\Models\Santri;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,12 +35,10 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 // start checking auth
-Route::middleware([CheckAuthFrontend::class])->group(function () {
-
-    // Profile
+Route::middleware([])->group(function () {
     Route::controller(AuthController::class)->group(function () {
-        Route::get('profile', 'profile');
-        Route::post('profile', 'profileUpdate');
+        Route::get('profile/{identifier}', 'profile');
+        Route::put('profile', 'profileUpdate'); // Ubah dari POST ke PUT
         Route::post('profile/change-password', 'changePassword');
     });
 });
