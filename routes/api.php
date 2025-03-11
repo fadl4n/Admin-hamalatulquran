@@ -35,11 +35,12 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 // start checking auth
-Route::middleware([])->group(function () {
+Route::middleware(['firebase.auth'])->group(function () {
     Route::controller(AuthController::class)->group(function () {
-        Route::get('profile/{identifier}', 'profile');
-        Route::put('profile', 'profileUpdate'); // Ubah dari POST ke PUT
+        Route::get('profile/{role}/{id}', 'profile');
+        Route::put('profile', 'profileUpdate');
         Route::post('profile/change-password', 'changePassword');
     });
 });
+
 // end checking auth

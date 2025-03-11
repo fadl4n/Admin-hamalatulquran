@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
 use Illuminate\Support\Facades\Hash;
@@ -19,7 +21,6 @@ class AuthController extends Controller
 {
     public function doLogin(Request $request)
     {
-        // dd($request->all());
         $validator = Validator::make($request->all(), [
             'identifier' => 'required',
             'password' => 'required',
@@ -36,95 +37,115 @@ class AuthController extends Controller
         $pengajar = Pengajar::where('nip', $request->identifier)->first();
         $santri = Santri::where('nisn', $request->identifier)->first();
 
-        $user = $pengajar ?: $santri;
-        $role = $pengajar ? 'pengajar' : ($santri ? 'santri' : null);
-
-        if ($user && Hash::check($request->password, $user->password)) {
-            // TOKEN PAYLOAD
-            $payload = [
-                'iss' => "hamalatulquran-app", // Issuer
-                'sub' => $user->id, // User ID
-                'role' => $role, // Role
-                'iat' => time(), // Issued at
-                'exp' => time() + 60 * 60 * 24, // Expiration (24 jam)
-            ];
-
-            // Encode token dengan secret key dari .env
-            $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
-
+        if ($pengajar && Hash::check($request->password, $pengajar->password)) {
+            $user = $pengajar;
+            $role = 'pengajar';
+            $user_id = "pengajar_" . $user->id_pengajar;
+        } elseif ($santri && Hash::check($request->password, $santri->password)) {
+            $user = $santri;
+            $role = 'santri';
+            $user_id = "santri_" . $user->id_santri;
+        } else {
             return response()->json([
-                'success' => true,
-                'message' => 'Login success',
-                'data' => [
-                    'id' => $user->{$pengajar ? 'id_pengajar' : 'id_santri'},
-                    'nama' => $user->nama,
-                    'role' => $role,
-                ],
-                'token' => $token,
-            ], 200);
+                'success' => false,
+                'message' => 'Invalid identifier or password',
+            ], 400);
         }
+
+        // TOKEN PAYLOAD
+        $payload = [
+            'iss' => "hamalatulquran-app",
+            'sub' => $user_id, // Pakai user_id yang ada prefix
+            'role' => $role,
+            'iat' => time(),
+            'exp' => time() + 60 * 60 * 24,
+        ];
+
+        // Encode token
+        $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
 
         return response()->json([
-            'success' => false,
-            'message' => 'Invalid identifier or password',
-        ], 400);
+            'success' => true,
+            'message' => 'Login success',
+            'data' => [
+                'id' => $user_id, // Kirim ID dengan prefix
+                'nama' => $user->nama,
+                'role' => $role,
+            ],
+            'token' => $token,
+        ], 200);
     }
 
-    public function profile($identifier)
+    public function profile(Request $request, $identifier)
     {
-        if (!$identifier) {
+        // Ambil role dari query parameter
+        $role = $request->query('role');
+
+        // Cek apakah role valid
+        if (!in_array($role, ['pengajar', 'santri'])) {
+            Log::error("Role tidak valid: $role");
             return response()->json([
                 'status' => 'error',
-                'message' => 'Identifier diperlukan'
-            ], 400); // 400 Bad Request
+                'message' => 'Role tidak valid'
+            ], 400);
         }
 
-        // Cek di tabel Pengajar (pakai NIP)
-        $pengajar = Pengajar::where('id_pengajar', $identifier)->orWhere('nip', $identifier)->first();
-        if ($pengajar) {
-            return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'id' => $pengajar->id_pengajar,
-                    'identifier' => $identifier,
-                    'nama' => $pengajar->nama,
-                    'nip' => $pengajar->nip,
-                    'tempat_tanggal_lahir' => $pengajar->tempat_lahir . ', ' . date('d M Y', strtotime($pengajar->tgl_lahir)),
-                    'jenis_kelamin' => $pengajar->jenis_kelamin,
-                    'no_telp' => $pengajar->no_telp,
-                    'alamat' => $pengajar->alamat,
-                    'role' => 'pengajar'
-                ]
-            ]);
+        Log::info("Mencari $role dengan ID: $identifier");
+
+        if ($role === 'pengajar') {
+            Log::info("Query: mencari pengajar dengan id_pengajar = $identifier");
+            $pengajar = Pengajar::where('id_pengajar', $identifier)->first();
+
+            if ($pengajar) {
+                Log::info("Pengajar ditemukan:", ['data' => $pengajar]);
+                return response()->json([
+                    'status' => 'success',
+                    'data' => [
+                        'id' => "pengajar_" . $pengajar->id_pengajar,
+                        'nama' => $pengajar->nama,
+                        'nip' => $pengajar->nip,
+                        'tempat_tanggal_lahir' => $pengajar->tempat_lahir . ', ' . date('d M Y', strtotime($pengajar->tgl_lahir)),
+                        'jenis_kelamin' => $pengajar->jenis_kelamin,
+                        'no_telp' => $pengajar->no_telp,
+                        'alamat' => $pengajar->alamat,
+                        'role' => 'pengajar'
+                    ]
+                ]);
+            } else {
+                Log::error("Pengajar tidak ditemukan dengan ID: $identifier");
+            }
+        } elseif ($role === 'santri') {
+            Log::info("Query: mencari santri dengan id_santri = $identifier");
+            $santri = Santri::where('id_santri', $identifier)->first();
+
+            if ($santri) {
+                Log::info("Santri ditemukan:", ['data' => $santri]);
+                return response()->json([
+                    'status' => 'success',
+                    'data' => [
+                        'id' => "santri_" . $santri->id_santri,
+                        'nama' => $santri->nama,
+                        'nisn' => $santri->nisn,
+                        'tempat_tanggal_lahir' => $santri->tempat_lahir . ', ' . date('d M Y', strtotime($santri->tgl_lahir)),
+                        'jenis_kelamin' => $santri->jenis_kelamin,
+                        'no_telp' => $santri->no_telp,
+                        'alamat' => $santri->alamat,
+                        'kelas' => $santri->id_kelas,
+                        'role' => 'santri'
+                    ]
+                ]);
+            } else {
+                Log::error("Santri tidak ditemukan dengan ID: $identifier");
+            }
         }
 
-        // Cek di tabel Santri (pakai NISN)
-        $santri = Santri::where('id_santri', $identifier)->orWhere('nisn', $identifier)->first();
-        if ($santri) {
-            return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'id' => $santri->id_santri,
-                    'identifier' => $identifier,
-                    'nama' => $santri->nama,
-                    'nisn' => $santri->nisn,
-                    'tempat_tanggal_lahir' => $santri->tempat_lahir . ', ' . date('d M Y', strtotime($santri->tgl_lahir)),
-                    'jenis_kelamin' => $santri->jenis_kelamin,
-                    'no_telp' => $santri->no_telp,
-                    'alamat' => $santri->alamat,
-                    'kelas' => $santri->id_kelas,
-                    'role' => 'santri'
-                ]
-            ]);
-        }
+        Log::error("User tidak ditemukan untuk role $role dengan ID: $identifier");
 
-        // Kalau user gak ditemukan
         return response()->json([
             'status' => 'error',
             'message' => 'User tidak ditemukan'
         ], 404);
     }
-
 
     public function profileUpdate(Request $request)
     {
