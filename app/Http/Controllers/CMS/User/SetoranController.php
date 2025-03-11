@@ -268,193 +268,182 @@ class SetoranController extends Controller
     }
 
     public function store(Request $request)
-    {
-        // Validasi input
-        $request->validate([
-            'id_santri' => 'required|exists:santris,id_santri',
-            'tgl_setoran' => 'required|date',
-            'id_kelas' => 'required|exists:kelas,id_kelas',
-            'id_surat' => 'required',
-            'id_pengajar' => 'required',
-            'nilai' => 'required',
-            'jumlah_ayat_start' => 'required|numeric',
-            'jumlah_ayat_end' => 'required|numeric',
-            'id_group' => 'required', // Tidak divalidasi dengan `exists`, karena hanya ada di `targets`
-        ]);
+{
+    // Validasi input
+    $request->validate([
+        'id_santri' => 'required|exists:santris,id_santri',
+        'tgl_setoran' => 'required|date',
+        'id_kelas' => 'required|exists:kelas,id_kelas',
+        'id_surat' => 'required',
+        'id_pengajar' => 'required',
+        'nilai' => 'required',
+        'jumlah_ayat_start' => 'required|numeric',
+        'jumlah_ayat_end' => 'required|numeric',
+        'id_group' => 'required', // Tidak divalidasi dengan exists, karena hanya ada di targets
+    ]);
 
-        // Ambil target berdasarkan 4 parameter utama
-        $target = Target::where([
-            ['id_santri', '=', $request->id_santri],
-            ['id_kelas', '=', $request->id_kelas],
-            ['id_surat', '=', $request->id_surat],
-            ['id_group', '=', $request->id_group]
-        ])->first();
+    // Ambil target berdasarkan 4 parameter utama
+    $target = Target::where([
+        ['id_santri', '=', $request->id_santri],
+        ['id_kelas', '=', $request->id_kelas],
+        ['id_surat', '=', $request->id_surat],
+        ['id_group', '=', $request->id_group]
+    ])->first();
 
-        // Validasi jika jumlah_ayat_start lebih besar dari jumlah_ayat_end
-        if ($request->jumlah_ayat_start > $request->jumlah_ayat_end) {
-            return redirect()->back()->withErrors(['jumlah_ayat_start' => 'Jumlah ayat mulai tidak boleh lebih besar dari jumlah ayat akhir, jumlah ayat akhir adalah ' . $request->jumlah_ayat_end]);
-        }
-
-        // Validasi jika jumlah_ayat_end lebih besar dari target ayat
-        if ($request->jumlah_ayat_end > $target->jumlah_ayat_target) {
-            return redirect()->back()->withErrors(['jumlah_ayat_end' => 'Jumlah ayat akhir tidak boleh lebih dari target ayat, target ayat surat ini adalah ' . $target->jumlah_ayat_target]);
-        }
-
-        // Validasi jika jumlah_ayat_start lebih besar dari target ayat
-        if ($request->jumlah_ayat_start > $target->jumlah_ayat_target) {
-            return redirect()->back()->withErrors(['jumlah_ayat_start' => 'Jumlah ayat mulai tidak boleh lebih besar dari jumlah ayat yang ditargetkan, jumlah ayat yang ditargetkan adalah ' . $target->jumlah_ayat_target]);
-        }
-
-        // Validasi jika jumlah_ayat_start lebih kecil dari target awal ayat
-        if ($request->jumlah_ayat_start < $target->jumlah_ayat_target_awal) {
-            return redirect()->back()->withErrors(['jumlah_ayat_start' => 'Jumlah ayat mulai tidak boleh lebih kecil dari target awal ayat surat ini, target awal ayat ini adalah ' . $target->jumlah_ayat_target_awal]);
-        }
-
-        // Validasi jika jumlah_ayat_end lebih kecil dari target awal ayat
-        if ($request->jumlah_ayat_end < $target->jumlah_ayat_target_awal) {
-            return redirect()->back()->withErrors(['jumlah_ayat_end' => 'Jumlah ayat akhir tidak boleh lebih kecil dari target awal ayat surat ini, jumlah ayat target awal adalah ' . $target->jumlah_ayat_target_awal]);
-        }
-        if ($request->tgl_setoran < $target->tgl_mulai) {
-            return redirect()->back()->withErrors(['tgl_setoran' => 'tanggal setoran tidak boleh sebelum tanggal mulai target, tanggal mulainya adalah ' .$target->tanggal_mulai]);
-        }
-
-        // Ambil setoran sebelumnya untuk validasi tumpang tindih
-        $setorans = Setoran::where('id_target', $target->id_target)
-            ->orderBy('jumlah_ayat_start') // Urutkan berdasarkan jumlah_ayat_start
-            ->get();
-
-        // Periksa apakah jumlah_ayat_start yang diinputkan valid
-        $valid = false;
-        $previousEnd = 0; // Nilai sebelumnya untuk perbandingan
-
-        foreach ($setorans as $setoran) {
-            // Cek apakah ayat yang diminta tidak tumpang tindih dengan setoran yang ada
-            if ($request->jumlah_ayat_start >= $previousEnd && $request->jumlah_ayat_start < $setoran->jumlah_ayat_start) {
-                $valid = true;
-                break;
-            }
-            $previousEnd = $setoran->jumlah_ayat_end;
-        }
-
-        // Cek apakah ayat terakhir berada setelah setoran terakhir
-        if (!$valid && $request->jumlah_ayat_start > $previousEnd && $request->jumlah_ayat_start <= $target->jumlah_ayat_target) {
-            $valid = true; // jika itu ayat terakhir
-        }
-
-        if (!$valid) {
-            return redirect()->back()->withErrors([
-                'jumlah_ayat_start' => 'Jumlah ayat mulai tidak boleh lebih kecil dari jumlah ayat akhir pada setoran sebelumnya (ayat akhir sebelumnya: ' . $previousEnd . '), dan harus berada di rentang yang kosong antara setoran-setoran yang ada.'
-            ]);
-        }
-
-        $totalAyat = max(1, $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1);
-        $persentase = number_format((($request->jumlah_ayat_end - $request->jumlah_ayat_start + 1) / $totalAyat) * 100, 2);
-
-        $status = $persentase >= 100 ? '1' : '0'; // 1 untuk selesai, 0 untuk proses
-
-        // Simpan data setoran dengan id_target yang sesuai dan status yang dihitung
-        $setoran = Setoran::create([
-            'id_santri' => $request->id_santri,
-            'tgl_setoran' => $request->tgl_setoran,
-            'status' => $status, // Status ditentukan otomatis
-            'id_kelas' => $request->id_kelas,
-            'persentase' => $persentase,
-            'id_target' => $target->id_target, // Gunakan id_target yang ditemukan
-            'id_surat' => $request->id_surat,
-            'nilai' => $request->nilai,
-            'jumlah_ayat_start' => $request->jumlah_ayat_start,
-            'jumlah_ayat_end' => $request->jumlah_ayat_end,
-            'id_pengajar' => $request->id_pengajar,
-            'keterangan' => $request->keterangan,
-        ]);
-        // Ambil histori yang terkait dengan setoran yang baru dimasukkan
-        $histori = Histori::where('id_santri', $request->id_santri)
-            ->where('id_target', $target->id_target)
-            ->where('id_surat', $request->id_surat)
-            ->first();
-
-
-
-        // Perbarui persentase berdasarkan setoran baru
-        if ($histori) {
-            // Hitung persentase baru berdasarkan nilai yang diperoleh
-            $totalAyat = max(1, $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1);
-            $persentaseBaru = number_format((($request->jumlah_ayat_end - $request->jumlah_ayat_start + 1) / $totalAyat) * 100, 2);
-
-            // Update persentase dan status
-            $histori->persentase = $persentaseBaru;
-            $histori->id_setoran = $setoran->id_setoran; // Menyimpan id_setoran di histori
-            // Default status adalah Proses
-            if ($request->tgl_setoran > $target->tgl_target) {
-                $statusHistori = 3; // Terlambat
-            } elseif ($persentase >= 100) {
-                $statusHistori = 2; // Selesai
-            } else {
-                $statusHistori = 1; // Proses
-            }
-
-            $histori->status = $statusHistori;
-            $histori->save();
-        } else {
-            // Ambil histori yang terkait dengan setoran yang baru dimasukkan
-            $histori = Histori::where('id_santri', $request->id_santri)
-                ->where('id_target', $target->id_target)
-                ->where('id_surat', $request->id_surat)
-                ->first();
-
-            if ($histori) {
-                // Ambil total ayat yang telah disetorkan dari setoran terkait
-                $totalAyatDisetorkan = Setoran::where('id_target', $target->id_target)->sum(DB::raw('jumlah_ayat_end - jumlah_ayat_start + 1'));
-
-                // Hitung total ayat target
-                $totalAyat = max(1, $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1);
-                $persentaseBaru = number_format(($totalAyatDisetorkan / $totalAyat) * 100, 2);
-
-                // Update persentase dan status
-                $histori->persentase = $persentaseBaru;
-                $histori->id_setoran = $setoran->id_setoran;
-
-                // Tentukan status
-                if ($request->tgl_setoran > $target->tgl_target) {
-                    $statusHistori = 3; // Terlambat
-                } elseif ($persentaseBaru >= 100) {
-                    $statusHistori = 2; // Selesai
-                } else {
-                    $statusHistori = 1; // Proses
-                }
-
-                $histori->status = $statusHistori;
-                $histori->save();
-            } else {
-                // Ambil total ayat yang telah disetorkan dari setoran terkait
-                $totalAyatDisetorkan = Setoran::where('id_target', $target->id_target)->sum(DB::raw('jumlah_ayat_end - jumlah_ayat_start + 1'));
-
-                // Hitung total ayat target
-                $totalAyat = max(1, $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1);
-                $persentaseBaru = floatval(($totalAyatDisetorkan / $totalAyat) * 100);
-
-                // Tentukan status
-                if ($request->tgl_setoran > $target->tgl_target) {
-                    $statusHistori = 3; // Terlambat
-                } elseif ($persentaseBaru >= 99.99) { // Toleransi perhitungan float
-                    $statusHistori = 2; // Selesai
-                } else {
-                    $statusHistori = 1; // Proses
-                }
-
-                // Buat histori baru
-                Histori::create([
-                    'id_santri' => $request->id_santri,
-                    'id_target' => $target->id_target,
-                    'id_surat' => $request->id_surat,
-                    'persentase' => $persentaseBaru,
-                    'id_setoran' => $setoran->id_setoran,
-                    'status' => $statusHistori,
-                ]);
-            }
-        }
-        return redirect()->route('setoran.index')->with('success', 'Setoran berhasil ditambahkan');
+    // Validasi jika jumlah_ayat_start lebih besar dari jumlah_ayat_end
+    if ($request->jumlah_ayat_start > $request->jumlah_ayat_end) {
+        return redirect()->back()->withErrors(['jumlah_ayat_start' => 'Jumlah ayat mulai tidak boleh lebih besar dari jumlah ayat akhir, jumlah ayat akhir adalah ' . $request->jumlah_ayat_end]);
     }
+
+    // Validasi jika jumlah_ayat_end lebih besar dari target ayat
+    if ($request->jumlah_ayat_end > $target->jumlah_ayat_target) {
+        return redirect()->back()->withErrors(['jumlah_ayat_end' => 'Jumlah ayat akhir tidak boleh lebih dari target ayat, target ayat surat ini adalah ' . $target->jumlah_ayat_target]);
+    }
+
+    // Validasi jika jumlah_ayat_start lebih besar dari target ayat
+    if ($request->jumlah_ayat_start > $target->jumlah_ayat_target) {
+        return redirect()->back()->withErrors(['jumlah_ayat_start' => 'Jumlah ayat mulai tidak boleh lebih besar dari jumlah ayat yang ditargetkan, jumlah ayat yang ditargetkan adalah ' . $target->jumlah_ayat_target]);
+    }
+
+    // Validasi jika jumlah_ayat_start lebih kecil dari target awal ayat
+    if ($request->jumlah_ayat_start < $target->jumlah_ayat_target_awal) {
+        return redirect()->back()->withErrors(['jumlah_ayat_start' => 'Jumlah ayat mulai tidak boleh lebih kecil dari target awal ayat surat ini, target awal ayat ini adalah ' . $target->jumlah_ayat_target_awal]);
+    }
+
+    // Validasi jika jumlah_ayat_end lebih kecil dari target awal ayat
+    if ($request->jumlah_ayat_end < $target->jumlah_ayat_target_awal) {
+        return redirect()->back()->withErrors(['jumlah_ayat_end' => 'Jumlah ayat akhir tidak boleh lebih kecil dari target awal ayat surat ini, jumlah ayat target awal adalah ' . $target->jumlah_ayat_target_awal]);
+    }
+
+    // Ambil setoran sebelumnya untuk validasi tumpang tindih
+    $setorans = Setoran::where('id_target', $target->id_target)
+        ->orderBy('jumlah_ayat_start') // Urutkan berdasarkan jumlah_ayat_start
+        ->get();
+
+    // Periksa apakah jumlah_ayat_start yang diinputkan valid
+    $valid = false;
+    $previousEnd = 0; // Nilai sebelumnya untuk perbandingan
+
+    foreach ($setorans as $setoran) {
+        // Cek apakah ayat yang diminta tidak tumpang tindih dengan setoran yang ada
+        if ($request->jumlah_ayat_start >= $previousEnd && $request->jumlah_ayat_start < $setoran->jumlah_ayat_start) {
+            $valid = true;
+            break;
+        }
+        $previousEnd = $setoran->jumlah_ayat_end;
+    }
+
+    // Cek apakah ayat terakhir berada setelah setoran terakhir
+    if (!$valid && $request->jumlah_ayat_start > $previousEnd && $request->jumlah_ayat_start <= $target->jumlah_ayat_target) {
+        $valid = true; // jika itu ayat terakhir
+    }
+
+    // Ambil jumlah ayat akhir pada setoran sebelumnya untuk digunakan dalam pesan error
+    $previousEndAyat = $previousEnd; // Nilai sebelumnya untuk ayat akhir
+
+    if (!$valid) {
+        return redirect()->back()->withErrors([
+            'jumlah_ayat_start' => 'Jumlah ayat mulai tidak boleh lebih kecil dari jumlah ayat akhir pada setoran sebelumnya (ayat akhir sebelumnya: ' . $previousEndAyat . '), dan harus berada di rentang yang kosong antara setoran-setoran yang ada.'
+        ]);
+    }
+
+    $totalAyat = max(1, $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1);
+
+    $persentase = number_format((($request->jumlah_ayat_end - $request->jumlah_ayat_start + 1) / $totalAyat) * 100, 2);
+
+    $status = $persentase >= 100 ? '1' : '0'; // 1 untuk selesai, 0 untuk proses
+
+    // Simpan data setoran dengan id_target yang sesuai dan status yang dihitung
+    $setoran = Setoran::create([
+        'id_santri' => $request->id_santri,
+        'tgl_setoran' => $request->tgl_setoran,
+        'status' => $status, // Status ditentukan otomatis
+        'id_kelas' => $request->id_kelas,
+        'persentase'=>$persentase,
+        'id_target' => $target->id_target, // Gunakan id_target yang ditemukan
+        'id_surat' => $request->id_surat,
+        'nilai' => $request->nilai,
+        'jumlah_ayat_start' => $request->jumlah_ayat_start,
+        'jumlah_ayat_end' => $request->jumlah_ayat_end,
+        'id_pengajar' => $request->id_pengajar,
+        'keterangan' => $request->keterangan,
+    ]);
+
+    // Periksa setoran lainnya dan ubah statusnya jika sudah selesai
+    $setorans = Setoran::where('id_target', $target->id_target)->get();
+
+    // Perbarui status setoran pertama jika sudah mencapai jumlah_ayat_target
+    $totalAyatTercapai = 0;
+    foreach ($setorans as $setoran) {
+        $totalAyatTercapai += $setoran->jumlah_ayat_end - $setoran->jumlah_ayat_start + 1;
+    }
+
+    // Jika total ayat yang dicapai sudah mencapai target, ubah status setoran menjadi selesai
+    if ($totalAyatTercapai >= $target->jumlah_ayat_target) {
+        foreach ($setorans as $setoran) {
+            $setoran->status = '1'; // Ubah status menjadi selesai
+            $setoran->save();
+        }
+    }
+
+    // Ambil histori yang terkait dengan setoran yang baru dimasukkan
+    $histori = Histori::where('id_santri', $request->id_santri)
+        ->where('id_target', $target->id_target)
+        ->where('id_surat', $request->id_surat)
+        ->first();
+
+    // Perbarui persentase berdasarkan setoran baru
+    if ($histori) {
+        // Hitung persentase baru berdasarkan nilai yang diperoleh
+        $totalAyat = max(1, $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1);
+        $persentaseBaru = number_format((($request->jumlah_ayat_end - $request->jumlah_ayat_start + 1) / $totalAyat) * 100, 2);
+
+        // Update persentase dan status
+        $histori->persentase = $persentaseBaru;
+        $histori->id_setoran = $setoran->id_setoran; // Menyimpan id_setoran di histori
+
+        // Status berdasarkan tanggal setoran dan persentase
+        if ($request->tgl_setoran > $target->tgl_target) {
+            $statusHistori = 3; // Terlambat
+        } elseif ($persentaseBaru >= 100) {
+            $statusHistori = 2; // Selesai
+        } else {
+            $statusHistori = 1; // Proses
+        }
+
+        $histori->status = $statusHistori;
+        $histori->save();
+    } else {
+        // Buat histori baru jika tidak ditemukan
+        $totalAyatDisetorkan = Setoran::where('id_target', $target->id_target)->sum(DB::raw('jumlah_ayat_end - jumlah_ayat_start + 1'));
+
+        // Hitung total ayat target
+        $totalAyat = max(1, $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1);
+        $persentaseBaru = number_format(($totalAyatDisetorkan / $totalAyat) * 100, 2);
+
+        // Tentukan status
+        if ($request->tgl_setoran > $target->tgl_target) {
+            $statusHistori = 3; // Terlambat
+        } elseif ($persentaseBaru >= 99.99) { // Toleransi perhitungan float
+            $statusHistori = 2; // Selesai
+        } else {
+            $statusHistori = 1; // Proses
+        }
+
+        // Buat histori baru
+        Histori::create([
+            'id_santri' => $request->id_santri,
+            'id_target' => $target->id_target,
+            'id_surat' => $request->id_surat,
+            'persentase' => $persentaseBaru,
+            'id_setoran' => $setoran->id_setoran,
+            'status' => $statusHistori,
+        ]);
+    }
+
+    return redirect()->route('setoran.index')->with('success', 'Setoran berhasil ditambahkan');
+}
+
 
 
 

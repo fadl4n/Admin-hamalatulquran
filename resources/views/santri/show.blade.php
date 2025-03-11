@@ -47,7 +47,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-   var oDataList = $('.santri-list').DataTable({
+  var oDataList = $('.santri-list').DataTable({
     processing: true,
     serverSide: true,
     ajax: {
@@ -60,7 +60,9 @@
         { data: 'angkatan', name: 'angkatan' },
         { data: 'action', name: 'action', orderable: false, searchable: false }
     ],
+    order: [[4, 'asc'], [0, 'asc']] // Mengurutkan berdasarkan id_kelas (indeks 4) dan nama (indeks 0)
 });
+
 
     $('.santri-list').on('click', '.btnDelete', function () {
         let id = $(this).data('id');

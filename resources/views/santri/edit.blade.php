@@ -307,7 +307,8 @@
                             </div>
 
                             <button type="submit" class="btn btn-primary">Simpan</button>
-                            <a href="{{ route('santri.show', $santri->id_santri) }}" class="btn btn-secondary">Batal</a>
+                            <a href="{{ route('santri.index') }}" class="btn btn-secondary">Batal</a>
+
                         </form>
                     </div>
                 </div>

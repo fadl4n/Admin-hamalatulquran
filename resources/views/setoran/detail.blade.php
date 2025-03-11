@@ -20,8 +20,6 @@
     </style>
 @endsection
 
-
-
 @section('content')
 <section class="content">
     <div class="container-fluid">
@@ -62,7 +60,7 @@
                                                 {{ $setoran->jumlah_ayat_start == $setoran->jumlah_ayat_end ? $setoran->jumlah_ayat_start : $setoran->jumlah_ayat_start . ' - ' . $setoran->jumlah_ayat_end }}
                                             </td>
                                             <td>{{ number_format($setoran->nilai) }}</td>
-                                            <td>{{$setoran->pengajar->nama}}
+                                            <td>{{$setoran->pengajar->nama}}</td>
                                             <td>{{ $setoran->keterangan }}</td>
                                             <td class="text-center">
                                                 <a href="{{ url('setoran/edit/' . $setoran->id_setoran) }}" class="btn btn-warning btn-sm">
@@ -79,12 +77,18 @@
                             </table>
                         @endforeach
 
+                        <!-- Tombol Kembali -->
+                        <div class="mt-4">
+                            <a href="{{ route('setoran.index') }}"  class="btn btn-secondary"> Kembali
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
 @section('script')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -120,6 +124,5 @@
 });
 </script>
 @endsection
-
 
 @endsection

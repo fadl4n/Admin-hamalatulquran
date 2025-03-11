@@ -66,85 +66,102 @@
             </div>
         </div>
     </div>
+   <!-- Modal untuk Preview Nilai -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewModalLabel">Preview Nilai dan Tanggal</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewTableBody">
+                        <!-- Data akan dimuat disini -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @endsection
 
 @section('script')
-    <script>
-        $(document).ready(function() {
-            var table = $('.histori-list').DataTable({
-                processing: true,
-                serverSide: true,
-                searching: true,
-                ajax: {
-                    url: "{{ route('histori.fnGetData') }}",
-                    data: function(d) {
-                        // Mengirimkan nilai search ke server saat pencarian dilakukan
-                        d.search_value = $('input[type="search"]').val();
+<script>
+    $(document).ready(function() {
+        // Inisialisasi DataTable
+        var table = $('.histori-list').DataTable({
+            processing: true,
+            serverSide: true,
+            searching: true,
+            ajax: {
+                url: "{{ route('histori.fnGetData') }}",
+                data: function(d) {
+                    // Kirimkan nilai pencarian saat pencarian dilakukan
+                    d.search_value = $('input[type="search"]').val();
+                }
+            },
+            columns: [
+                { data: 'nama', name: 'nama' },
+                { data: 'kelas', name: 'kelas' },
+                { data: 'nama_surat', name: 'nama_surat' },
+                { data: 'ayat', name: 'ayat' },
+                { data: 'persentase', name: 'persentase' },
+                {
+                    data: 'status',
+                    name: 'status',
+                    render: function(data, type, row) {
+                        // Ganti status angka dengan label teks
+                        switch (data) {
+                            case 0:
+                                return '<span class="badge bg-secondary">Belum Mulai</span>';
+                            case 1:
+                                return '<span class="badge bg-warning">Proses</span>';
+                            case 2:
+                                return '<span class="badge bg-success">Selesai</span>';
+                            case 3:
+                                return '<span class="badge bg-danger">Terlambat</span>';
+                            default:
+                                return data;
+                        }
                     }
                 },
-
-                columns: [{
-                        data: 'nama',
-                        name: 'nama'
-                    },
-                    {
-                        data: 'kelas',
-                        name: 'kelas'
-                    },
-                    {
-                        data: 'nama_surat',
-                        name: 'nama_surat'
-                    },
-                    {
-                        data: 'ayat',
-                        name: 'ayat'
-                    },
-                    {
-                        data: 'persentase',
-                        name: 'persentase'
-                    },
-                    {
-                        data: 'status',
-                        name: 'status',
-                        render: function(data, type, row) {
-                            // Mengganti status angka dengan label teks
-                            switch (data) {
-                                case 0:
-                                    return '<span class="badge bg-secondary">Belum Mulai</span>';
-                                case 1:
-                                    return '<span class="badge bg-warning">Proses</span>';
-                                case 2:
-                                    return '<span class="badge bg-success">Selesai</span>';
-                                case 3:
-                                    return '<span class="badge bg-danger">Terlambat</span>';
-                                default:
-                                    return data;
-                            }
-                        }
-                    },
-                    {
-                        data: 'nilai',
-                        name: 'nilai'
-                    },
-                    {
-                        data: 'aksi',
-                        name: 'aksi',
-                        orderable: false,
-                        searchable: false,
-                        render: function(data, type, row) {
-                            return `<button class="btn btn-primary btn-sm edit-nilai" data-id="${row.id_target}" data-nilai="${row.nilai}"><i class="fas fa-edit"></i></button>`;
-                        }
+                { data: 'nilai', name: 'nilai' },
+                {
+                    data: 'aksi',
+                    name: 'aksi',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        return `<button class="btn btn-primary btn-sm edit-nilai" data-id="${row.id_target}" data-nilai="${row.nilai}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-info btn-sm preview-nilai" data-id="${row.id_target}">
+                                    <i class="fas fa-eye"></i>
+                                </button>`;
                     }
-                ],
-                columnDefs: [{
-                        className: "text-center",
-                        targets: [0, 1, 2, 3, 4, 5, 6, 7]
-                    } // Menyenter teks pada kolom tertentu
-                ]
-            });
+                }
+            ],
+            columnDefs: [{
+                className: "text-center",
+                targets: [0, 1, 2, 3, 4, 5, 6, 7]
+            }]
         });
 
-        // Tampilkan modal edit nilai
+        // Tampilkan modal edit nilai saat tombol edit diklik
         $(document).on('click', '.edit-nilai', function() {
             var id = $(this).data('id');
             var nilai = $(this).data('nilai');
@@ -158,21 +175,59 @@
             e.preventDefault();
             var id_target = $('#histori_id').val();
             var nilai = $('#nilai').val();
+
             $.ajax({
-                url: `/histori/update-nilai/${id_target}`,
+                url: `/histori/update-nilai/${id_target}`, // Perbaikan URL
                 method: 'POST',
                 data: {
                     nilai: nilai,
-                    _token: '{{ csrf_token() }}'
+                    _token: '{{ csrf_token() }}'  // Sertakan token CSRF untuk keamanan
                 },
                 success: function(response) {
-                    $('#nilaiModal').modal('hide');
-                    oDataList.ajax.reload(); // Reload tabel setelah update nilai
+                    if (response.success) {
+                        $('#nilaiModal').modal('hide');
+                        table.ajax.reload(null, false);
+                    } else {
+                        alert('Gagal memperbarui nilai');
+                    }
                 },
                 error: function(error) {
-                    alert('Gagal menyimpan nilai');
+                    alert('Terjadi kesalahan saat memperbarui nilai');
                 }
             });
         });
-    </script>
+
+        // Tampilkan modal preview saat tombol preview diklik
+        $(document).on('click', '.preview-nilai', function() {
+            var id = $(this).data('id');
+
+            $.ajax({
+                url: `/histori/get-preview/${id}`, // Perbaikan URL
+                method: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        var tableBody = $('#previewTableBody');
+                        tableBody.empty();  // Bersihkan tabel sebelumnya
+
+                        response.data.forEach(function(item) {
+                            tableBody.append(
+                                `<tr>
+                                    <td>${item.updated_at}</td> <!-- Tanggal pembaruan -->
+                                    <td>${item.nilai}</td>       <!-- Nilai -->
+                                </tr>`
+                            );
+                        });
+
+                        $('#previewModal').modal('show');
+                    } else {
+                        alert('Gagal mengambil data preview');
+                    }
+                },
+                error: function(error) {
+                    alert('Terjadi kesalahan saat mengambil data preview');
+                }
+            });
+        });
+    });
+</script>
 @endsection

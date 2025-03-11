@@ -246,8 +246,10 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
             Route::post('update-nilai/{id_target}', 'updateNilai')->name('updateNilai'); // Update berdasarkan id_target
+            Route::post('update-histori/{id_target}', 'updateHistori')->name('updateHistori'); // Tambahkan ini
         });
     });
+    Route::get('/histori/get-preview/{id}', [HistoriController::class, 'getPreview'])->name('histori.getPreview');
 
 
 

@@ -17,7 +17,9 @@ class SantriController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Santri::with('kelas')->get();
+            $data = Santri::with('kelas')
+            ->orderBy('id_kelas')
+            ->get();
             return DataTables::of($data)
                 ->addColumn('nama_kelas', function ($row) {
                     return $row->kelas ? $row->kelas->nama_kelas : 'Tidak Ada Kelas';
@@ -209,7 +211,7 @@ class SantriController extends Controller
         // Update data santri
         $santri->update($data);
 
-        return redirect()->route('santri.show', $santri->id_santri)->with('success', 'Santri berhasil diperbarui.');
+        return redirect()->route('santri.index')->with('success', 'Santri berhasil diperbarui.');
     }
 
     private function updateKeluarga($id_santri, $hubungan, $data, $prefix)
@@ -251,6 +253,30 @@ class SantriController extends Controller
     {
         $santris = Santri::with('kelas')->select(['id_santri', 'nama', 'nisn', 'angkatan', 'id_kelas']);
 
+        // Menangani pengurutan berdasarkan kolom yang dikirim dari DataTables
+        if ($request->has('order')) {
+            $orderColumnIndex = $request->input('order.0.column');
+            $orderDirection = $request->input('order.0.dir');
+
+            // Menentukan kolom yang akan diurutkan
+            $columns = ['id_kelas', 'nama', 'nisn', 'angkatan'];
+
+            // Menambahkan pengurutan berdasarkan kolom dan arah
+            if ($orderColumnIndex == 0) {
+                // Jika yang diurutkan adalah kolom nama (indeks 0), maka urutkan berdasarkan id_kelas dulu
+                $santris->orderBy('id_kelas', 'asc')->orderBy('nama', $orderDirection);
+            } elseif ($orderColumnIndex == 1) {
+                // Jika yang diurutkan adalah kolom lainnya, lakukan pengurutan yang sesuai
+                $santris->orderBy('id_kelas', 'asc')->orderBy('nama', 'asc');
+            } else {
+                // Pengurutan default jika bukan kolom pertama atau lainnya
+                $santris->orderBy('id_kelas', 'asc')->orderBy('nama', 'asc');
+            }
+        } else {
+            // Default urutan berdasarkan id_kelas terlebih dahulu, baru nama
+            $santris->orderBy('id_kelas', 'asc')->orderBy('nama', 'asc');
+        }
+
         return DataTables::of($santris)
             ->addColumn('nama_kelas', function ($santri) {
                 return $santri->kelas ? $santri->kelas->nama_kelas : 'Tidak Ada Kelas';
@@ -269,6 +295,7 @@ class SantriController extends Controller
             ->rawColumns(['action'])
             ->make(true);
     }
+
 
 
 }

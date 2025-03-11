@@ -52,6 +52,7 @@
             { data: 'email', name: 'email' },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ],
+        order: [[1, 'asc']],
         columnDefs: [
             { className: "text-center", targets: [0, 2, 3, 4] } // ✅ Pusatkan teks di kolom tertentu
         ]

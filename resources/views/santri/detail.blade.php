@@ -4,7 +4,6 @@
     Detail Santri
 @endsection
 
-
 @section('content')
     <section class="content">
 
@@ -13,7 +12,7 @@
                 <div class="col-md-10 offset-md-1">
                     <div class="card">
                         <div class="card-body">
-                            <div class="row">
+                            <div class="row mt-4">
                                 <div class="col-md-8">
                                     <table class="table table-bordered">
                                         <tr>
@@ -55,10 +54,10 @@
                                     </table>
                                 </div>
                                 <div class="col-md-4 text-center">
-                                    <img src="{{ $santri->foto_santri ? $santri->foto_santri : asset('assets/image/default.png') }}" alt="Foto Santri" class="img-fluid rounded" width="150">
+                                    <img src="{{ $santri->foto_santri ? asset($santri->foto_santri) : asset('assets/image/default.png') }}" alt="Foto Santri" class="img-fluid rounded" width="150">
                                 </div>
-
                             </div>
+
                             <div class="mt-4 d-flex justify-content-between align-items-center">
                                 <h4>Data Orang Tua:</h4>
                             </div>
@@ -165,9 +164,11 @@
                                 </tr>
                             </table>
 
-
-
-
+                            <!-- Tombol Kembali di Bawah -->
+                            <div class="mt-4">
+                                <a href="{{ route('santri.index') }}" class="btn btn-secondary"> Kembali
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

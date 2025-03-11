@@ -7,10 +7,8 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
+                    <h5> @isset($targets){{ $targets->first()->first()->santri->nama }}@endisset</h5>
                     <div class="card">
-                        <div class="card-header bg-navy text-white">
-                            <h5>Detail Target @isset($targets){{ $targets->first()->first()->santri->nama }}@endisset</h5>
-                        </div>
                         <div class="card-body">
                             @if($targets->isEmpty())
                                 <p class="text-center text-danger">Data tidak ditemukan.</p>
