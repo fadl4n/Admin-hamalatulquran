@@ -79,7 +79,7 @@ class SantriController extends Controller
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
 
-        $data['foto_santri'] = asset('assets/image/default.png'); // Gambar default
+        $data['foto_santri'] = asset('assets/image/default-user.png'); // Gambar default
 
         if ($request->hasFile('foto_santri')) {
             $file = $request->file('foto_santri');
@@ -179,29 +179,36 @@ class SantriController extends Controller
             $data['password'] = Hash::make($request->password);
         }
 
-        // Handle foto santri upload
-        if ($request->hasFile('foto_santri')) {
-            $file = $request->file('foto_santri');
-            $allowedFileTypes = ['png', 'jpg', 'jpeg'];
+      // Handle foto santri upload
+if ($request->hasFile('foto_santri')) {
+    $file = $request->file('foto_santri');
+    $allowedFileTypes = ['png', 'jpg', 'jpeg'];
+    $extension = $file->getClientOriginalExtension();
 
-            // Validasi tipe file
-            $extension = $file->getClientOriginalExtension();
-            if (!in_array($extension, $allowedFileTypes)) {
-                return redirect()->back()->with('error', 'File type not allowed. Only PNG, JPG, and JPEG files are allowed.');
-            }
+    // Validasi tipe file
+    if (!in_array($extension, $allowedFileTypes)) {
+        return redirect()->back()->with('error', 'File type not allowed. Only PNG, JPG, and JPEG files are allowed.');
+    }
 
-            // Hapus file lama jika ada
-            if ($santri->foto_santri && file_exists(public_path('uploadedFile/image/santri/' . basename($santri->foto_santri)))) {
-                unlink(public_path('uploadedFile/image/santri/' . basename($santri->foto_santri)));
-            }
-
-            // Simpan file gambar baru dengan nama unik
-            $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploadedFile/image/santri'), $name_original);
-
-            // Simpan path gambar baru ke dalam data
-            $data['foto_santri'] = 'uploadedFile/image/santri/' . $name_original;
+    // Hapus file lama jika ada
+    if (!empty($santri->foto_santri) && $santri->foto_santri !== asset('assets/image/default-user.png')) {
+        $oldFilePath = public_path('uploadedFile/image/santri/' . basename($santri->foto_santri));
+        if (file_exists($oldFilePath)) {
+            unlink($oldFilePath);
         }
+    }
+
+    // Simpan file gambar baru dengan nama unik
+    $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
+    $file->move(public_path('uploadedFile/image/santri'), $name_original);
+
+    // Simpan path gambar baru ke dalam data
+    $data['foto_santri'] = url('uploadedFile/image/santri/' . $name_original);
+} else {
+    // Jika tidak ada gambar baru, tetap gunakan gambar lama
+    $data['foto_santri'] = $santri->foto_santri ?? asset('assets/image/default-user.png');
+}
+
 
         // Update data keluarga (ayah, ibu, wali)
         $this->updateKeluarga($santri->id_santri, 1, $request->all(), 'ayah');

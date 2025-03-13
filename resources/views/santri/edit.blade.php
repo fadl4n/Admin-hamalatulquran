@@ -133,7 +133,7 @@
 
                                 <!-- Pratinjau Gambar -->
                                 <div class="mt-2">
-                                    <img id="preview" src="{{ $santri->foto_santri ? asset('uploadedFile/image/santri/' . basename($santri->foto_santri)) : asset('assets/image/default-user.png') }}" alt="Foto Santri" class="img-thumbnail" width="150">
+                                    <img id="preview"src="{{ !empty($santri->foto_santri) && file_exists(public_path('uploadedFile/image/santri/' . basename($santri->foto_santri)))? asset('uploadedFile/image/santri/' . basename($santri->foto_santri)): asset('assets/image/default-user.png') }}"alt="Foto Santri"class="img-thumbnail" width="150">
                                 </div>
                             </div>
                             <h4>Ayah</h4>

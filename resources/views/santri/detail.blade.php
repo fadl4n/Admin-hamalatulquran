@@ -54,7 +54,7 @@
                                     </table>
                                 </div>
                                 <div class="col-md-4 text-center">
-                                    <img src="{{ $santri->foto_santri ? asset($santri->foto_santri) : asset('assets/image/default.png') }}" alt="Foto Santri" class="img-fluid rounded" width="150">
+                                    <img src="{{ $santri->foto_santri ? asset($santri->foto_santri) : asset('assets/image/default-user.png') }}" alt="Foto Santri" class="img-fluid rounded" width="150">
                                 </div>
                             </div>
 

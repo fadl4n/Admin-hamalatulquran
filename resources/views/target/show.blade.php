@@ -29,11 +29,10 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Nama</th>
-                                        <th>NISN</th>
-                                        <th>Nama Kelas</th>
-                                        <th>Nama Pengajar</th>
+                                        <th>Kelas</th>
+                                        <th>Pengajar</th>
                                         <th>Target</th>
-                                        <th>Tanggal Awal</th>
+                                        <th>Tanggal Mulai</th>
                                         <th>Tanggal Target</th>
                                         <th>Aksi</th>
                                     </tr>
@@ -45,7 +44,6 @@
                                     <tr>
                                         <td>{{ $no++ }}</td>
                                         <td>{{ $first->santri->nama }}</td>
-                                        <td>{{ $first->santri->nisn }}</td>
                                         <td>{{ $first->kelas->nama_kelas }}</td>
                                         <td>{{ $first->pengajar->nama }}</td>
                                         <td>{{'Target '}} {{$first->id_group}}</td>

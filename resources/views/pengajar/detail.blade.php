@@ -47,7 +47,7 @@
                                     </table>
                                 </div>
                                 <div class="col-md-4 text-center">
-                                    <img src="{{ $pengajar->foto_pengajar ? asset($pengajar->foto_pengajar) : asset('assets/image/default.png') }}" alt="Foto Pengajar" class="img-fluid rounded" width="150">
+                                    <img src="{{ $pengajar->foto_pengajar ? asset($pengajar->foto_pengajar) : asset('assets/image/default-user.png') }}" alt="Foto Pengajar" class="img-fluid rounded" width="150">
                                 </div>
                             </div>
                             <div class="mt-4">

@@ -71,7 +71,7 @@ class PengajarController extends Controller
         return redirect()->back()->withInput()->with('error', 'Email sudah digunakan. Silakan gunakan email lain.');
     }
 
-    $fotoPath = asset('assets/image/default.png'); // Gambar default
+    $fotoPath = asset('assets/image/default-user.png'); // Gambar default
 
     if ($request->hasFile('foto_pengajar')) {
         $file = $request->file('foto_pengajar');
@@ -172,7 +172,7 @@ class PengajarController extends Controller
         $file->move(public_path('uploadedFile/image/pengajar'), $name_original);
         $fotoPath = url('uploadedFile/image/pengajar') . '/' . $name_original;
     } else {
-        $fotoPath = asset('assets/image/default.png');
+        $fotoPath = asset('assets/image/default-user.png');
     }
 
 
