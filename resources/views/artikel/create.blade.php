@@ -21,14 +21,38 @@
                                     <label>Deskripsi</label>
                                     <textarea name="deskripsi" class="form-control" rows="4" required></textarea>
                                 </div>
-                                <div class="form-group">
-                                    <label>Gambar</label>
-                                    <input type="file" name="gambar" class="form-control" required>
-                                </div>
+
                                 <div class="form-group">
                                     <label>Tanggal Expired</label>
                                     <input type="date" name="expired_at" class="form-control">
                                 </div>
+
+                                <div class="form-group">
+                                    <label for="gambar">Gambar Artikel</label>
+                                    <input type="file" name="gambar" id="gambar"
+                                        class="form-control @error('gambar') is-invalid @enderror"
+                                        accept="image/png, image/jpeg"
+                                        onchange="previewImage(event)">
+
+                                    <small class="text-muted">Kosongkan jika tidak ingin mengunggah foto.</small>
+
+                                    @error('gambar')
+                                        <span class="text-danger">Format gambar tidak valid atau ukuran terlalu besar.</span>
+                                    @enderror
+
+                                    <!-- Pratinjau Gambar -->
+                                   <!-- Pratinjau Gambar -->
+<div class="mt-2">
+    <img id="preview"
+        src="{{ asset('assets/image/default.png') }}"
+        alt="Gambar Artikel"
+        class="img-thumbnail"
+        width="150"
+        onerror="this.onerror=null;this.src='{{ asset('assets/image/default.png') }}'">
+</div>
+
+                                </div>
+
                                 <button type="submit" class="btn btn-primary">Simpan</button>
                                 <a href="{{ route('artikel.index') }}" class="btn btn-secondary">Batal</a>
                             </form>
@@ -38,4 +62,14 @@
             </div>
         </div>
     </section>
+    <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function(){
+                var output = document.getElementById('preview');
+                output.src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
 @endsection

@@ -40,32 +40,34 @@
         </div>
     </section>
 
-    <!-- Modal untuk input/edit nilai -->
-    <div class="modal fade" id="nilaiModal" tabindex="-1" aria-labelledby="nilaiModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="nilaiModalLabel">Input/Edit Nilai</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form id="nilaiForm">
-                    <div class="modal-body">
-                        <input type="hidden" id="histori_id" name="histori_id">
-                        <div class="form-group">
-                            <label for="nilai">Nilai:</label>
-                            <input type="number" id="nilai" name="nilai" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                    </div>
-                </form>
+   <!-- Modal untuk input/edit nilai -->
+<div class="modal fade" id="nilaiModal" tabindex="-1" aria-labelledby="nilaiModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="nilaiModalLabel">Input/Edit Nilai</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
+            <form id="nilaiForm">
+                <div class="modal-body">
+                    <input type="hidden" id="histori_id" name="histori_id">
+                    <div class="form-group">
+                        <label for="nilai">Nilai:</label>
+                        <input type="number" id="nilai" name="nilai" class="form-control" required>
+                        <small id="nilaiError" class="text-danger" style="display: none;">Nilai tidak boleh negatif!</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
+
    <!-- Modal untuk Preview Nilai -->
 <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -161,73 +163,85 @@
             }]
         });
 
-        // Tampilkan modal edit nilai saat tombol edit diklik
-        $(document).on('click', '.edit-nilai', function() {
-            var id = $(this).data('id');
-            var nilai = $(this).data('nilai');
-            $('#histori_id').val(id);
-            $('#nilai').val(nilai);
-            $('#nilaiModal').modal('show');
-        });
+      // Tampilkan modal edit nilai saat tombol edit diklik
+$(document).on('click', '.edit-nilai', function() {
+    var id = $(this).data('id');
+    var nilai = $(this).data('nilai');
+    $('#histori_id').val(id);
+    $('#nilai').val(nilai);
+    $('#nilaiError').hide(); // Sembunyikan pesan error saat modal dibuka
+    $('#nilaiModal').modal('show');
+});
 
-        // Submit form untuk menyimpan nilai
-        $('#nilaiForm').submit(function(e) {
-            e.preventDefault();
-            var id_target = $('#histori_id').val();
-            var nilai = $('#nilai').val();
+// Submit form untuk menyimpan nilai
+$('#nilaiForm').submit(function(e) {
+    e.preventDefault();
 
-            $.ajax({
-                url: `/histori/update-nilai/${id_target}`, // Perbaikan URL
-                method: 'POST',
-                data: {
-                    nilai: nilai,
-                    _token: '{{ csrf_token() }}'  // Sertakan token CSRF untuk keamanan
-                },
-                success: function(response) {
-                    if (response.success) {
-                        $('#nilaiModal').modal('hide');
-                        table.ajax.reload(null, false);
-                    } else {
-                        alert('Gagal memperbarui nilai');
-                    }
-                },
-                error: function(error) {
-                    alert('Terjadi kesalahan saat memperbarui nilai');
-                }
-            });
-        });
+    var id_target = $('#histori_id').val();
+    var nilai = $('#nilai').val();
+    var nilaiError = $('#nilaiError');
 
-        // Tampilkan modal preview saat tombol preview diklik
-        $(document).on('click', '.preview-nilai', function() {
-            var id = $(this).data('id');
+    // Validasi: Cek apakah nilai negatif
+    if (nilai < 0) {
+        nilaiError.text('Nilai tidak boleh negatif!').show();
+        return; // Hentikan proses submit
+    } else {
+        nilaiError.hide(); // Sembunyikan pesan error jika nilai valid
+    }
 
-            $.ajax({
-                url: `/histori/get-preview/${id}`, // Perbaikan URL
-                method: 'GET',
-                success: function(response) {
-                    if (response.success) {
-                        var tableBody = $('#previewTableBody');
-                        tableBody.empty();  // Bersihkan tabel sebelumnya
+    $.ajax({
+        url: `/histori/update-nilai/${id_target}`, // Perbaikan URL
+        method: 'POST',
+        data: {
+            nilai: nilai,
+            _token: '{{ csrf_token() }}'  // Sertakan token CSRF untuk keamanan
+        },
+        success: function(response) {
+            if (response.success) {
+                $('#nilaiModal').modal('hide');
+                table.ajax.reload(null, false);
+            } else {
+                alert('Gagal memperbarui nilai');
+            }
+        },
+        error: function(error) {
+            alert('Terjadi kesalahan saat memperbarui nilai');
+        }
+    });
+});
 
-                        response.data.forEach(function(item) {
-                            tableBody.append(
-                                `<tr>
-                                    <td>${item.updated_at}</td> <!-- Tanggal pembaruan -->
-                                    <td>${item.nilai}</td>       <!-- Nilai -->
-                                </tr>`
-                            );
-                        });
+      // Tampilkan modal preview saat tombol preview diklik
+$(document).on('click', '.preview-nilai', function() {
+    var id = $(this).data('id');
 
-                        $('#previewModal').modal('show');
-                    } else {
-                        alert('Gagal mengambil data preview');
-                    }
-                },
-                error: function(error) {
-                    alert('Terjadi kesalahan saat mengambil data preview');
-                }
-            });
-        });
+    $.ajax({
+        url: `/histori/get-preview/${id}`, // Pastikan URL benar
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                var tableBody = $('#previewTableBody');
+                tableBody.empty();  // Bersihkan tabel sebelumnya
+
+                response.data.forEach(function(item) {
+                    tableBody.append(
+                        `<tr>
+                            <td>${item.updated_at}</td> <!-- Tanggal dan Waktu -->
+                            <td>${item.nilai}</td>       <!-- Nilai -->
+                        </tr>`
+                    );
+                });
+
+                $('#previewModal').modal('show');
+            } else {
+                alert('Gagal mengambil data preview');
+            }
+        },
+        error: function(error) {
+            alert('Terjadi kesalahan saat mengambil data preview');
+        }
+    });
+});
+
     });
 </script>
 @endsection

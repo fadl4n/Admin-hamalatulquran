@@ -10,8 +10,10 @@ use App\Models\Pengajar;
 use App\Models\Kelas;
 use App\Models\Surat;
 use App\Models\Histori;
+use App\Models\Setoran;
 use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
 
@@ -101,7 +103,6 @@ class TargetController extends Controller
         }
           // Cek apakah ada target yang sama dengan id_santri, id_surat, id_group tetapi berbeda tgl_mulai dan tgl_target
           $existingTargetDates = Target::where('id_santri', $request->id_santri)
-          ->where('id_surat', $request->id_surat)
           ->where('id_group', $request->id_group)
           ->where(function ($query) use ($request) {
               $query->where('tgl_mulai', '!=', $request->tgl_mulai)
@@ -115,6 +116,13 @@ class TargetController extends Controller
               'tgl_target' => 'Sudah ada target untuk santri ini dengan tanggal target ' . Carbon::parse($existingTargetDates->tgl_target)->format('d-m-Y') . '.'
           ])->withInput();
       }
+      // Pengecekan apakah id_kelas sesuai dengan santri
+   // Pengecekan apakah id_kelas sesuai dengan santri
+$santri = Santri::findOrFail($request->id_santri);
+if ($santri->id_kelas != $request->id_kelas) {
+    return back()->withErrors(['id_kelas' => 'Santri ini terdaftar di kelas ' . $santri->kelas->nama_kelas . ', bukan di kelas yang dipilih.'])->withInput();
+}
+
 
         // Simpan data target ke database
         $target = Target::create([
@@ -138,7 +146,7 @@ class TargetController extends Controller
 
             'status' => 0,  // Status default yang bisa kamu sesuaikan
             'id_target' => $target->id_target,  // Menghubungkan histori dengan target
-            'nilai' => 0,  // Nilai default, bisa disesuaikan jika diperlukan
+            'nilai' => null,  // Nilai default, bisa disesuaikan jika diperlukan
         ]);
 
         // Cek apakah tombol "Continue" ditekan
@@ -200,14 +208,15 @@ class TargetController extends Controller
 
     public function update(Request $request, Target $target)
     {
+        // Validasi input data
         $request->validate([
             'id_santri' => 'required|exists:santris,id_santri',
             'id_pengajar' => 'required|exists:pengajars,id_pengajar',
             'id_kelas' => 'required|exists:kelas,id_kelas',
             'id_surat' => 'required|exists:surats,id_surat',
+            'tgl_mulai' => 'required|date',
             'jumlah_ayat_target_awal' => 'required|integer|min:1',
             'jumlah_ayat_target' => 'required|integer|min:1',
-            'tgl_mulai' => 'required|date',
             'tgl_target' => 'required|date',
             'id_group' => 'nullable|integer'
         ]);
@@ -215,6 +224,7 @@ class TargetController extends Controller
         // Ambil jumlah ayat dari surat terkait
         $surat = Surat::findOrFail($request->id_surat);
 
+        // Validasi jumlah_ayat_target_awal dan jumlah_ayat_target
         if ($request->jumlah_ayat_target_awal > $request->jumlah_ayat_target) {
             return back()->withErrors(['jumlah_ayat_target_awal' => 'Jumlah ayat target awal tidak boleh lebih dari jumlah ayat target.'])->withInput();
         }
@@ -223,22 +233,87 @@ class TargetController extends Controller
             return back()->withErrors(['jumlah_ayat_target' => 'Jumlah ayat target tidak boleh lebih dari jumlah ayat surat.'])->withInput();
         }
 
-        // Update target
+        // Menghitung jumlah_ayat_target_end
+        $jumlah_ayat_target_end = $request->jumlah_ayat_target_awal + $request->jumlah_ayat_target - 1;
+
+        // Cek apakah kombinasi id_santri, id_group, id_surat, dan jumlah ayat sudah ada
+        $existingTarget = Target::where('id_santri', $request->id_santri)
+            ->where('id_group', $request->id_group)
+            ->where('id_surat', $request->id_surat)
+            ->where('jumlah_ayat_target_awal', $request->jumlah_ayat_target_awal)
+            ->where('jumlah_ayat_target', $request->jumlah_ayat_target)
+            ->where('id_target', '!=', $target->id_target)  // Menghindari perbaruan target yang sama
+            ->exists();
+
+        if ($existingTarget) {
+            return back()->withErrors(['jumlah_ayat_target' => 'Target dengan jumlah ayat yang sama sudah ada.'])->withInput();
+        }
+
+        // Validasi untuk menghindari tumpang tindih rentang ayat
+        $overlapTarget = Target::where('id_santri', $request->id_santri)
+            ->where('id_group', $request->id_group)
+            ->where('id_surat', $request->id_surat)
+            ->where(function ($query) use ($request, $jumlah_ayat_target_end) {
+                $query->whereBetween('jumlah_ayat_target_awal', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end])
+                    ->orWhereBetween('jumlah_ayat_target', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end]);
+            })
+            ->where('id_target', '!=', $target->id_target)  // Menghindari perbaruan target yang sama
+            ->exists();
+
+        if ($overlapTarget) {
+            return back()->withErrors(['jumlah_ayat_target' => 'Rentang jumlah ayat tumpang tindih dengan target yang sudah ada.'])->withInput();
+        }
+
+        // Cek apakah ada target yang sama dengan id_santri, id_surat, id_group tetapi berbeda tgl_mulai dan tgl_target
+        $existingTargetDates = Target::where('id_santri', $request->id_santri)
+            ->where('id_group', $request->id_group)
+            ->where(function ($query) use ($request) {
+                $query->where('tgl_mulai', '!=', $request->tgl_mulai)
+                    ->orWhere('tgl_target', '!=', $request->tgl_target);
+            })
+            ->where('id_target', '!=', $target->id_target)  // Menghindari perbaruan target yang sama
+            ->first();
+
+        if ($existingTargetDates) {
+            return back()->withErrors([
+                'tgl_mulai' => 'Sudah ada target untuk santri ini dengan tanggal mulai ' . Carbon::parse($existingTargetDates->tgl_mulai)->format('d-m-Y') . '.',
+                'tgl_target' => 'Sudah ada target untuk santri ini dengan tanggal target ' . Carbon::parse($existingTargetDates->tgl_target)->format('d-m-Y') . '.'
+            ])->withInput();
+        }
+
+        // Pengecekan apakah id_kelas sesuai dengan santri
+        $santri = Santri::findOrFail($request->id_santri);
+        if ($santri->id_kelas != $request->id_kelas) {
+            return back()->withErrors(['id_kelas' => 'Santri ini terdaftar di kelas ' . $santri->kelas->nama_kelas . ', bukan di kelas yang dipilih.'])->withInput();
+        }
+
+        // Update data target
         $target->update($request->all());
 
         // Setelah update target, perbarui histori yang terkait
         $histori = Histori::where('id_target', $target->id_target)->first();
+
         if ($histori) {
-            // Update histori sesuai dengan target yang baru
+            // Hitung ulang persentase berdasarkan jumlah ayat yang baru
+            $totalAyatDisetorkan = Setoran::where('id_target', $target->id_target)
+                ->sum(DB::raw('jumlah_ayat_end - jumlah_ayat_start + 1'));
+
+            $persentaseBaru = number_format(($totalAyatDisetorkan / max(1, $request->jumlah_ayat_target)) * 100, 2);
+
+            // Tentukan status baru
+            $status = Histori::determineStatus($totalAyatDisetorkan, $request->jumlah_ayat_target, $request->tgl_target, $histori->tgl_setoran);
+
             $histori->update([
-                'id_santri' => $target->id_santri, // Sesuaikan dengan id_santri yang baru
-                'id_surat' => $target->id_surat,   // Sesuaikan dengan id_surat yang baru jika perlu
-                'jumlah_ayat_target' => $target->jumlah_ayat_target, // Sesuaikan jumlah ayat target
-                'tgl_target' => $target->tgl_target, // Sesuaikan tanggal target jika diperlukan
+                'id_santri' => $target->id_santri,
+                'id_surat' => $target->id_surat,
+                'id_kelas' => $target->id_kelas,
+                'persentase' => $persentaseBaru,
+                'status' => $status,
+                'tgl_target' => $target->tgl_target,
             ]);
         }
 
-        return redirect()->route('target.index')->with('success', 'Target berhasil diperbarui!');
+        return redirect()->route('target.index')->with('success', 'Target dan histori berhasil diperbarui!');
     }
 
 

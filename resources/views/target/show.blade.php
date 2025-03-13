@@ -106,12 +106,12 @@ $(document).ready(function() {
         var id_group = $(this).data('id_group');
 
         Swal.fire({
-            title: "Confirmation",
-            text: "Are you sure you want to delete this target?",
+            title: "Konfirmasi",
+            text: "Apakah kamu ingin menghapus target ini?",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonText: "Yes, delete!",
-            cancelButtonText: "Cancel"
+            confirmButtonText: "Ya, hapus!",
+            cancelButtonText: "Batal"
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
@@ -121,7 +121,7 @@ $(document).ready(function() {
                         _token: '{{ csrf_token() }}',
                     },
                     success: function(response) {
-                        Swal.fire('Success!', 'Target has been deleted!', 'success');
+                        Swal.fire('Sukses!', 'Target berhasil terhapus!', 'sukses');
                         location.reload();
                     },
                     error: function(xhr, status, error) {
@@ -132,6 +132,6 @@ $(document).ready(function() {
         });
     });
 });
-    
+
 </script>
 @endsection
