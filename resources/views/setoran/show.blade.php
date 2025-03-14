@@ -8,6 +8,18 @@
     <link rel="stylesheet"
         href="{{ asset('/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+
+    <style>
+        .status-proses {
+            background-color: #f7d24c; /* Kuning untuk status 0 */
+            color: white;
+        }
+
+        .status-selesai {
+            background-color: #28a745; /* Hijau untuk status 1 */
+            color: white;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -71,10 +83,14 @@
                                             <td class="text-center">{{ $loop->iteration }}</td>
                                             <td>{{ $santri->nama }} | {{ $santri->nisn }}</td>
                                             <td class="text-center">{{ $kelasList }}</td>
-
                                             <td class="text-center">{{ 'target '.$idGroup }}</td>
-                                            <td class="text-center">{{ $status }}</td> <!-- Menampilkan status berdasarkan persentase -->
-
+                                            <td class="text-center">
+                                                @if ($status == 1)
+                                                    <span class="badge bg-warning">Proses</span>
+                                                @else
+                                                    <span class="badge bg-success">Selesai</span>
+                                                @endif
+                                            </td>
                                             <td class="text-center">{{ round($averagePersentase, 2) }} %</td>
                                             <td class="text-center">
                                                 <a href="{{ route('setoran.show', $groupKey) }}" class="btn btn-sm btn-info">

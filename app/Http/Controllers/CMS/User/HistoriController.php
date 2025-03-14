@@ -165,7 +165,7 @@ public function getPreview($id)
     // Format tanggal dengan waktu
     $data = $data->map(function ($item) {
         return [
-            'updated_at' => $item->updated_at->format('d-m-Y H:i:s'), // Format: Hari-Bulan-Tahun Jam:Menit:Detik
+            'updated_at' => $item->updated_at->format('d-m-Y'), // Format: Hari-Bulan-Tahun Jam:Menit:Detik
             'nilai' => $item->nilai
         ];
     });

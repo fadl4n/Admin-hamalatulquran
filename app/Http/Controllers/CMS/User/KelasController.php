@@ -34,7 +34,6 @@ class KelasController extends Controller
     {
         return view('kelas.create')->with('error', session('error'));
     }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -43,19 +42,26 @@ class KelasController extends Controller
             'nama_kelas.required' => 'Nama kelas harus diisi.',
         ]);
 
+        // Cek apakah nama kelas sudah ada
         if (Kelas::where('nama_kelas', $request->nama_kelas)->exists()) {
-            return redirect('kelas/create')->with('error', 'Nama kelas sudah ada. Silakan pilih nama lain.');
+            // Mengirimkan response JSON dengan error jika nama kelas sudah ada
+            return response()->json(['error' => 'Nama kelas sudah ada. Silakan pilih nama lain.'], 400);
         }
 
+        // Menyimpan kelas baru
         Kelas::create($request->all());
-        return redirect('kelas')->with('success', 'Kelas berhasil ditambahkan.');
+
+        // Mengirimkan response sukses
+        return response()->json(['success' => 'Kelas berhasil ditambahkan.'], 200);
     }
+
 
     public function edit($id)
     {
         $kelas = Kelas::findOrFail($id);
-        return view('kelas.edit', compact('kelas'));
+        return response()->json($kelas); // Mengirimkan data kelas dalam bentuk JSON
     }
+
 
     public function update(Request $request, $id)
     {
@@ -65,15 +71,20 @@ class KelasController extends Controller
             'nama_kelas.required' => 'Nama kelas harus diisi.',
         ]);
 
+        // Cek apakah nama kelas sudah ada dan bukan kelas yang sedang diupdate
         if (Kelas::where('nama_kelas', $request->nama_kelas)->where('id_kelas', '!=', $id)->exists()) {
-            return redirect('kelas')->with('error', 'Nama kelas sudah ada. Silakan pilih nama lain.');
+            // Mengirimkan response JSON dengan error jika nama kelas sudah ada
+            return response()->json(['error' => 'Nama kelas sudah ada. Silakan pilih nama lain.'], 400);
         }
 
+        // Update kelas
         $kelas = Kelas::findOrFail($id);
         $kelas->update($request->all());
 
-        return redirect('kelas')->with('success', 'Kelas berhasil diperbarui.');
+        // Mengirimkan response sukses
+        return response()->json(['success' => 'Kelas berhasil diperbarui.'], 200);
     }
+
 
     public function destroy($id)
     {
@@ -84,22 +95,23 @@ class KelasController extends Controller
     }
 
     public function fnGetData(Request $request)
-    {
-        $kelas = Kelas::withCount('santri')->get();
+{
+    $kelas = Kelas::withCount('santri')->get();
 
-        return DataTables::of($kelas)
-            ->addIndexColumn()
-            ->addColumn('action', function ($kelas) {
-                return '
-                    <a href="'.url('kelas/edit/'.$kelas->id_kelas).'" class="btn btn-warning btn-sm" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    <button class="btn btn-danger btn-sm btnDelete" data-id="'.$kelas->id_kelas.'" title="Hapus">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                ';
-            })
-            ->rawColumns(['action'])
-            ->make(true);
-    }
+    return DataTables::of($kelas)
+        ->addIndexColumn()
+        ->addColumn('action', function ($kelas) {
+            return '
+                <button class="btn btn-warning btn-sm btnEdit" data-id="'.$kelas->id_kelas.'" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-sm btnDelete" data-id="'.$kelas->id_kelas.'" title="Hapus">
+                    <i class="fas fa-trash"></i>
+                </button>
+            ';
+        })
+        ->rawColumns(['action'])
+        ->make(true);
+}
+
 }

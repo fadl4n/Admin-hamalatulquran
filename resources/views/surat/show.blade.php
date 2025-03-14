@@ -86,7 +86,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ url('/surat') }}/" + id,
+                        url: "/surat/delete/" + id, // Sesuai dengan perubahan di web.php
                         type: "DELETE",
                         headers: {
                             'X-CSRF-TOKEN': "{{ csrf_token() }}"

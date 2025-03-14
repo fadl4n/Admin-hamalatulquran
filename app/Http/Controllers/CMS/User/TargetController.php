@@ -101,27 +101,27 @@ class TargetController extends Controller
         if ($overlapTarget) {
             return back()->withErrors(['jumlah_ayat_target' => 'Rentang jumlah ayat tumpang tindih dengan target yang sudah ada.'])->withInput();
         }
-          // Cek apakah ada target yang sama dengan id_santri, id_surat, id_group tetapi berbeda tgl_mulai dan tgl_target
-          $existingTargetDates = Target::where('id_santri', $request->id_santri)
-          ->where('id_group', $request->id_group)
-          ->where(function ($query) use ($request) {
-              $query->where('tgl_mulai', '!=', $request->tgl_mulai)
+        // Cek apakah ada target yang sama dengan id_santri, id_surat, id_group tetapi berbeda tgl_mulai dan tgl_target
+        $existingTargetDates = Target::where('id_santri', $request->id_santri)
+            ->where('id_group', $request->id_group)
+            ->where(function ($query) use ($request) {
+                $query->where('tgl_mulai', '!=', $request->tgl_mulai)
                     ->orWhere('tgl_target', '!=', $request->tgl_target);
-          })
-          ->first();
+            })
+            ->first();
 
-      if ($existingTargetDates) {
-          return back()->withErrors([
-              'tgl_mulai' => 'Sudah ada target untuk santri ini dengan tanggal mulai ' . Carbon::parse($existingTargetDates->tgl_mulai)->format('d-m-Y') . '.',
-              'tgl_target' => 'Sudah ada target untuk santri ini dengan tanggal target ' . Carbon::parse($existingTargetDates->tgl_target)->format('d-m-Y') . '.'
-          ])->withInput();
-      }
-      // Pengecekan apakah id_kelas sesuai dengan santri
-   // Pengecekan apakah id_kelas sesuai dengan santri
-$santri = Santri::findOrFail($request->id_santri);
-if ($santri->id_kelas != $request->id_kelas) {
-    return back()->withErrors(['id_kelas' => 'Santri ini terdaftar di kelas ' . $santri->kelas->nama_kelas . ', bukan di kelas yang dipilih.'])->withInput();
-}
+        if ($existingTargetDates) {
+            return back()->withErrors([
+                'tgl_mulai' => 'Sudah ada target untuk santri ini dengan tanggal mulai ' . Carbon::parse($existingTargetDates->tgl_mulai)->format('d-m-Y') . '.',
+                'tgl_target' => 'Sudah ada target untuk santri ini dengan tanggal target ' . Carbon::parse($existingTargetDates->tgl_target)->format('d-m-Y') . '.'
+            ])->withInput();
+        }
+        // Pengecekan apakah id_kelas sesuai dengan santri
+        // Pengecekan apakah id_kelas sesuai dengan santri
+        $santri = Santri::findOrFail($request->id_santri);
+        if ($santri->id_kelas != $request->id_kelas) {
+            return back()->withErrors(['id_kelas' => 'Santri ini terdaftar di kelas ' . $santri->kelas->nama_kelas . ', bukan di kelas yang dipilih.'])->withInput();
+        }
 
 
         // Simpan data target ke database
@@ -137,14 +137,16 @@ if ($santri->id_kelas != $request->id_kelas) {
             'id_group' => $request->id_group,
         ]);
 
+        $today = now(); // Mendapatkan tanggal sekarang
+        $status = ($today->greaterThan($target->tgl_target)) ? 3 : 0;  // Jika tanggal sekarang lebih besar dari tgl_target, status 3 (terlambat), jika tidak status 0 (belum mulai)
+
         // Simpan histori berdasarkan target
         Histori::create([
-            'id_santri'=>$target->id_santri,
-            'id_surat'=>$target->id_surat,
-            'id_kelas'=>$target->id_kelas,
-            'persentase'=> 0.00,
-
-            'status' => 0,  // Status default yang bisa kamu sesuaikan
+            'id_santri' => $target->id_santri,
+            'id_surat' => $target->id_surat,
+            'id_kelas' => $target->id_kelas,
+            'persentase' => 0.00,
+            'status' => $status,  // Status default yang bisa kamu sesuaikan
             'id_target' => $target->id_target,  // Menghubungkan histori dengan target
             'nilai' => null,  // Nilai default, bisa disesuaikan jika diperlukan
         ]);

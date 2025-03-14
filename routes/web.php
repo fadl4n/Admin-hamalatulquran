@@ -52,7 +52,11 @@ Route::middleware([CheckAuth::class])->group(function () {
     });
 
     Route::controller(DashboardController::class)->group(function () {
+        // Halaman utama dashboard
         Route::get('/', 'index');
+
+        // Rute API untuk mendapatkan statistik
+        Route::get('/statistics', 'dashboardStatistics');
     });
 
     Route::prefix('group-menu')->group(function () {
@@ -145,17 +149,17 @@ Route::middleware([CheckAuth::class])->group(function () {
 
 
 
-    Route::prefix('kelas')->name('kelas.')->group(function () {
-    Route::controller(KelasController::class)->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::get('create', 'create')->name('create');
-        Route::post('store', 'store')->name('store');
-        Route::get('edit/{id}', 'edit')->name('edit');
-        Route::put('update/{id}', 'update')->name('update'); // Perbaiki route update
-        Route::delete('delete/{id}', 'destroy')->name('destroy');
-        Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+        Route::prefix('kelas')->name('kelas.')->group(function () {
+        Route::controller(KelasController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('update/{id}', 'update')->name('update'); // Perbaiki route update
+            Route::delete('delete/{id}', 'destroy')->name('destroy');
+            Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+        });
     });
-});
     Route::prefix('pengajar')->name('pengajar.')->group(function () {
         Route::controller(PengajarController::class)->group(function () {
             Route::get('/', 'index')->name('index');
@@ -184,12 +188,13 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('create', 'create')->name('create');
             Route::post('store', 'store')->name('store');
-            Route::get('edit/{surat}', 'edit')->name('edit'); // Gunakan {surat} untuk Route Model Binding
+            Route::get('edit/{surat}', 'edit')->name('edit'); // Menggunakan {surat} untuk binding
             Route::put('update/{surat}', 'update')->name('update');
-            Route::delete('delete/{surat}', 'destroy')->name('destroy');
+            Route::delete('delete/{id}', 'destroy')->name('destroy'); // Tetap menggunakan {id}
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
         });
     });
+
     Route::prefix('setoran')->name('setoran.')->group(function () {
         Route::controller(SetoranController::class)->group(function () {
             Route::get('/', 'index')->name('index');

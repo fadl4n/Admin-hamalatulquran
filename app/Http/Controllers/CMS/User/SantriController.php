@@ -42,8 +42,6 @@ class SantriController extends Controller
         $santri = Santri::with(['kelas', 'keluarga'])->findOrFail($id);
         return view('santri.detail', compact('santri'));
     }
-
-
     public function create()
     {
         $kelas = Kelas::all();
