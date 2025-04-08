@@ -16,7 +16,7 @@
           <li class="nav-item">
             <a class="nav-link dropdown-toggle" href="javascript:void(0)" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
-                <img src="{{ Session::get('user')['image'] }}" alt="user"
+                <img src="{{ url(Session::get('user')['image']) }}" alt="user"
                     class="rounded-circle" width="30">
                 <span class="ml-2 d-none d-lg-inline-block"><span class="text-dark">{{ Session::get('user')['name'] }}</span>
                     <i data-feather="chevron-down" class="svg-icon"></i>
