@@ -16,21 +16,24 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="d-flex justify-content-end pb-2">
+                            <div class="d-flex justify-content-between pb-2">
+                                <h5>Daftar Santri</h5>
                                 <a href="{{ url('santri/create') }}" class="btn btn-info">+ Tambah Santri</a>
                             </div>
-                            <table class="table table-bordered table-hover santri-list">
-                                <thead class="bg-navy disabled">
-                                    <tr>
-                                        <th>Nama</th>
-                                        <th>NISN</th>
-                                        <th>Nama Kelas</th>
-                                        <th>Angkatan</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover santri-list w-100">
+                                    <thead class="bg-navy disabled">
+                                        <tr>
+                                            <th>Nama</th>
+                                            <th>NISN</th>
+                                            <th>Nama Kelas</th>
+                                            <th>Angkatan</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

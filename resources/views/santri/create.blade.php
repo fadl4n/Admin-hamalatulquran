@@ -81,7 +81,7 @@
 
                                 <div class="form-group">
                                     <label>Angkatan</label>
-                                    <input type="text" name="angkatan" class="form-control @error('angkatan') is-invalid @enderror"
+                                    <input type="number" name="angkatan" class="form-control @error('angkatan') is-invalid @enderror"
                                            value="{{ old('angkatan') }}">
                                     @error('angkatan')
                                         <span class="text-danger">Angkatan tidak boleh kosong.</span>

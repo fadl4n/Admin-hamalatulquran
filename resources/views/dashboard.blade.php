@@ -3,6 +3,7 @@
 @section('content')
 <div class="container-fluid">
   <div class="row">
+    <!-- Jumlah Santri -->
     <div class="col-lg-4">
       <div class="card">
         <div class="card-header" style="background-color: #6c757d; color: white;">
@@ -16,6 +17,7 @@
       </div>
     </div>
 
+    <!-- Jumlah Kelas -->
     <div class="col-lg-4">
       <div class="card">
         <div class="card-header" style="background-color: #6c757d; color: white;">
@@ -29,6 +31,7 @@
       </div>
     </div>
 
+    <!-- Jumlah Pengajar -->
     <div class="col-lg-4">
       <div class="card">
         <div class="card-header" style="background-color: #6c757d; color: white;">
@@ -43,22 +46,16 @@
     </div>
   </div>
 
+  <!-- Grafik Santri per Angkatan -->
   <div class="row">
     <div class="col-lg-12">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Statistik User :</h3>
+          <h3 class="card-title">Grafik Santri per Angkatan (Naik Turun)</h3>
         </div>
         <div class="card-body">
-          <div class="row">
-            <div class="col-md-8">
-              <div class="chart-responsive">
-                <canvas id="pieChart" height="150"></canvas>
-              </div>
-            </div>
-            <div class="col-md-4" style="padding-top: 5%;">
-              <ul class="chart-legend clearfix" style="font-size: x-large"></ul>
-            </div>
+          <div class="chart-responsive">
+            <canvas id="lineChart" height="150"></canvas>
           </div>
         </div>
       </div>
@@ -70,21 +67,27 @@
 @section('script')
 <script src="{{ asset('/bower_components/admin-lte/plugins/chart.js/Chart.min.js') }}"></script>
 <script>
-  // Data untuk chart pie
-  var backgroundColor = ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de', '#FF8A8A', '#F4DEB3', '#D5ED9F', '#E0E5B6'];
-  var pieChartCanvas = $('#pieChart').get(0).getContext('2d');
-  var pieData = {
-    labels: [],
+  // Data untuk grafik naik turun (line chart)
+  var lineChartCanvas = $('#lineChart').get(0).getContext('2d');
+  var lineChartData = {
+    labels: [], // Angkatan
     datasets: [
       {
-        data: [],
-        backgroundColor: []
+        label: 'Jumlah Santri',
+        fill: false, // Tidak mengisi area
+        borderColor: '#3e95cd', // Warna garis
+        pointBackgroundColor: '#3e95cd', // Warna titik
+        data: [] // Jumlah santri per angkatan
       }
     ]
   };
-  var pieOptions = {
-    legend: {
-      display: false
+  var lineChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true
+      }
     }
   };
 
@@ -106,11 +109,22 @@
             $('#pengajarCount').text('0');
         }
 
+        // Isi data untuk grafik naik turun
+        var labels = [];
+        var data = [];
 
-        var pieChart = new Chart(pieChartCanvas, {
-            type: 'doughnut',
-            data: pieData,
-            options: pieOptions
+        response.santri_per_angkatan.forEach(function(item) {
+            labels.push(item.angkatan);  // Angkatan
+            data.push(item.count); // Jumlah santri
+        });
+
+        lineChartData.labels = labels;
+        lineChartData.datasets[0].data = data;
+
+        var lineChart = new Chart(lineChartCanvas, {
+            type: 'line',
+            data: lineChartData,
+            options: lineChartOptions
         });
     },
     error: function() {

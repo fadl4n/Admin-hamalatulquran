@@ -24,45 +24,47 @@
                             <div class="d-flex justify-content-end pb-2">
                                 <a href="{{ route('target.create') }}" class="btn btn-info">+ Tambah Target</a>
                             </div>
-                            <table class="table table-bordered table-hover target-list" id="targetTable">
-                                <thead class="bg-navy disabled">
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Nama</th>
-                                        <th>Kelas</th>
-                                        <th>Pengajar</th>
-                                        <th>Target</th>
-                                        <th>Tanggal Mulai</th>
-                                        <th>Tanggal Target</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @php $no = 1; @endphp
-                                    @foreach($targets as $groupKey => $group)
-                                    @php $first = $group->first(); @endphp
-                                    <tr>
-                                        <td>{{ $no++ }}</td>
-                                        <td>{{ $first->santri->nama }}</td>
-                                        <td>{{ $first->kelas->nama_kelas }}</td>
-                                        <td>{{ $first->pengajar->nama }}</td>
-                                        <td>{{'Target '}} {{$first->id_group}}</td>
-                                        <td>{{ $first->tgl_mulai }}</td>
-                                        <td>{{ $first->tgl_target }}</td>
-                                        <td class="text-center">
-                                            <a href="{{ route('target.detail', ['id_group' => $first->id_group]) }}?id_santri={{ $first->id_santri }}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <button class="btn btn-danger btn-sm btnDelete"
-                                                    data-id_santri="{{ $first->santri->id_santri }}"
-                                                    data-id_group="{{ $first->id_group }}">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover target-list" id="targetTable">
+                                    <thead class="bg-navy disabled">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama</th>
+                                            <th>Kelas</th>
+                                            <th>Pengajar</th>
+                                            <th>Target</th>
+                                            <th>Tanggal Mulai</th>
+                                            <th>Tanggal Target</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @php $no = 1; @endphp
+                                        @foreach($targets as $groupKey => $group)
+                                        @php $first = $group->first(); @endphp
+                                        <tr>
+                                            <td>{{ $no++ }}</td>
+                                            <td>{{ $first->santri->nama }}</td>
+                                            <td>{{ $first->kelas->nama_kelas }}</td>
+                                            <td>{{ $first->pengajar->nama }}</td>
+                                            <td>{{'Target '}} {{$first->id_group}}</td>
+                                            <td>{{ $first->tgl_mulai }}</td>
+                                            <td>{{ $first->tgl_target }}</td>
+                                            <td class="text-center">
+                                                <a href="{{ route('target.detail', ['id_group' => $first->id_group]) }}?id_santri={{ $first->id_santri }}" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <button class="btn btn-danger btn-sm btnDelete"
+                                                        data-id_santri="{{ $first->santri->id_santri }}"
+                                                        data-id_group="{{ $first->id_group }}">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

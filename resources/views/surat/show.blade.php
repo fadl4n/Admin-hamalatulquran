@@ -17,21 +17,24 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="d-flex justify-content-end pb-2">
+                            <div class="d-flex justify-content-between pb-2">
+                                <h5>Daftar Surat</h5>
                                 <a href="{{ route('surat.create') }}" class="btn btn-info">+ Tambah Surat</a>
                             </div>
-                            <table class="table table-bordered table-hover surat-list">
-                                <thead class="bg-navy disabled">
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Nama Surat</th>
-                                        <th>Jumlah Ayat</th>
-                                        <th>Deskripsi</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover surat-list w-100">
+                                    <thead class="bg-navy disabled">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama Surat</th>
+                                            <th>Jumlah Ayat</th>
+                                            <th>Deskripsi</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

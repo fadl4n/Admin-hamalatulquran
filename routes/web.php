@@ -252,21 +252,21 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
             Route::post('update-nilai/{id_target}', 'updateNilai')->name('updateNilai'); // Update berdasarkan id_target
             Route::post('update-histori/{id_target}', 'updateHistori')->name('updateHistori'); // Tambahkan ini
+            Route::get('get-preview/{id}', 'getPreview')->name('getPreview'); // Gabungkan ke dalam group
         });
     });
-    Route::get('/histori/get-preview/{id}', [HistoriController::class, 'getPreview'])->name('histori.getPreview');
 
 
 
     // web.php
 Route::get('/setoran/targets/{santri_id}', [SetoranController::class, 'getTargetsBySantri'])->name('setoran.getTargetsBySantri');
 Route::get('/get-nama-surat', [SetoranController::class, 'getNamaSurat']);
-Route::get('get-target-detail-by-surat', [TargetController::class, 'getTargetDetailBySurat']);
+
 Route::get('get-ayats-validation', [SetoranController::class, 'validateAyat']);
 Route::get('/get-id-target', [SetoranController::class, 'getIdTarget'])->name('setoran.getIdTarget');
 
 
-
+Route::get('get-target-detail-b y-surat', [TargetController::class, 'getTargetDetailBySurat']);
 
 });
 // end checking auth

@@ -3,37 +3,42 @@
 namespace App\Http\Controllers\CMS;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\Santri;
-use App\Models\Pengajar;
 use App\Models\Kelas;
-use Illuminate\Support\Facades\DB;
+use App\Models\Pengajar;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return view('dashboard');
+        // Ambil data statistik per angkatan
+        $santriPerAngkatan = Santri::selectRaw('angkatan, COUNT(*) as count')
+            ->groupBy('angkatan')
+            ->orderBy('angkatan', 'asc')
+            ->get();
+
+        // Kirimkan data ke view
+        return view('dashboard', compact('santriPerAngkatan'));
     }
+
     public function dashboardStatistics()
     {
-        // Ambil data jumlah santri, kelas, pengajar, dan statistik berdasarkan usia
-        $santriCount = Santri::count();  // Menghitung jumlah santri
-        $kelasCount = Kelas::count();    // Menghitung jumlah kelas
-        $pengajarCount = Pengajar::count();  // Menghitung jumlah pengajar
+        // Ambil data jumlah santri, kelas, dan pengajar
+        $santriCount = Santri::count();
+        $kelasCount = Kelas::count();
+        $pengajarCount = Pengajar::count();
 
- 
+        // Ambil statistik jumlah santri per angkatan
+        $santriPerAngkatan = Santri::selectRaw('angkatan, COUNT(*) as count')
+            ->groupBy('angkatan')
+            ->get();
 
         return response()->json([
             'santri_count' => $santriCount,
             'kelas_count' => $kelasCount,
             'pengajar_count' => $pengajarCount,
-
+            'santri_per_angkatan' => $santriPerAngkatan
         ]);
     }
-
-
 }

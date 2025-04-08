@@ -1,26 +1,24 @@
 @extends('admin_template')
 
-@section('title page', 'Daftar Setoran')
-
 @section('css')
-    <link rel="stylesheet"
-        href="{{ asset('/bower_components/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}" />
-    <link rel="stylesheet"
-        href="{{ asset('/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('/bower_components/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
 
     <style>
         .status-proses {
-            background-color: #f7d24c; /* Kuning untuk status 0 */
+            background-color: #f7d24c;
             color: white;
         }
 
         .status-selesai {
-            background-color: #28a745; /* Hijau untuk status 1 */
+            background-color: #28a745;
             color: white;
         }
     </style>
 @endsection
+
+@section('title page', 'Daftar Setoran')
 
 @section('content')
     <section class="content">
@@ -29,84 +27,56 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <!-- 🔍 SEARCH & TAMBAH -->
-                            <div class="d-flex justify-content-end pb-3">
+                            <div class="d-flex justify-content-between pb-3">
+                                <h5>Daftar Setoran</h5>
                                 <a href="{{ route('setoran.create') }}" class="btn btn-info">+ Tambah Setoran</a>
                             </div>
-
-                            <!-- 📊 TABEL SETORAN -->
-                            <table class="table table-bordered table-hover setoran-list">
-                                <thead class="bg-navy disabled">
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Santri</th>
-                                        <th>Kelas</th>
-
-                                        <th>Target</th>
-                                        <th>Status</th>
-                                        <th>Persentase</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($setoransGrouped as $groupKey => $setoranGroup)
-                                        @php
-                                            // Memisahkan groupKey menjadi id_santri dan id_group
-                                            [$idSantri, $idGroup] = explode('-', $groupKey);
-                                            $santri = \App\Models\Santri::find($idSantri);
-                                            $target = \App\Models\Target::where('id_group', $idGroup)->first();
-
-                                            // Mengambil nilai unik untuk kelas, pengajar, status
-                                            $kelasList = $setoranGroup->pluck('kelas.nama_kelas')->unique()->implode(', ');
-
-                                            $statusList = $setoranGroup->pluck('status')->unique()->map(function ($status) {
-                                                return $status == 1 ? 'Selesai' : 'Proses';
-                                            })->values()->all();
-
-                                            // Tentukan status berdasarkan kondisi kombinasi
-                                            if (in_array('Selesai', $statusList) && in_array('Proses', $statusList)) {
-                                                $statusList = ['Proses']; // Jika ada "Selesai" dan "Proses", tampilkan "Proses"
-                                            } elseif (in_array('Selesai', $statusList)) {
-                                                $statusList = ['Selesai']; // Jika hanya "Selesai", tampilkan "Selesai"
-                                            } elseif (in_array('Proses', $statusList)) {
-                                                $statusList = ['Proses']; // Jika hanya "Proses", tampilkan "Proses"
-                                            }
-
-                                            // Menghitung rata-rata persentase
-                                            $averagePersentase = $setoranGroup->pluck('persentase')->avg();
-
-                                            // Tentukan status berdasarkan persentase
-                                            $status = $averagePersentase >= 100 ? 'Selesai' : 'Proses'; // Tentukan status berdasarkan persentase
-                                        @endphp
-
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover setoran-list w-100">
+                                    <thead class="bg-navy disabled">
                                         <tr>
-                                            <td class="text-center">{{ $loop->iteration }}</td>
-                                            <td>{{ $santri->nama }} | {{ $santri->nisn }}</td>
-                                            <td class="text-center">{{ $kelasList }}</td>
-                                            <td class="text-center">{{ 'target '.$idGroup }}</td>
-                                            <td class="text-center">
-                                                @if ($status == 1)
-                                                    <span class="badge bg-warning">Proses</span>
-                                                @else
-                                                    <span class="badge bg-success">Selesai</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-center">{{ round($averagePersentase, 2) }} %</td>
-                                            <td class="text-center">
-                                                <a href="{{ route('setoran.show', $groupKey) }}" class="btn btn-sm btn-info">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <!-- Tombol Delete -->
-                                                <button class="btn btn-sm btn-danger btnDelete" data-id_group="{{ $idGroup }}" data-id_santri="{{ $idSantri }}">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-
-                                            </td>
+                                            <th>No</th>
+                                            <th>Santri</th>
+                                            <th>Kelas</th>
+                                            <th>Target</th>
+                                            <th>Status</th>
+                                            <th>Persentase</th>
+                                            <th>Aksi</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($setoransGrouped as $groupKey => $setoranGroup)
+                                            @php
+                                                [$idSantri, $idGroup] = explode('-', $groupKey);
+                                                $santri = \App\Models\Santri::find($idSantri);
+                                                $target = \App\Models\Target::where('id_group', $idGroup)->first();
+                                                $kelasList = $setoranGroup->pluck('kelas.nama_kelas')->unique()->implode(', ');
+                                                $statusList = $setoranGroup->pluck('status')->unique()->map(fn($status) => $status == 1 ? 'Selesai' : 'Proses')->values()->all();
+                                                $averagePersentase = $setoranGroup->pluck('persentase')->avg();
+                                                $status = $averagePersentase >= 100 ? 'Selesai' : 'Proses';
+                                            @endphp
+                                            <tr>
+                                                <td class="text-center">{{ $loop->iteration }}</td>
+                                                <td>{{ $santri->nama }} | {{ $santri->nisn }}</td>
+                                                <td class="text-center">{{ $kelasList }}</td>
+                                                <td class="text-center">{{ 'target '.$idGroup }}</td>
+                                                <td class="text-center">
+                                                    <span class="badge {{ $status == 'Proses' ? 'bg-warning' : 'bg-success' }}">{{ $status }}</span>
+                                                </td>
+                                                <td class="text-center">{{ round($averagePersentase, 2) }} %</td>
+                                                <td class="text-center">
+                                                    <a href="{{ route('setoran.show', $groupKey) }}" class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <button class="btn btn-sm btn-danger btnDelete" data-id_group="{{ $idGroup }}" data-id_santri="{{ $idSantri }}">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
