@@ -51,7 +51,7 @@
     <div class="col-lg-12">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Grafik Santri per Angkatan (Naik Turun)</h3>
+          <h3 class="card-title">Statistik Santri per Angkatan</h3>
         </div>
         <div class="card-body">
           <div class="chart-responsive">
@@ -65,28 +65,52 @@
 @endsection
 
 @section('script')
-<script src="{{ asset('/bower_components/admin-lte/plugins/chart.js/Chart.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-  // Data untuk grafik naik turun (line chart)
-  var lineChartCanvas = $('#lineChart').get(0).getContext('2d');
-  var lineChartData = {
-    labels: [], // Angkatan
-    datasets: [
-      {
-        label: 'Jumlah Santri',
-        fill: false, // Tidak mengisi area
-        borderColor: '#3e95cd', // Warna garis
-        pointBackgroundColor: '#3e95cd', // Warna titik
-        data: [] // Jumlah santri per angkatan
-      }
-    ]
+  const lineChartCanvas = $('#lineChart').get(0).getContext('2d');
+
+  const lineChartData = {
+    labels: [],
+    datasets: [{
+      label: 'Jumlah Santri',
+      fill: false,
+      borderColor: '#3e95cd',
+      pointBackgroundColor: '#3e95cd',
+      tension: 0.3,
+      data: []
+    }]
   };
-  var lineChartOptions = {
+
+  const lineChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Angkatan'
+        }
+      },
       y: {
-        beginAtZero: true
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Jumlah Santri'
+        },
+        ticks: {
+          // Hanya tampilkan angka bulat
+          callback: function(value) {
+            return Number.isInteger(value) ? value : null;
+          },
+          stepSize: 10 // default, akan diubah dinamis di bawah
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top'
       }
     }
   };
@@ -95,45 +119,55 @@
     url: _baseURL + '/statistics',
     method: 'GET',
     success: function(response) {
-        console.log(response); // Untuk debug
+      console.log('Response Statistik:', response);
 
-        if (response.santri_count && response.kelas_count && response.pengajar_count) {
-            // Tampilkan jumlah santri, kelas, dan pengajar
-            $('#santriCount').text(response.santri_count);
-            $('#kelasCount').text(response.kelas_count);
-            $('#pengajarCount').text(response.pengajar_count);
-        } else {
-            console.error('Data tidak lengkap');
-            $('#santriCount').text('0');
-            $('#kelasCount').text('0');
-            $('#pengajarCount').text('0');
-        }
+      // Update total
+      $('#santriCount').text(response.santri_count || 0);
+      $('#kelasCount').text(response.kelas_count || 0);
+      $('#pengajarCount').text(response.pengajar_count || 0);
 
-        // Isi data untuk grafik naik turun
-        var labels = [];
-        var data = [];
+      if (Array.isArray(response.santri_per_angkatan)) {
+        const labels = [];
+        const data = [];
 
         response.santri_per_angkatan.forEach(function(item) {
-            labels.push(item.angkatan);  // Angkatan
-            data.push(item.count); // Jumlah santri
+          if (item.count > 0) {
+            labels.push(item.angkatan);
+            data.push(item.count);
+          }
         });
+
+        if (data.length === 0) {
+          $('#lineChart').replaceWith('<div class="text-center text-muted p-3">Tidak ada data santri per angkatan.</div>');
+          return;
+        }
 
         lineChartData.labels = labels;
         lineChartData.datasets[0].data = data;
 
-        var lineChart = new Chart(lineChartCanvas, {
-            type: 'line',
-            data: lineChartData,
-            options: lineChartOptions
+        // Hitung stepSize yang sesuai berdasarkan nilai tertinggi
+        const maxData = Math.max(...data);
+        const stepSize = Math.ceil(maxData / 5); // Misalnya 5 garis vertikal
+        lineChartOptions.scales.y.ticks.stepSize = stepSize;
+
+        new Chart(lineChartCanvas, {
+          type: 'line',
+          data: lineChartData,
+          options: lineChartOptions
         });
+      } else {
+        console.warn('santri_per_angkatan tidak dalam format array');
+        $('#lineChart').replaceWith('<div class="text-center text-danger p-3">Format data salah.</div>');
+      }
     },
-    error: function() {
-        console.error('Error fetching data for dashboard');
-        // Menangani kesalahan
-        $('#santriCount').text('0');
-        $('#kelasCount').text('0');
-        $('#pengajarCount').text('0');
+    error: function(xhr, status, error) {
+      console.error('Gagal memuat data statistik:', error);
+      $('#santriCount').text('0');
+      $('#kelasCount').text('0');
+      $('#pengajarCount').text('0');
+      $('#lineChart').replaceWith('<div class="text-center text-danger p-3">Gagal memuat grafik.</div>');
     }
-});
+  });
 </script>
 @endsection
+

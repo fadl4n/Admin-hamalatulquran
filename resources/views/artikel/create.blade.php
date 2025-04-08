@@ -44,7 +44,7 @@
                                    <!-- Pratinjau Gambar -->
 <div class="mt-2">
     <img id="preview"
-        src="{{ asset('assets/image/default.png') }}"
+        src="{{ asset('assets/image/default-user.png') }}"
         alt="Gambar Artikel"
         class="img-thumbnail"
         width="150"

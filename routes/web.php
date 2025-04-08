@@ -90,22 +90,22 @@ Route::middleware([CheckAuth::class])->group(function () {
     });
 
     // start checking priviledge
-    // Route::middleware([CheckPriviledge::class])->group(function () {
-    //     Route::prefix('users')->group(function () {
-    //         Route::controller(UserController::class)->group(function () {
-    //             Route::get('/', 'index');
-    //             Route::get('create', 'create');
-    //             Route::post('store', 'store');
-    //             Route::get('detail/{id}', 'detail');
-    //             Route::get('edit/{id}', 'edit');
-    //             Route::post('update/{id}', 'update');
-    //             Route::get('delete/{id}', 'delete');
-    //             Route::get('fn-get-data', 'fnGetData');
-    //         });
-    //     });
+    Route::middleware([CheckPriviledge::class])->group(function () {
+        Route::prefix('users')->group(function () {
+            Route::controller(UserController::class)->group(function () {
+                Route::get('/', 'index');
+                Route::get('create', 'create');
+                Route::post('store', 'store');
+                Route::get('detail/{id}', 'detail');
+                Route::get('edit/{id}', 'edit');
+                Route::post('update/{id}', 'update');
+                Route::get('delete/{id}', 'delete');
+                Route::get('fn-get-data', 'fnGetData');
+            });
+        });
 
 
-    // });
+    });
     // end checking priviledge
     Route::prefix('roles')->group(function () {
         Route::controller(RoleController::class)->group(function () {

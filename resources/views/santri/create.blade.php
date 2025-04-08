@@ -11,7 +11,14 @@
                 <div class="col-md-8">
                     <div class="card card-primary">
                         <div class="card-body">
-                            <!-- Menampilkan notifikasi jika ada error -->
+                            <!-- Notifikasi session error manual -->
+                            @if (session('error'))
+                                <div class="alert alert-danger">
+                                    {{ session('error') }}
+                                </div>
+                            @endif
+
+                            <!-- Notifikasi validasi error -->
                             @if ($errors->any())
                                 <div class="alert alert-danger">
                                     <ul>
@@ -24,6 +31,8 @@
 
                             <form action="{{ url('santri/store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
+
+                                <!-- Semua form input tetap sama seperti sebelumnya -->
 
                                 <div class="form-group">
                                     <label>Nama</label>

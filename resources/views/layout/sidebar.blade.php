@@ -48,7 +48,7 @@
 /* Pastikan sidebar dapat di-scroll dan menyesuaikan tinggi */
 .main-sidebar {
     overflow-y: auto; /* Sidebar bisa di-scroll */
-    height: 100vh; /* Sesuai tinggi layar */
+    height: 200vh; /* Sesuai tinggi layar */
 }
 
 /* Efek scroll di Firefox */
@@ -70,4 +70,4 @@
 body.sidebar-collapse .main-sidebar {
     overflow: hidden;
 }
-</style>    
+</style>
