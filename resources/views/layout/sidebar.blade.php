@@ -1,6 +1,5 @@
 <!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-dark-primary elevation-4"
-    style="height: 100vh; overflow-y: scroll; background: #343a40; width: 250px; position: fixed; top: 0; left: 0; bottom: 0; scrollbar-width: none;">
+<aside class="main-sidebar sidebar-dark-primary elevation-4" style="height: 100vh; background: #343a40; position: fixed;">
 
     <!-- Brand Logo -->
     <a href="{{url('/')}}" class="brand-link text-center">
@@ -8,8 +7,7 @@
     </a>
 
     <!-- Sidebar -->
-    <div class="sidebar">
-      <!-- Sidebar Menu -->
+    <div class="sidebar no-scrollbar" style="height: calc(100vh - 56px); overflow-y: auto;">
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-item">
@@ -44,16 +42,6 @@
         </ul>
       </nav>
     </div>
-</aside>
+  </aside>
 
-<style>
-/* Hilangkan scrollbar di Chrome, Safari */
-.main-sidebar::-webkit-scrollbar {
-    display: none;
-}
-
-/* Hilangkan scrollbar di Firefox */
-.main-sidebar {
-    scrollbar-width: none;
-}
-</style>
+  

@@ -16,21 +16,24 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="d-flex justify-content-end pb-2">
+                            <div class="d-flex justify-content-between pb-2">
+                                <h5>Daftar Santri</h5>
                                 <a href="{{ url('santri/create') }}" class="btn btn-info">+ Tambah Santri</a>
                             </div>
-                            <table class="table table-bordered table-hover santri-list">
-                                <thead class="bg-navy disabled">
-                                    <tr>
-                                        <th>Nama</th>
-                                        <th>NISN</th>
-                                        <th>Nama Kelas</th>
-                                        <th>Angkatan</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover santri-list w-100">
+                                    <thead class="bg-navy disabled">
+                                        <tr>
+                                            <th>Nama</th>
+                                            <th>NISN</th>
+                                            <th>Nama Kelas</th>
+                                            <th>Angkatan</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -47,7 +50,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-   var oDataList = $('.santri-list').DataTable({
+  var oDataList = $('.santri-list').DataTable({
     processing: true,
     serverSide: true,
     ajax: {
@@ -60,7 +63,9 @@
         { data: 'angkatan', name: 'angkatan' },
         { data: 'action', name: 'action', orderable: false, searchable: false }
     ],
+    order: [[4, 'asc'], [0, 'asc']] // Mengurutkan berdasarkan id_kelas (indeks 4) dan nama (indeks 0)
 });
+
 
     $('.santri-list').on('click', '.btnDelete', function () {
         let id = $(this).data('id');

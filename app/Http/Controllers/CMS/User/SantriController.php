@@ -18,7 +18,9 @@ class SantriController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Santri::with('kelas')->get();
+            $data = Santri::with('kelas')
+            ->orderBy('id_kelas')
+            ->get();
             return DataTables::of($data)
                 ->addColumn('nama_kelas', function ($row) {
                     return $row->kelas ? $row->kelas->nama_kelas : 'Tidak Ada Kelas';
@@ -41,8 +43,6 @@ class SantriController extends Controller
         $santri = Santri::with(['kelas', 'keluarga'])->findOrFail($id);
         return view('santri.detail', compact('santri'));
     }
-
-
     public function create()
     {
         $kelas = Kelas::all();
@@ -81,7 +81,7 @@ class SantriController extends Controller
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
 
-        // $data['foto_santri'] = asset('assets/images/default.png'); // Gambar default
+        $data['foto_santri'] = asset('assets/image/default-user.png'); // Gambar default
 
         if ($request->hasFile('foto_santri')) {
             $image = $request->file('foto_santri');
@@ -184,29 +184,36 @@ class SantriController extends Controller
             $data['password'] = Hash::make($request->password);
         }
 
-        // Handle foto santri upload
-        if ($request->hasFile('foto_santri')) {
-            $file = $request->file('foto_santri');
-            $allowedFileTypes = ['png', 'jpg', 'jpeg'];
+      // Handle foto santri upload
+if ($request->hasFile('foto_santri')) {
+    $file = $request->file('foto_santri');
+    $allowedFileTypes = ['png', 'jpg', 'jpeg'];
+    $extension = $file->getClientOriginalExtension();
 
-            // Validasi tipe file
-            $extension = $file->getClientOriginalExtension();
-            if (!in_array($extension, $allowedFileTypes)) {
-                return redirect()->back()->with('error', 'File type not allowed. Only PNG, JPG, and JPEG files are allowed.');
-            }
+    // Validasi tipe file
+    if (!in_array($extension, $allowedFileTypes)) {
+        return redirect()->back()->with('error', 'File type not allowed. Only PNG, JPG, and JPEG files are allowed.');
+    }
 
-            // Hapus file lama jika ada
-            if ($santri->foto_santri && file_exists(public_path('uploadedFile/image/santri/' . basename($santri->foto_santri)))) {
-                unlink(public_path('uploadedFile/image/santri/' . basename($santri->foto_santri)));
-            }
-
-            // Simpan file gambar baru dengan nama unik
-            $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploadedFile/image/santri'), $name_original);
-
-            // Simpan path gambar baru ke dalam data
-            $data['foto_santri'] = 'uploadedFile/image/santri/' . $name_original;
+    // Hapus file lama jika ada
+    if (!empty($santri->foto_santri) && $santri->foto_santri !== asset('assets/image/default-user.png')) {
+        $oldFilePath = public_path('uploadedFile/image/santri/' . basename($santri->foto_santri));
+        if (file_exists($oldFilePath)) {
+            unlink($oldFilePath);
         }
+    }
+
+    // Simpan file gambar baru dengan nama unik
+    $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
+    $file->move(public_path('uploadedFile/image/santri'), $name_original);
+
+    // Simpan path gambar baru ke dalam data
+    $data['foto_santri'] = url('uploadedFile/image/santri/' . $name_original);
+} else {
+    // Jika tidak ada gambar baru, tetap gunakan gambar lama
+    $data['foto_santri'] = $santri->foto_santri ?? asset('assets/image/default-user.png');
+}
+
 
         // Update data keluarga (ayah, ibu, wali)
         $this->updateKeluarga($santri->id_santri, 1, $request->all(), 'ayah');
@@ -216,7 +223,7 @@ class SantriController extends Controller
         // Update data santri
         $santri->update($data);
 
-        return redirect()->route('santri.show', $santri->id_santri)->with('success', 'Santri berhasil diperbarui.');
+        return redirect()->route('santri.index')->with('success', 'Santri berhasil diperbarui.');
     }
 
     private function updateKeluarga($id_santri, $hubungan, $data, $prefix)
@@ -253,6 +260,30 @@ class SantriController extends Controller
     public function fnGetData(Request $request)
     {
         $santris = Santri::with('kelas')->select(['id_santri', 'nama', 'nisn', 'angkatan', 'id_kelas']);
+
+        // Menangani pengurutan berdasarkan kolom yang dikirim dari DataTables
+        if ($request->has('order')) {
+            $orderColumnIndex = $request->input('order.0.column');
+            $orderDirection = $request->input('order.0.dir');
+
+            // Menentukan kolom yang akan diurutkan
+            $columns = ['id_kelas', 'nama', 'nisn', 'angkatan'];
+
+            // Menambahkan pengurutan berdasarkan kolom dan arah
+            if ($orderColumnIndex == 0) {
+                // Jika yang diurutkan adalah kolom nama (indeks 0), maka urutkan berdasarkan id_kelas dulu
+                $santris->orderBy('id_kelas', 'asc')->orderBy('nama', $orderDirection);
+            } elseif ($orderColumnIndex == 1) {
+                // Jika yang diurutkan adalah kolom lainnya, lakukan pengurutan yang sesuai
+                $santris->orderBy('id_kelas', 'asc')->orderBy('nama', 'asc');
+            } else {
+                // Pengurutan default jika bukan kolom pertama atau lainnya
+                $santris->orderBy('id_kelas', 'asc')->orderBy('nama', 'asc');
+            }
+        } else {
+            // Default urutan berdasarkan id_kelas terlebih dahulu, baru nama
+            $santris->orderBy('id_kelas', 'asc')->orderBy('nama', 'asc');
+        }
 
         return DataTables::of($santris)
             ->addColumn('nama_kelas', function ($santri) {

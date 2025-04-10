@@ -53,20 +53,23 @@ class Histori extends Model
         return $this->belongsTo(Setoran::class, 'id_setoran', 'id_setoran');
     }
 
-    // Method untuk menentukan status berdasarkan setoran
-    public static function determineStatus($totalAyatDisetorkan, $jumlahAyatTarget, $tgl_target,$persentase)
-    {
-        $today = now()->toDateString(); // Ambil tanggal hari ini (format: Y-m-d)
+    public static function determineStatus($totalAyatDisetorkan, $jumlahAyatTarget, $tglTarget, $tglSetoranTerakhir)
+{
+    $hariIni = now()->toDateString(); // Format YYYY-MM-DD
 
-        if ($persentase == 0) {
-            return 0; // Status belum mulai
-        }
-        if ($totalAyatDisetorkan >= $jumlahAyatTarget) {
-            return 2; // Status selesai
-        } elseif ($tgl_target < $today) {
-            return 3; // Status terlambat
-        } else {
-            return 1; // Status proses
-        }
+    // Jika target sudah tercapai, status tetap selesai (2)
+    if ($totalAyatDisetorkan >= $jumlahAyatTarget) {
+        return 2; // Selesai
     }
+
+    // Jika tanggal target sudah terlewati dan belum selesai, status menjadi terlambat (3)
+    if ($hariIni > $tglTarget) {
+        return 3; // Terlambat
+    }
+
+    // Jika ada progres, status tetap proses (1), jika tidak ada progres status tetap belum mulai (0)
+    return ($totalAyatDisetorkan > 0) ? 1 : 0;
+}
+
+
 }

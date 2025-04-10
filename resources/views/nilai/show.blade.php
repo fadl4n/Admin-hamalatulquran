@@ -7,23 +7,26 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-body">
-                <table class="table table-bordered" id="santriTable">
-                    <thead class="bg-navy disabled">
-                        <tr>
-                            <th>Nama</th>
-                            <th>NISN</th>
-                            <th>Kelas</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-bordered w-100" id="santriTable">
+                        <thead class="bg-navy disabled">
+                            <tr>
+                                <th>Nama</th>
+                                <th>NISN</th>
+                                <th>Kelas</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </section>
 @endsection
+
 
 @section('script')
 <script>

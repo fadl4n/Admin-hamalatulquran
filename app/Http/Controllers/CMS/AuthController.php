@@ -79,9 +79,9 @@ class AuthController extends Controller
 
     public function profile() {
         $data = User::where('id', Session::get('user')['id'])->first();
-
         return view('profile', ['data' => $data]);
     }
+
 
     public function profileUpdate(Request $request)
     {
@@ -139,4 +139,5 @@ class AuthController extends Controller
 
         return redirect('/profile');
     }
+
 }

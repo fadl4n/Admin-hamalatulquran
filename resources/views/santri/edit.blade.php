@@ -144,8 +144,7 @@
 
                                     <!-- Pratinjau Gambar -->
                                     <div class="mt-2">
-                                        <img id="preview"
-                                            src="{{ $santri->foto_santri ? asset('uploadedFile/image/santri/' . basename($santri->foto_santri)) : asset('assets/image/default-user.png') }}"
+                                        <img id="preview"src="{{ !empty($santri->foto_santri) && file_exists(public_path('uploadedFile/image/santri/' . basename($santri->foto_santri))) ? asset('uploadedFile/image/santri/' . basename($santri->foto_santri)) : asset('assets/image/default-user.png') }}"
                                             alt="Foto Santri" class="img-thumbnail" width="150">
                                     </div>
                                 </div>
@@ -323,6 +322,16 @@
                                     class="btn btn-secondary">Batal</a>
                             </form>
                         </div>
+                        <div class="row justify-content-center gx-4">
+                            <div class="col-4">
+                                <a href="{{ route('santri.index') }}" class="btn btn-secondary w-100">Batal</a>
+                            </div>
+                            <div class="col-4">
+                                <button type="submit" class="btn btn-primary w-100">Simpan</button>
+                            </div>
+                        </div>
+
+
                     </div>
                 </div>
             </div>

@@ -1,16 +1,17 @@
 @extends('admin_template')
+
 @section('css')
-    <!-- DataTables -->
     <link rel="stylesheet"
-        href={{ asset('/bower_components/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}>
+        href="{{ asset('/bower_components/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
     <link rel="stylesheet"
-        href={{ asset('/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}>
+        href="{{ asset('/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
     <link rel="stylesheet"
-        href={{ asset('/bower_components/admin-lte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}>
+        href="{{ asset('/bower_components/admin-lte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 @endsection
 
 @section('title page')
-    User
+    Daftar Pengguna
 @endsection
 
 @section('content')
@@ -20,39 +21,33 @@
                 <div class="col-12">
                     @include('component.error_bar')
                     <div class="card">
-                        <!-- /.card-header -->
                         <div class="card-body">
-                            <div class="d-flex justify-content-end pb-2">
-                                {{-- <a href="{{url('/role/create')}}" class="btn btn-info mr-2 bg-navy color-palette"><i class="fas fa-user-plus"></i></a> --}}
-                                <a href="{{ url('users/create') }}" class="btn btn-info mr-2 color-palette">+ Add
-                                    User</a>
+                            <div class="d-flex justify-content-between pb-2">
+                                <h5>Daftar Pengguna</h5>
+                                <a href="{{ url('users/create') }}" class="btn btn-info">+ Tambah Pengguna</a>
                             </div>
-                            <table class="table table-bordered table-hover user-list">
-                                <thead class="bg-navy disabled">
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-
-                                </tbody>
-
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover user-list w-100">
+                                    <thead class="bg-navy disabled">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama</th>
+                                            <th>Email</th>
+                                            <th>Peran</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
-                        <!-- /.card-body -->
                     </div>
-                    <!-- /.card -->
                 </div>
-                <!-- /.col -->
             </div>
-            <!-- /.row -->
         </div>
     </section>
 @endsection
+
 
 @section('script')
 <script>
@@ -63,11 +58,11 @@
         ajax: {
             url: _baseURL + '/users/fn-get-data',
             data: function(d) {
-                
+
             }
         },
         "fnDrawCallback": function(oSettings) {
-            
+
         },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
@@ -79,16 +74,16 @@
         "order": [
             0
         ]
-    });  
+    });
 
     $('.user-list').on('click', '.btnDelete', function () {
         $('#modal-delete .deleteUrl').attr('href', _baseURL + '/users/delete/'+$(this).attr('data-id'));
 
         // SHOW MODAL
-        $('#modal-delete').modal('show'); 
+        $('#modal-delete').modal('show');
     });
 
-    
+
 </script>
-    
+
 @endsection

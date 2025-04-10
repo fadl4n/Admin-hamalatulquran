@@ -3,33 +3,60 @@
 @section('content')
 <div class="container-fluid">
   <div class="row">
+    <!-- Jumlah Santri -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header" style="background-color: #6c757d; color: white;">
+          <h3 class="card-title">Jumlah Santri</h3>
+        </div>
+        <div class="card-body">
+          <h3 class="text-center">
+            <span class="badge" style="background-color: #ffffff; color: #6c757d; font-size: 2rem;" id="santriCount">0</span>
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jumlah Kelas -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header" style="background-color: #6c757d; color: white;">
+          <h3 class="card-title">Jumlah Kelas</h3>
+        </div>
+        <div class="card-body">
+          <h3 class="text-center">
+            <span class="badge" style="background-color: #ffffff; color: #6c757d; font-size: 2rem;" id="kelasCount">0</span>
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jumlah Pengajar -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header" style="background-color: #6c757d; color: white;">
+          <h3 class="card-title">Jumlah Pengajar</h3>
+        </div>
+        <div class="card-body">
+          <h3 class="text-center">
+            <span class="badge" style="background-color: #ffffff; color: #6c757d; font-size: 2rem;" id="pengajarCount">0</span>
+          </h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grafik Santri per Angkatan -->
+  <div class="row">
     <div class="col-lg-12">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">User Age Statistic</h3>
+          <h3 class="card-title">Statistik Santri per Angkatan</h3>
         </div>
         <div class="card-body">
-          <div class="row">
-            <div class="col-md-8">
-              <div class="chart-responsive">
-                <canvas id="pieChart" height="150"></canvas>
-              </div>
-            </div>
-            <div class="col-md-4" style="padding-top: 5%;">
-              <ul class="chart-legend clearfix" style="font-size: x-large">
-              </ul>
-            </div>
+          <div class="chart-responsive">
+            <canvas id="lineChart" height="150"></canvas>
           </div>
-        </div>
-        <div class="card-footer p-0">
-          <ul class="nav nav-pills flex-column">
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-              Total User:
-              <span class="text-success total-user"></span>
-              </a>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
@@ -38,52 +65,109 @@
 @endsection
 
 @section('script')
-<script src="{{ asset('/bower_components/admin-lte/plugins/chart.js/Chart.min.js') }}"></script>
-<script>
-  var backgroundColor = ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de', '#FF8A8A', '#F4DEB3', '#D5ED9F', '#E0E5B6']
-  var pieChartCanvas = $('#pieChart').get(0).getContext('2d')
-  var pieData = {
-    labels: [
-      
-    ],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: []
-      }
-    ]
-  }
-  var pieOptions = {
-    legend: {
-      display: false
-    }
-  }
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  $.ajax({
-    url: _baseURL + '/dashboard/fn-get-total-user/',
-    method: 'GET',
-    success: function(response) {
-      if (response.community != undefined) {
-        var iter = 0;
-        
-        $.each(response.community, function (key, val) {
-          pieData.labels[iter] = val.age_range;
-          pieData.datasets[0].data[iter] = val.total_users;
-          pieData.datasets[0].backgroundColor[iter] = backgroundColor[iter];
-          $('.chart-legend').append('<li><i class="far fa-circle" style="color:'+backgroundColor[iter]+'"></i> '+val.age_range+' : '+val.total_users+' user</li>')
-          iter++;
-        });
-        $('.total-user').html('<b>'+response.total_users+'</b>')
-        var pieChart = new Chart(pieChartCanvas, {
-          type: 'doughnut',
-          data: pieData,
-          options: pieOptions
-        })
+<script>
+  const lineChartCanvas = $('#lineChart').get(0).getContext('2d');
+
+  const lineChartData = {
+    labels: [],
+    datasets: [{
+      label: 'Jumlah Santri',
+      fill: false,
+      borderColor: '#3e95cd',
+      pointBackgroundColor: '#3e95cd',
+      tension: 0.3,
+      data: []
+    }]
+  };
+
+  const lineChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Angkatan'
+        }
+      },
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Jumlah Santri'
+        },
+        ticks: {
+          // Hanya tampilkan angka bulat
+          callback: function(value) {
+            return Number.isInteger(value) ? value : null;
+          },
+          stepSize: 10 // default, akan diubah dinamis di bawah
+        }
       }
     },
-    error: function() {
-        
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top'
+      }
+    }
+  };
+
+  $.ajax({
+    url: _baseURL + '/statistics',
+    method: 'GET',
+    success: function(response) {
+      console.log('Response Statistik:', response);
+
+      // Update total
+      $('#santriCount').text(response.santri_count || 0);
+      $('#kelasCount').text(response.kelas_count || 0);
+      $('#pengajarCount').text(response.pengajar_count || 0);
+
+      if (Array.isArray(response.santri_per_angkatan)) {
+        const labels = [];
+        const data = [];
+
+        response.santri_per_angkatan.forEach(function(item) {
+          if (item.count > 0) {
+            labels.push(item.angkatan);
+            data.push(item.count);
+          }
+        });
+
+        if (data.length === 0) {
+          $('#lineChart').replaceWith('<div class="text-center text-muted p-3">Tidak ada data santri per angkatan.</div>');
+          return;
+        }
+
+        lineChartData.labels = labels;
+        lineChartData.datasets[0].data = data;
+
+        // Hitung stepSize yang sesuai berdasarkan nilai tertinggi
+        const maxData = Math.max(...data);
+        const stepSize = Math.ceil(maxData / 5); // Misalnya 5 garis vertikal
+        lineChartOptions.scales.y.ticks.stepSize = stepSize;
+
+        new Chart(lineChartCanvas, {
+          type: 'line',
+          data: lineChartData,
+          options: lineChartOptions
+        });
+      } else {
+        console.warn('santri_per_angkatan tidak dalam format array');
+        $('#lineChart').replaceWith('<div class="text-center text-danger p-3">Format data salah.</div>');
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error('Gagal memuat data statistik:', error);
+      $('#santriCount').text('0');
+      $('#kelasCount').text('0');
+      $('#pengajarCount').text('0');
+      $('#lineChart').replaceWith('<div class="text-center text-danger p-3">Gagal memuat grafik.</div>');
     }
   });
 </script>
 @endsection
+

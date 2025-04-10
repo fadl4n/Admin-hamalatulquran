@@ -24,16 +24,20 @@ class HistoriController extends Controller
     public function fnGetData(Request $request)
     {
         $query = Histori::with(['santri', 'surat', 'target'])
-            ->select('historis.*');
+            ->whereIn('id_histori', function ($subquery) {
+                $subquery->selectRaw('MAX(id_histori)')
+                    ->from('historis')
+                    ->groupBy('id_target');
+            });
 
-        // Filter berdasarkan santri jika ada
+        // Filter berdasarkan id_santri jika ada
         if ($request->filled('id_santri')) {
             $query->whereHas('santri', function ($q) use ($request) {
                 $q->where('id_santri', $request->id_santri);
             });
         }
 
-        // Menambahkan pencarian berdasarkan search_value
+        // Pencarian berdasarkan search_value
         if ($request->has('search_value') && $request->search_value != '') {
             $searchValue = $request->search_value;
             $query->where(function ($query) use ($searchValue) {
@@ -63,45 +67,48 @@ class HistoriController extends Controller
                 return round(($ayatEnd / $totalAyat) * 100) . '%';
             })
             ->addColumn('nilai', fn($histori) => $histori->nilai)
+            ->addColumn('aksi', function($histori) {
+                return '<button class="btn btn-primary btn-sm edit-nilai" data-id="' . $histori->id_target . '" data-nilai="' . $histori->nilai . '"><i class="fas fa-edit"></i></button>';
+            })
             ->make(true);
     }
 
     public function updateHistori(Request $request, $id)
 {
     $request->validate([
-        'status' => 'required|string',
+        'status' => 'required|integer',
         'persentase' => 'required|numeric',
         'nilai' => 'required|numeric',
         'id_setoran' => 'required|array',
+        'id_setoran.*' => 'integer', // Pastikan setiap id_setoran bertipe integer
     ]);
 
     $histori = Histori::findOrFail($id);
-    $target = $histori->target;  // Mengambil target terkait histori
+    $target = $histori->target;
+
+    if (!$target) {
+        return redirect()->back()->with('error', 'Target tidak ditemukan.');
+    }
+
     $jumlahAyatTarget = $target->jumlah_ayat_target;
     $totalAyatDisetorkan = 0;
-    $setoranIds = [];
+    $setoranIds = collect();
     $tglSetoranTerakhir = null;
 
-    foreach ($request->id_setoran as $idSetoran) {
-        $setoran = Setoran::findOrFail($idSetoran);
+    $setorans = Setoran::whereIn('id_setoran', $request->id_setoran)->get();
+
+    foreach ($setorans as $setoran) {
         $totalAyatDisetorkan += ($setoran->jumlah_ayat_end - $setoran->jumlah_ayat_start + 1);
-        $setoranIds[] = $setoran->id_setoran;
+        $setoranIds->push($setoran->id_setoran);
         if (!$tglSetoranTerakhir || $setoran->tgl_setoran > $tglSetoranTerakhir) {
             $tglSetoranTerakhir = $setoran->tgl_setoran;
         }
     }
 
-    // **Cek apakah sudah melewati tgl_target**
-    $today = now()->toDateString(); // Ambil tanggal hari ini (format: Y-m-d)
-    $status = 1; // Default status = Proses (1)
+    // Cek status otomatis dengan method determineStatus
+    $status = Histori::determineStatus($totalAyatDisetorkan, $jumlahAyatTarget, $target->tgl_target, $tglSetoranTerakhir);
 
-    if ($totalAyatDisetorkan >= $jumlahAyatTarget) {
-        $status = 2; // Selesai (2)
-    } elseif ($target->tgl_target < $today) {
-        $status = 3; // Terlambat (3) jika tgl_target sudah lewat
-    }
-
-    $persentaseBaru = number_format(($totalAyatDisetorkan / $jumlahAyatTarget) * 100, 2);
+    $persentaseBaru = number_format(($totalAyatDisetorkan / max(1, $jumlahAyatTarget)) * 100, 2);
 
     // Pastikan id_santri terbaru sesuai target yang baru
     $santriId = $target->id_santri;
@@ -109,10 +116,10 @@ class HistoriController extends Controller
     Histori::updateOrCreate(
         ['id_target' => $target->id_target, 'id_santri' => $santriId],
         [
-            'status' => $status, // Menggunakan status integer
+            'status' => $status,
             'persentase' => $persentaseBaru,
             'nilai' => $request->nilai,
-            'id_setoran' => json_encode($setoranIds),
+            'id_setoran' => $setoranIds->first(),
             'tgl_setoran' => $tglSetoranTerakhir,
         ]
     );
@@ -123,20 +130,50 @@ class HistoriController extends Controller
 public function updateNilai(Request $request, $id_target)
 {
     $request->validate([
-        'nilai' => 'required|numeric',
+        'nilai' => 'required|numeric|min:0',
     ]);
 
-    // Cari histori berdasarkan id_target
-    $histori = Histori::where('id_target', $id_target)->firstOrFail();
+    // Ambil histori terakhir berdasarkan id_target
+    $lastHistori = Histori::where('id_target', $id_target)->orderBy('updated_at', 'desc')->first();
 
-    // Update nilai
-    $histori->update([
-        'nilai' => $request->nilai
-    ]);
+    // Jika histori terakhir ditemukan, gunakan data yang ada, tetapi buat histori baru
+    $histori = new Histori();
+    $histori->id_target = $id_target;
+    $histori->nilai = $request->nilai;
+    $histori->persentase = $lastHistori ? $lastHistori->persentase : 0;
+    $histori->id_santri = $lastHistori ? $lastHistori->id_santri : null;
+    $histori->id_surat = $lastHistori ? $lastHistori->id_surat : null;
+    $histori->id_kelas = $lastHistori ? $lastHistori->id_kelas : null;
+    $histori->id_setoran = $lastHistori ? $lastHistori->id_setoran : null;
 
-    return response()->json(['success' => true, 'message' => 'Nilai berhasil diperbarui!']);
+    // Status tetap sama dengan histori terakhir, jika ada
+    $histori->status = $lastHistori ? $lastHistori->status : 0;
+
+    $histori->save();
+
+    return response()->json(['success' => true, 'message' => 'Nilai berhasil ditambahkan ke histori!']);
 }
 
+public function getPreview($id)
+{
+    // Ambil histori berdasarkan id_target dan urutkan berdasarkan updated_at
+    $data = Histori::where('id_target', $id)
+        ->whereNotNull('nilai') // Hanya ambil data yang nilai-nya tidak null
+        ->orderBy('updated_at', 'asc') // Urutkan berdasarkan tanggal perubahan
+        ->get(['updated_at', 'nilai']); // Ambil nilai dan tanggal perubahan
 
+    // Format tanggal dengan waktu
+    $data = $data->map(function ($item) {
+        return [
+            'updated_at' => $item->updated_at->format('d-m-Y    '), // Format: Hari-Bulan-Tahun Jam:Menit:Detik
+            'nilai' => $item->nilai
+        ];
+    });
+
+    return response()->json([
+        'success' => true,
+        'data' => $data
+    ]);
+}
 
 }

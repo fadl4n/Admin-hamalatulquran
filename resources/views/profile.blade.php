@@ -60,21 +60,27 @@
                         <label for="password">New Password</label>
                         <div class="input-group">
                             <input type="password" class="form-control" id="password" placeholder="Password" name="password">
-                            <div class="form-control-feedback reveal-password" style="padding-right: 1em;">
-                                <i class="fas fa-eye"></i>
+                            <div class="input-group-append">
+                                <span class="input-group-text reveal-password" style="cursor: pointer;">
+                                    <i class="fas fa-eye"></i>
+                                </span>
                             </div>
                         </div>
+
                         <span style="color: grey; font-size: 12px">Leave empty if you don't want to change password.</span>
                     </div>
                     <div class="form-group">
                         <label for="passwordConfirmation">New Password Confirmation</label>
                         <div class="input-group">
                             <input type="password" class="form-control" id="passwordConfirmation" placeholder="Password Confirmation" name="passwordConfirmation">
-                            <div class="form-control-feedback reveal-passwordConfirmation" style="padding-right: 1em;">
-                                <i class="fas fa-eye"></i>
+                            <div class="input-group-append">
+                                <span class="input-group-text reveal-password" style="cursor: pointer;">
+                                    <i class="fas fa-eye"></i>
+                                </span>
                             </div>
                         </div>
-                        
+
+
                         <span style="color: grey; font-size: 12px">Leave empty if you don't want to change password.</span>
                     </div>
                     <button type="submit" class="btn mb-2 btn-primary btnSave">Update</button>
@@ -105,7 +111,7 @@
             $("#imgPreview").attr("src", imgURL);
         });
     });
-    
+
     $('.reveal-password').on('click', function() {
       if ($('#password').prop('type') == 'password') {
         $('#password').prop('type', 'text')

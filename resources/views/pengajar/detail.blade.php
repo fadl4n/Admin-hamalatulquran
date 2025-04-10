@@ -6,13 +6,10 @@
     <section class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-8 offset-md-2">
+                <div class="col-md-10 offset-md-1">
                     <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Informasi Pengajar</h3>
-                        </div>
-
                         <div class="card-body">
+<<<<<<< HEAD
                             <div class="row">
                                 <!-- Gambar Pengajar -->
                                 <div class="col-md-4 text-center">
@@ -20,10 +17,13 @@
                                         alt="Foto Pengajar" class="rounded-circle border" width="150" height="150"
                                         style="object-fit: cover;">
                                 </div>
+=======
+                            <div class="row mt-4">
+>>>>>>> 9af0d6cb63021ec26056c3b5266990e8e0b54d1f
                                 <div class="col-md-8">
                                     <table class="table table-bordered">
                                         <tr>
-                                            <th>Nama</th>
+                                            <th width="40%">Nama</th>
                                             <td>{{ $pengajar->nama }}</td>
                                         </tr>
                                         <tr>
@@ -44,13 +44,7 @@
                                         </tr>
                                         <tr>
                                             <th>Jenis Kelamin</th>
-                                            <td>
-                                                {{ match ($pengajar->jenis_kelamin) {
-                                                    1 => 'Laki-laki',
-                                                    2 => 'Perempuan',
-                                                    default => 'Tidak diketahui',
-                                                } }}
-                                            </td>
+                                            <td>{{ $pengajar->jenis_kelamin == 1 ? 'Laki-laki' : 'Perempuan' }}</td>
                                         </tr>
                                         <tr>
                                             <th>Tempat Lahir</th>
@@ -60,12 +54,15 @@
                                             <th>Tanggal Lahir</th>
                                             <td>{{ $pengajar->tgl_lahir }}</td>
                                         </tr>
-
                                     </table>
                                 </div>
+                                <div class="col-md-4 text-center">
+                                    <img src="{{ $pengajar->foto_pengajar ? asset($pengajar->foto_pengajar) : asset('assets/image/default-user.png') }}" alt="Foto Pengajar" class="img-fluid rounded" width="150">
+                                </div>
                             </div>
-                            <div class="text-start mt-3">
-                                <a href="{{ url('pengajar') }}" class="btn btn-secondary">Kembali</a>
+                            <div class="mt-4">
+                                <a href="{{ url('pengajar') }}" class="btn btn-secondary">Kembali
+                                </a>
                             </div>
                         </div>
                     </div>

@@ -5,8 +5,7 @@
   asset("/bower_components/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css")}}>
 <link rel="stylesheet" href={{
   asset("/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css")}}>
-<link rel="stylesheet" href={{
-  asset("/bower_components/admin-lte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css")}}>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 @endsection
 
 @section('title page')
@@ -26,34 +25,33 @@ Priviledge
               {{-- <a href="{{url('/role/create')}}" class="btn btn-info mr-2 bg-navy color-palette"><i class="fas fa-user-plus"></i></a> --}}
               {{-- <a href="{{url('/roles/create')}}" class="btn btn-info mr-2 bg-info color-palette"><p style="font-size: 13px; margin-bottom: 0px;">Add Priviledge +</p></a> --}}
             </div>
-            <table id="example2" class="table table-bordered table-hover">
-              <thead class="bg-navy disabled">
-                <tr>
-                  <th>No</th>
-                  <th>Roles Name</th>
-                  <th>Description</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach ($roles as $index => $item)
-                <tr>
-                  <td>{{ $index + 1 }}</td>
-                  <td>{{ $item['roleName'] }}</td>
-                  <td>{{ $item['description'] }}</td>
-                  <td>
-                    {{-- <a href="{{url('/role/edit/{{ $item->id }}')}}" class="text-black"><i class="fas fa-edit"></i></a> --}}
-                    <a href="{{url('/manage-priviledge/edit/'.$item['id'])}}" class="btn btn-sm btn-light text-navy"><i class="fas fa-edit"></i></a>
-                    <a href="#" data-toggle="modal" data-target="#modal-default" data-target-id="{{ $item['id'] }}" class="btn btn-sm btn-danger text-white">
-                      <i class="fas fa-trash-alt"></i>
-                    </a>
-                  </td>
-                </tr>
-                @endforeach
-
-              </tbody>
-
-            </table>
+            <div class="table-responsive">
+                <table id="example2" class="table table-bordered table-hover">
+                  <thead class="bg-navy disabled">
+                    <tr>
+                      <th>No</th>
+                      <th>Roles Name</th>
+                      <th>Description</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach ($roles as $index => $item)
+                    <tr>
+                      <td>{{ $index + 1 }}</td>
+                      <td>{{ $item['roleName'] }}</td>
+                      <td>{{ $item['description'] }}</td>
+                      <td>
+                        <a href="{{url('/manage-priviledge/edit/'.$item['id'])}}" class="btn btn-sm btn-light text-navy"><i class="fas fa-edit"></i></a>
+                        <button type="button" class="btn btn-sm btn-danger text-white btnDelete" data-id="{{ $item['id'] }}" data-role="{{ $item['roleName'] }}">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
+                      </td>
+                    </tr>
+                    @endforeach
+                  </tbody>
+                </table>
+              </div>
           </div>
           <!-- /.card-body -->
         </div>
@@ -63,21 +61,33 @@ Priviledge
     </div>
     <!-- /.row -->
   </div>
-  <div class="modal fade" id="modal-default">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-body">
-          <p>Are you sure you want to delete {{ $item['roleName'] }} ?</p>
-        </div>
-        <div class="modal-footer justify-content-end">
-          <a href="{{url('/roles/delete/'.$item['id'])}}" class="btn btn-danger">Delete</a>
-          <button type="button" class="btn btn-defaut" data-dismiss="modal">Close</button>
-        </div>
-      </div>
-      <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
-  </div>
   <!-- /.container-fluid -->
 </section>
+@endsection
+
+@section('js')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      document.querySelectorAll(".btnDelete").forEach(button => {
+          button.addEventListener("click", function() {
+              let id = this.getAttribute("data-id");
+              let roleName = this.getAttribute("data-role");
+
+              Swal.fire({
+                  title: "Konfirmasi",
+                  text: "Apakah Anda yakin ingin menghapus " + roleName + "?",
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonText: "Ya, hapus!",
+                  cancelButtonText: "Batal"
+              }).then((result) => {
+                  if (result.isConfirmed) {
+                      window.location.href = "{{ url('/roles/delete/') }}/" + id;
+                  }
+              });
+          });
+      });
+  });
+</script>
 @endsection

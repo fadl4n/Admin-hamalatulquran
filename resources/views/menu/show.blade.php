@@ -2,11 +2,11 @@
 @section('css')
     <!-- DataTables -->
     <link rel="stylesheet"
-        href={{ asset('/bower_components/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}>
+        href="{{ asset('/bower_components/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
     <link rel="stylesheet"
-        href={{ asset('/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}>
+        href="{{ asset('/bower_components/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
     <link rel="stylesheet"
-        href={{ asset('/bower_components/admin-lte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}>
+        href="{{ asset('/bower_components/admin-lte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
 @endsection
 
 @section('title page')
@@ -18,43 +18,34 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
-
                     <div class="card">
-                        <!-- /.card-header -->
                         <div class="card-body">
-                            <div class="d-flex justify-content-end pb-2">
-                                {{-- <a href="{{url('/role/create')}}" class="btn btn-info mr-2 bg-navy color-palette"><i class="fas fa-user-plus"></i></a> --}}
-                                <a href="{{ url('menu/create') }}" class="btn btn-info mr-2 color-palette">+ Add
-                                    Menu</a>
+                            <div class="d-flex justify-content-between pb-2">
+                                <h5>Daftar Menu</h5>
+                                <a href="{{ url('menu/create') }}" class="btn btn-info">+ Tambah Menu</a>
                             </div>
-                            <table class="table table-bordered table-hover menu-list">
-                                <thead class="bg-navy disabled">
-                                    <tr>
-                                        <th>Menu Group</th>
-                                        <th>Name</th>
-                                        <th>URL</th>
-                                        {{-- <th>Description</th> --}}
-                                        <th>Sequence</th>
-                                        {{-- <th>Status</th> --}}
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-
-                                </tbody>
-
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover menu-list w-100">
+                                    <thead class="bg-navy disabled">
+                                        <tr>
+                                            <th>Menu Group</th>
+                                            <th>Name</th>
+                                            <th>URL</th>
+                                            <th>Sequence</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
-                        <!-- /.card-body -->
                     </div>
-                    <!-- /.card -->
                 </div>
-                <!-- /.col -->
             </div>
-            <!-- /.row -->
         </div>
     </section>
 @endsection
+
 
 @section('script')
 <script>
@@ -69,7 +60,7 @@
             }
         },
         "fnDrawCallback": function(oSettings) {
-            
+
         },
         columns: [
             { data: 'group_menu.name', name: 'group_menu.name', orderable: false, searchable: false},
@@ -89,8 +80,8 @@
         $('#modal-delete .deleteUrl').attr('href', _baseURL + '/menu/delete/'+$(this).attr('data-id'));
 
         // SHOW MODAL
-        $('#modal-delete').modal('show'); 
+        $('#modal-delete').modal('show');
     });
 </script>
-    
+
 @endsection
