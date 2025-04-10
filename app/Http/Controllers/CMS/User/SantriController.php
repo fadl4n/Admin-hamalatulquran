@@ -11,6 +11,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
 
 class SantriController extends Controller
 {
@@ -62,7 +63,10 @@ class SantriController extends Controller
             'jenis_kelamin' => 'required|integer|in:1,2',
             'status' => 'required|integer|in:0,1',
             'password' => 'required|string|min:6',
-            'foto_santri' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto_santri' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:7168',
+        ], [
+            'foto_santri.mimes' => 'Format file tidak didukung! Gunakan PNG, JPG, atau JPEG.',
+            'foto_santri.max' => 'Ukuran file terlalu besar! Maksimal 7MB.',
         ]);
 
         // Pengecekan manual untuk NISN dan Email
@@ -77,29 +81,32 @@ class SantriController extends Controller
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
 
-        $data['foto_santri'] = asset('assets/image/default.png'); // Gambar default
+        // $data['foto_santri'] = asset('assets/images/default.png'); // Gambar default
 
         if ($request->hasFile('foto_santri')) {
-            $file = $request->file('foto_santri');
-            $allowedFileTypes = ['png', 'jpg', 'jpeg'];
-            $extension = $file->getClientOriginalExtension();
-
-            // Validasi tipe file
-            if (!in_array($extension, $allowedFileTypes)) {
-                return redirect()->back()->with('error', 'File type not allowed. Only png and jpg files are allowed.');
-            }
-
-            // Buat nama file unik
-            $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
-
-            // Simpan file ke folder public
-            $file->move(public_path('uploadedFile/image/santri'), $name_original);
-
-            // Simpan path gambar
-            $data['foto_santri'] = url('uploadedFile/image/santri') . '/' . $name_original;
+            $image = $request->file('foto_santri');
+        
+            $filename = time() . '.' . $image->getClientOriginalExtension();
+        
+            // Create new ImageManager instance with 'gd' driver
+            $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+        
+            // Create image from uploaded file
+            $img = $manager->read($image->getPathname());
+        
+            // Resize image
+            $img->resize(600, null); // otomatis maintain aspect ratio
+        
+            // Encode to JPG (or use $img->toPng() / ->toWebp())
+            $encodedImage = $img->toJpeg(75); // kualitas 75%
+        
+            // Simpan ke storage/public
+            $path = 'uploadedFile/image/santri/' . $filename;
+            Storage::disk('public')->put($path, (string) $encodedImage);
+        
+            $data['foto_santri'] = asset('storage/' . $path);
         }
-
-
+        
         Santri::create($data);
 
         return redirect('santri')->with('success', 'Santri berhasil ditambahkan.');
@@ -133,7 +140,7 @@ class SantriController extends Controller
             'jenis_kelamin' => 'required|integer|in:1,2',
             'status' => 'required|integer|in:0,1',
             'password' => 'nullable|string|min:6',
-            'foto_santri' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto_santri' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:7168',
             'nama_ayah' => 'nullable|string|max:255',
             'pekerjaan_ayah' => 'nullable|string|max:255',
             'pendidikan_ayah' => 'nullable|string|max:255',
@@ -232,10 +239,6 @@ class SantriController extends Controller
         );
     }
 
-
-
-
-
     public function destroy($id)
     {
         $santri = Santri::findOrFail($id);
@@ -269,8 +272,4 @@ class SantriController extends Controller
             ->rawColumns(['action'])
             ->make(true);
     }
-
-
 }
-
-

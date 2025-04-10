@@ -16,8 +16,9 @@
                             <div class="row">
                                 <!-- Gambar Pengajar -->
                                 <div class="col-md-4 text-center">
-                                    <img src="{{ $pengajar->foto_pengajar ? $pengajar->foto_pengajar : asset('assets/image/default.png') }}"
-                                        alt="Foto Pengajar" class="img-fluid rounded-circle border" width="150">
+                                    <img src="{{ $pengajar->foto_pengajar ? $pengajar->foto_pengajar : asset('assets/images/default.png') }}"
+                                        alt="Foto Pengajar" class="rounded-circle border" width="150" height="150"
+                                        style="object-fit: cover;">
                                 </div>
                                 <div class="col-md-8">
                                     <table class="table table-bordered">
@@ -43,7 +44,13 @@
                                         </tr>
                                         <tr>
                                             <th>Jenis Kelamin</th>
-                                            <td>{{ $pengajar->jenis_kelamin }}</td>
+                                            <td>
+                                                {{ match ($pengajar->jenis_kelamin) {
+                                                    1 => 'Laki-laki',
+                                                    2 => 'Perempuan',
+                                                    default => 'Tidak diketahui',
+                                                } }}
+                                            </td>
                                         </tr>
                                         <tr>
                                             <th>Tempat Lahir</th>

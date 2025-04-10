@@ -42,8 +42,15 @@
                                         </tr>
                                         <tr>
                                             <th>Jenis Kelamin</th>
-                                            <td>{{ $santri->jenis_kelamin == 1 ? 'Laki-laki' : 'Perempuan' }}</td>
+                                            <td>
+                                                {{ match ($santri->jenis_kelamin) {
+                                                    1 => 'Laki-laki',
+                                                    2 => 'Perempuan',
+                                                    default => 'Tidak diketahui',
+                                                } }}
+                                            </td>
                                         </tr>
+
                                         <tr>
                                             <th>Nama Kelas</th>
                                             <td>{{ $santri->kelas ? $santri->kelas->nama_kelas : 'Tidak Ada Kelas' }}</td>
@@ -55,9 +62,10 @@
                                     </table>
                                 </div>
                                 <div class="col-md-4 text-center">
-                                    <img src="{{ $santri->foto_santri ? $santri->foto_santri : asset('assets/image/default.png') }}" alt="Foto Santri" class="img-fluid rounded" width="150">
+                                    <img src="{{ $santri->foto_santri ? $santri->foto_santri : asset('assets/images/default.png') }}"
+                                        alt="Foto Santri" class="img-fluid rounded border"
+                                        style="width: 150px; height: 200px; object-fit: cover;">
                                 </div>
-
                             </div>
                             <div class="mt-4 d-flex justify-content-between align-items-center">
                                 <h4>Data Orang Tua:</h4>
