@@ -25,7 +25,7 @@ class DashboardController extends Controller
     public function dashboardStatistics()
     {
         // Ambil data jumlah santri, kelas, dan pengajar
-        $santriCount = Santri::count();
+        $santriCount = Santri::where('status', 1)->count();
         $kelasCount = Kelas::count();
         $pengajarCount = Pengajar::count();
 

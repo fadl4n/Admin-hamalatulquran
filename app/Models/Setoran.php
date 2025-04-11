@@ -61,6 +61,10 @@ class Setoran extends Model
     {
         return $this->hasOne(Histori::class, 'id_setoran');
     }
+    public function target()
+    {
+        return $this->hasMany(Target::class, 'id_target', 'id_target');
+    }
 
 
     public function getPersentaseAttribute()

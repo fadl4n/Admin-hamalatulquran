@@ -30,13 +30,8 @@ class TargetController extends Controller
             ->groupBy(function ($item) {
                 return $item->id_santri . '-' . $item->id_group;
             });
-
-
-
         return view('target.show', compact('targets'));
     }
-
-
     public function create()
     {
         $santris = Santri::all();
@@ -45,7 +40,6 @@ class TargetController extends Controller
         $surats = Surat::all();
         return view('target.create', compact('santris', 'pengajars', 'kelas', 'surats'));
     }
-
     public function store(Request $request)
     {
         // Validasi input data
@@ -122,8 +116,6 @@ class TargetController extends Controller
         if ($santri->id_kelas != $request->id_kelas) {
             return back()->withErrors(['id_kelas' => 'Santri ini terdaftar di kelas ' . $santri->kelas->nama_kelas . ', bukan di kelas yang dipilih.'])->withInput();
         }
-
-
         // Simpan data target ke database
         $target = Target::create([
             'id_santri' => $request->id_santri,
@@ -188,12 +180,6 @@ class TargetController extends Controller
             ])->withInput();
         }
     }
-
-
-
-
-
-
     public function show($id)
     {
         $target = Target::with(['santri', 'pengajar', 'kelas', 'surat'])->findOrFail($id);
@@ -207,7 +193,6 @@ class TargetController extends Controller
         $surats = Surat::all();
         return view('target.edit', compact('target', 'santris', 'pengajars', 'kelas', 'surats'));
     }
-
     public function update(Request $request, Target $target)
     {
         // Validasi input data
@@ -354,9 +339,6 @@ class TargetController extends Controller
             return response()->json(['error' => 'Gagal menghapus target'], 500);
         }
     }
-
-
-
     // Untuk DataTables
     public function fnGetData()
     {
