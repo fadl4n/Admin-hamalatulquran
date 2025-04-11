@@ -9,19 +9,33 @@ use Exception;
 
 class SantriController extends Controller
 {
+    // Helper untuk format URL foto
+    private function formatFotoSantri($santri)
+    {
+        $santri->map(function ($item) {
+            if ($item->foto_santri) {
+                $item->foto_santri = asset('storage/' . $item->foto_santri);
+                $item->foto_santri = str_replace("127.0.0.1", "10.0.2.2", $item->foto_santri); // Emulator fix
+            }
+        });
+    }
+
     // Get all santri
     public function getAllSantri()
     {
         try {
-            $santri = Santri::all();
+            $santri = Santri::with('kelas')->get();
+
+            $this->formatFotoSantri($santri);
 
             return response()->json([
-                'status' => 'success',
+                'status' => true,
+                'message' => 'Berhasil mengambil semua data santri',
                 'data' => $santri
             ], 200);
         } catch (Exception $e) {
             return response()->json([
-                'status' => 'error',
+                'status' => false,
                 'message' => 'Terjadi kesalahan pada server',
                 'error' => $e->getMessage()
             ], 500);
@@ -32,10 +46,9 @@ class SantriController extends Controller
     public function getSantriById($id)
     {
         try {
-            // Cek apakah ID valid (harus angka)
             if (!filter_var($id, FILTER_VALIDATE_INT)) {
                 return response()->json([
-                    'status' => 'error',
+                    'status' => false,
                     'message' => 'ID harus berupa angka'
                 ], 400);
             }
@@ -44,40 +57,58 @@ class SantriController extends Controller
 
             if (!$santri) {
                 return response()->json([
-                    'status' => 'error',
+                    'status' => false,
                     'message' => 'Santri tidak ditemukan'
                 ], 404);
             }
 
+            // Format URL foto
+            if ($santri->foto_santri) {
+                $santri->foto_santri = asset('storage/' . $santri->foto_santri);
+                $santri->foto_santri = str_replace("127.0.0.1", "10.0.2.2", $santri->foto_santri);
+            }
+
             return response()->json([
-                'status' => 'success',
+                'status' => true,
+                'message' => 'Berhasil mengambil data santri',
                 'data' => $santri
             ], 200);
         } catch (Exception $e) {
             return response()->json([
-                'status' => 'error',
+                'status' => false,
                 'message' => 'Terjadi kesalahan pada server',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
+    // Get santri by kelas
     public function getSantriByKelas($id)
     {
-        $santri = Santri::where('id_kelas', $id)->get();
+        try {
+            $santri = Santri::where('id_kelas', $id)->get();
 
-        if ($santri->isEmpty()) {
+            $this->formatFotoSantri($santri);
+
+            if ($santri->isEmpty()) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Kelas masih kosong',
+                    'data' => []
+                ], 200);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Data santri berdasarkan kelas',
+                'data' => $santri
+            ], 200);
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Kelas masih kosong',
-                'data' => []
-            ], 200);
+                'message' => 'Terjadi kesalahan pada server',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Data santri berdasarkan kelas',
-            'data' => $santri
-        ]);
     }
 }
