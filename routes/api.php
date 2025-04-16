@@ -92,6 +92,7 @@ Route::middleware('api')->group(function () {
 
 Route::middleware('api')->group(function () {
     Route::get('/santri', [SantriController::class, 'index']);
+    Route::get('/santri/data', [SantriController::class, 'DataSantri']);
 
 });
 

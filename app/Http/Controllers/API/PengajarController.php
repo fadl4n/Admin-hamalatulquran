@@ -4,20 +4,20 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Kelas;
+use App\Models\Pengajar;
 use Exception;
 
-class KelasController extends Controller
+class PengajarController extends Controller
 {
-    // Get all Kelas
-    public function getAllKelas()
+    // Get all pengajar
+    public function getAllPengajar()
     {
         try {
-            $kelas = Kelas::all();
+            $pengajar = Pengajar::all();
 
             return response()->json([
                 'status' => 'success',
-                'data' => $kelas
+                'data' => $pengajar
             ], 200);
         } catch (Exception $e) {
             return response()->json([
@@ -28,8 +28,8 @@ class KelasController extends Controller
         }
     }
 
-    // Get Kelas by ID
-    public function getKelasById($id)
+    // Get pengajar by ID
+    public function getPengajarById($id)
     {
         try {
             // Cek apakah ID valid (harus angka)
@@ -40,18 +40,18 @@ class KelasController extends Controller
                 ], 400);
             }
 
-            $kelas = Kelas::find($id);
+            $pengajar = Pengajar::find($id);
 
-            if (!$kelas) {
+            if (!$pengajar) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Kelas tidak ditemukan'
+                    'message' => 'Pengajar tidak ditemukan'
                 ], 404);
             }
 
             return response()->json([
                 'status' => 'success',
-                'data' => $kelas
+                'data' => $pengajar
             ], 200);
         } catch (Exception $e) {
             return response()->json([
@@ -62,3 +62,7 @@ class KelasController extends Controller
         }
     }
 }
+
+
+
+

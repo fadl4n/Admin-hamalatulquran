@@ -62,9 +62,9 @@
       <a href="{{ url('/logout') }}" class="d-block text-white">Logout</a>
     </div>
   </aside>
-
+{{--
   {{-- Footer (HANYA SATU) --}}
-  @include('layout.footer')
+  {{-- @include('layout.footer') --}} 
 
 </div>
 
