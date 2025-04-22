@@ -63,7 +63,7 @@ class HistoriController extends Controller
         $histori->id_kelas = $lastHistori->id_kelas ?? null;
         $histori->id_setoran = $lastHistori->id_setoran ?? null;
         $histori->status = $lastHistori->status ?? 0;
-
+        
         $histori->save();
 
         return response()->json(['success' => true, 'message' => 'Nilai berhasil ditambahkan ke histori!']);

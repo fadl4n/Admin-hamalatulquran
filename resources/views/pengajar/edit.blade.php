@@ -127,9 +127,10 @@
                             <!-- Pratinjau Gambar -->
                             <div class="mt-2">
                                 <img id="preview"
-                                    src="{{ $pengajar->foto_pengajar ? asset('uploadedFile/image/pengajar/' . basename($pengajar->foto_pengajar)) : asset('assets/image/default-user.png') }}"
-                                    alt="Foto Pengajar"
-                                    class="img-thumbnail" width="150">
+                                src="{{ $pengajar->foto_pengajar ? asset($pengajar->foto_pengajar) : asset('assets/image/default-user.png') }}"
+                                alt="Foto Pengajar"
+                                class="img-thumbnail" width="150">
+
                             </div>
                         </div>
 

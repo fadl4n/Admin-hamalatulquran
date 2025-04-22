@@ -170,10 +170,9 @@ class PengajarController extends Controller
 
         $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
         $file->move(public_path('uploadedFile/image/pengajar'), $name_original);
-        $fotoPath = url('uploadedFile/image/pengajar') . '/' . $name_original;
-    } else {
-        $fotoPath = asset('assets/image/default-user.png');
+        $fotoPath = 'uploadedFile/image/pengajar/' . $name_original; // << diubah di sini
     }
+
 
 
     $data = [
