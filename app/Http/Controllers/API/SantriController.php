@@ -12,12 +12,33 @@ class SantriController extends Controller
     // Helper untuk format URL foto
     private function formatFotoSantri($santri)
     {
-        $santri->map(function ($item) {
-            if ($item->foto_santri) {
-                $item->foto_santri = asset('storage/' . $item->foto_santri);
-                $item->foto_santri = str_replace("127.0.0.1", "10.0.2.2", $item->foto_santri); // Emulator fix
+        if (is_iterable($santri)) {
+            foreach ($santri as $item) {
+                $this->formatFotoSantri($item);
             }
-        });
+        } elseif ($santri) {
+            $foto = (string) $santri->foto_santri;
+
+            if ($foto !== '' && !str_starts_with($foto, 'http://') && !str_starts_with($foto, 'https://')) {
+                $santri->foto_santri = asset('storage/' . $foto);
+            } else {
+                $santri->foto_santri = $foto;
+            }
+
+            if ($santri->foto_santri !== null && is_string($santri->foto_santri)) {
+                $santri->foto_santri = str_replace("127.0.0.1", "10.0.2.2", $santri->foto_santri);
+            }
+        }
+    }
+
+    public function countAktif()
+    {
+        $jumlah = Santri::where('status', 1)->count();
+
+        return response()->json([
+            'status' => 'success',
+            'jumlah' => $jumlah
+        ]);
     }
 
     // Get all santri
@@ -63,10 +84,7 @@ class SantriController extends Controller
             }
 
             // Format URL foto
-            if ($santri->foto_santri) {
-                $santri->foto_santri = asset('storage/' . $santri->foto_santri);
-                $santri->foto_santri = str_replace("127.0.0.1", "10.0.2.2", $santri->foto_santri);
-            }
+            $this->formatFotoSantri($santri);
 
             return response()->json([
                 'status' => true,
@@ -86,7 +104,7 @@ class SantriController extends Controller
     public function getSantriByKelas($id)
     {
         try {
-            $santri = Santri::where('id_kelas', $id)->get();
+            $santri = Santri::with('kelas')->where('id_kelas', $id)->get();
 
             $this->formatFotoSantri($santri);
 

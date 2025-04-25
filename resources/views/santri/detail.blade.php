@@ -61,13 +61,10 @@
                                     </table>
                                 </div>
                                 <div class="col-md-4 text-center">
-<<<<<<< HEAD
-                                    <img src="{{ $santri->foto_santri ? $santri->foto_santri : asset('assets/images/default.png') }}"
-                                        alt="Foto Santri" class="img-fluid rounded border"
-                                        style="width: 150px; height: 200px; object-fit: cover;">
-=======
-                                    <img src="{{ $santri->foto_santri ? asset($santri->foto_santri) : asset('assets/image/default-user.png') }}" alt="Foto Santri" class="img-fluid rounded" width="150">
->>>>>>> 9af0d6cb63021ec26056c3b5266990e8e0b54d1f
+                                    <img src="{{ $santri->foto_santri ? asset($santri->foto_santri) : asset('assets/image/default-user.png') }}"
+                                        alt="Foto Santri"
+                                        style="height: 400px; object-fit: cover; border-radius: 8px;">
+
                                 </div>
                             </div>
 

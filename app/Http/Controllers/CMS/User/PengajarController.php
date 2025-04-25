@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Pengajar;
 use Illuminate\Support\Facades\Hash;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
 
 class PengajarController extends Controller
 {
@@ -59,20 +61,23 @@ class PengajarController extends Controller
             return redirect()->back()->withInput()->with('error', 'Email sudah digunakan.');
         }
 
-        $fotoPath = asset('assets/image/default-user.png'); // Default image
+        $fotoPath = 'uploadedFile/image/default-user.png'; // Default image di storage/app/public
 
         if ($request->hasFile('foto_pengajar')) {
             $file = $request->file('foto_pengajar');
-            $extension = $file->getClientOriginalExtension();
-            $allowedFileTypes = ['png', 'jpg', 'jpeg'];
 
-            if (!in_array($extension, $allowedFileTypes)) {
-                return redirect()->back()->with('error', 'Tipe file tidak diperbolehkan.');
-            }
+            $filename = time() . '.' . $file->getClientOriginalExtension();
 
-            $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploadedFile/image/pengajar'), $name_original);
-            $fotoPath = url('uploadedFile/image/pengajar/' . $name_original);
+            // Gunain Intervention Image (pakai driver GD)
+            $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $img = $manager->read($file->getPathname());
+
+            $encodedImage = $img->toJpeg(75); // kualitas 75%
+
+            $path = 'uploadedFile/image/pengajar/' . $filename;
+            Storage::disk('public')->put($path, (string) $encodedImage);
+
+            $fotoPath = asset('storage/' . $path);
         }
 
         Pengajar::create([
@@ -81,7 +86,7 @@ class PengajarController extends Controller
             'email' => $request->email,
             'tempat_lahir' => $request->tempat_lahir,
             'tgl_lahir' => $request->tgl_lahir,
-            'foto_pengajar' => $fotoPath,
+            'foto_pengajar' => $fotoPath, // cuma path (biar Storage::url bisa dipake di frontend)
             'no_telp' => $request->no_telp,
             'jenis_kelamin' => $request->jenis_kelamin,
             'alamat' => $request->alamat,

@@ -58,7 +58,7 @@ class SantriController extends Controller
             'tgl_lahir' => 'required|date',
             'alamat' => 'nullable|string|max:255',
             'email' => 'nullable|string|max:255',
-            'angkatan' => 'nullable|string|max:50',
+            'angkatan' => 'nullable|integer|min:2000|max:'.(date('Y') + 1),
             'id_kelas' => 'nullable|exists:kelas,id_kelas',
             'jenis_kelamin' => 'required|integer|in:1,2',
             'status' => 'required|integer|in:0,1',
@@ -81,7 +81,7 @@ class SantriController extends Controller
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
 
-        $data['foto_santri'] = 'uploadedFile/image/default-user.png';
+        $data['foto_santri'] = Storage::url('uploadedFile/image/default-user.png');
 
         if ($request->hasFile('foto_santri')) {
             $image = $request->file('foto_santri');
@@ -91,11 +91,7 @@ class SantriController extends Controller
             // Create new ImageManager instance with 'gd' driver
             $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
 
-            // Create image from uploaded file
             $img = $manager->read($image->getPathname());
-
-            // Resize image
-            $img->resize(600, null); // otomatis maintain aspect ratio
 
             // Encode to JPG (or use $img->toPng() / ->toWebp())
             $encodedImage = $img->toJpeg(75); // kualitas 75%
@@ -104,7 +100,7 @@ class SantriController extends Controller
             $path = 'uploadedFile/image/santri/' . $filename;
             Storage::disk('public')->put($path, (string) $encodedImage);
 
-            $data['foto_santri'] = $path;
+            $data['foto_santri'] = asset('storage/' . $path);
         }
 
         Santri::create($data);
@@ -189,22 +185,22 @@ class SantriController extends Controller
 
             $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
             $img = $manager->read($image->getPathname());
-            $img->resize(600, null);
             $encodedImage = $img->toJpeg(75);
 
             // Hapus file lama
-            if (!empty($santri->foto_santri) && $santri->foto_santri !== 'uploadedFile/image/default-user.png') {
+            $defaultFoto = Storage::url('uploadedFile/image/default-user.png');
+            if (!empty($santri->foto_santri) && $santri->foto_santri !== $defaultFoto) {
                 Storage::disk('public')->delete($santri->foto_santri);
             }
 
             $path = 'uploadedFile/image/santri/' . $filename;
             Storage::disk('public')->put($path, (string) $encodedImage);
-            $data['foto_santri'] = $path;
+            $data['foto_santri'] = asset('storage/' . $path);
         }
 
         // Kalo gak upload gambar, keep yang lama
         if (empty($data['foto_santri'])) {
-            $data['foto_santri'] = $santri->foto_santri ?? 'uploadedFile/image/default-user.png';
+            $data['foto_santri'] = $santri->foto_santri ?? $defaultFoto;
         }
 
         // Update data keluarga

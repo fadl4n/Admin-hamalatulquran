@@ -49,11 +49,12 @@ Route::middleware([])->group(function () {
 // Route untuk get semua santri & santri berdasarkan ID
 Route::controller(SantriController::class)->group(function () {
     Route::get('/santri', 'getAllSantri');        // Get semua santri
+    Route::get('/santri/jumlah-aktif', 'countAktif');
     Route::get('/santri/{id}', 'getSantriById');  // Get santri by ID
     Route::get('/santri/by-kelas/{id}', 'getSantriByKelas');  // Get santri by ID
 });
 
-// Route untuk get semua santri & santri berdasarkan ID
+// Route untuk get semua pengajar & pengajar berdasarkan ID
 Route::controller(PengajarController::class)->group(function () {
     Route::get('/pengajar', 'getAllPengajar');    // Get semua pengajar
     Route::get('/pengajar/{id}', 'getPengajarById'); // Get pengajar by ID

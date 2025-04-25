@@ -76,15 +76,26 @@
                                     @enderror
                                 </div>
 
+                                @php
+                                    $tahunSekarang = date('Y');
+                                @endphp
+
                                 <div class="form-group">
                                     <label>Angkatan</label>
-                                    <input type="text" name="angkatan"
-                                        class="form-control @error('angkatan') is-invalid @enderror"
-                                        value="{{ old('angkatan', $santri->angkatan) }}">
+                                    <select name="angkatan" class="form-control @error('angkatan') is-invalid @enderror">
+                                        <option value="">-- Pilih Angkatan --</option>
+                                        @for ($tahun = 2010; $tahun <= $tahunSekarang + 1; $tahun++)
+                                            <option value="{{ $tahun }}"
+                                                {{ old('angkatan', $santri->angkatan ?? '') == $tahun ? 'selected' : '' }}>
+                                                {{ $tahun }}
+                                            </option>
+                                        @endfor
+                                    </select>
                                     @error('angkatan')
-                                        <span class="text-danger">Angkatan wajib diisi.</span>
+                                        <span class="text-danger">Angkatan tidak boleh kosong.</span>
                                     @enderror
                                 </div>
+
 
                                 <div class="form-group">
                                     <label>Kelas</label>
@@ -316,22 +327,16 @@
                                         <span class="text-danger">Tanggal lahir tidak boleh kosong.</span>
                                     @enderror
                                 </div>
-
-                                <button type="submit" class="btn btn-primary">Simpan</button>
-                                <a href="{{ route('santri.show', $santri->id_santri) }}"
-                                    class="btn btn-secondary">Batal</a>
+                                <div class="row justify-content-center gx-4">
+                                    <div class="col-4">
+                                        <a href="{{ route('santri.index') }}" class="btn btn-secondary w-100">Batal</a>
+                                    </div>
+                                    <div class="col-4">
+                                        <button type="submit" class="btn btn-primary w-100">Simpan</button>
+                                    </div>
+                                </div>
                             </form>
                         </div>
-                        <div class="row justify-content-center gx-4">
-                            <div class="col-4">
-                                <a href="{{ route('santri.index') }}" class="btn btn-secondary w-100">Batal</a>
-                            </div>
-                            <div class="col-4">
-                                <button type="submit" class="btn btn-primary w-100">Simpan</button>
-                            </div>
-                        </div>
-
-
                     </div>
                 </div>
             </div>

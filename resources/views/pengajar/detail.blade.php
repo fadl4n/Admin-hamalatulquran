@@ -12,7 +12,7 @@
                             <div class="row">
                                 <!-- Gambar Pengajar -->
                                 <div class="col-md-4 text-center">
-                                    <img src="{{ $pengajar->foto_pengajar ? $pengajar->foto_pengajar : asset('assets/images/default.png') }}"
+                                    <img src="{{ $pengajar->foto_pengajar ? asset('storage/' . $pengajar->foto_pengajar) : asset('assets/images/default.png') }}"
                                         alt="Foto Pengajar" class="rounded-circle border" width="150" height="150"
                                         style="object-fit: cover;">
                                 </div>
