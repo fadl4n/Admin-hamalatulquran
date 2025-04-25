@@ -132,7 +132,7 @@ class SantriController extends Controller
             'email' => 'nullable|string|max:255',
             'alamat' => 'nullable|string|max:255',
             'angkatan' => 'nullable|string|max:50',
-            'id_kelas' => 'nullable|exists:kelas,id_kelas',
+            'id_kelas' => 'required|exists:kelas,id_kelas',
             'jenis_kelamin' => 'required|integer|in:1,2',
             'status' => 'required|integer|in:0,1',
             'password' => 'nullable|string|min:6',

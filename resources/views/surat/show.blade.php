@@ -17,7 +17,7 @@
         }
 
         th.no, td.no {
-            width: 50px;
+            width: 30px;
             text-align: center;
         }
 

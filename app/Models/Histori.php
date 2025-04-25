@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Histori extends Model
@@ -54,22 +55,18 @@ class Histori extends Model
     }
 
     public static function determineStatus($totalAyatDisetorkan, $jumlahAyatTarget, $tglTarget, $tglSetoranTerakhir)
-{
-    $hariIni = now()->toDateString(); // Format YYYY-MM-DD
+    {
+        $hariIni = Carbon::today();
+        $targetDate = Carbon::parse($tglTarget);
 
-    // Jika target sudah tercapai, status tetap selesai (2)
-    if ($totalAyatDisetorkan >= $jumlahAyatTarget) {
-        return 2; // Selesai
+        if ($totalAyatDisetorkan >= $jumlahAyatTarget) {
+            return 2; // Selesai
+        }
+
+        if ($hariIni->gt($targetDate)) {
+            return 3; // Terlambat
+        }
+
+        return ($totalAyatDisetorkan > 0) ? 1 : 0;
     }
-
-    // Jika tanggal target sudah terlewati dan belum selesai, status menjadi terlambat (3)
-    if ($hariIni > $tglTarget) {
-        return 3; // Terlambat
-    }
-
-    // Jika ada progres, status tetap proses (1), jika tidak ada progres status tetap belum mulai (0)
-    return ($totalAyatDisetorkan > 0) ? 1 : 0;
-}
-
-
 }

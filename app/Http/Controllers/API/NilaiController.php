@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\CMS\User;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Santri;
@@ -12,13 +12,12 @@ use Illuminate\Http\Request;
 class NilaiController extends Controller
 {
     /**
-     * Menampilkan daftar santri dengan opsi untuk melihat detail nilai.
+     * Endpoint untuk mendapatkan daftar santri dengan pencarian.
      */
     public function index(Request $request)
     {
-        $query = Santri::with('kelas', 'targets');
+        $query = Santri::with('kelas');
 
-        // Jika ada input pencarian
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -28,9 +27,8 @@ class NilaiController extends Controller
                         $kelasQuery->where('nama_kelas', 'like', "%$search%");
                     })
                     ->orWhereHas('targets', function ($targetQuery) use ($search) {
-                        // Deteksi jika input mengandung "Target X" atau angka langsung
                         if (preg_match('/^Target (\d+)$/i', $search, $matches)) {
-                            $idGroup = $matches[1]; // Ambil angka setelah "Target "
+                            $idGroup = $matches[1];
                             $targetQuery->where('id_group', $idGroup);
                         } elseif (is_numeric($search)) {
                             $targetQuery->where('id_group', $search);
@@ -43,36 +41,40 @@ class NilaiController extends Controller
 
         $santris = $query->get();
 
-        return view('nilai.show', compact('santris'));
-    }   
+        // Ambil hanya data yang diperlukan untuk tampilan tabel
+        $data = $santris->map(function ($santri) {
+            return [
+                'nama' => $santri->nama,
+                'nisn' => $santri->nisn,
+                'kelas' => $santri->kelas->nama_kelas ?? '-'
+            ];
+        });
 
-
+        return response()->json([
+            'status' => 'success',
+            'data' => $data
+        ]);
+    }
 
     /**
-     * Menampilkan detail nilai hafalan dan muroja'ah untuk seorang santri berdasarkan id_group.
+     * Endpoint untuk menampilkan detail nilai hafalan dan murojaah untuk seorang santri berdasarkan id_group.
      */
     public function show($idSantri, $idGroup)
     {
-        $santri = Santri::findOrFail($idSantri);
-        // Ambil target berdasarkan santri dan id_group
+        $santri = Santri::with('kelas')->findOrFail($idSantri);
+
         $targets = Target::where('id_santri', $idSantri)
             ->where('id_group', $idGroup)
             ->get();
 
-        // Buat array untuk menyimpan nilai hafalan dan muroja'ah
         $hafalan = [];
         $murojaah = [];
 
         foreach ($targets as $target) {
             $namaSurat = $target->surat->nama_surat;
 
-            // Hitung rata-rata nilai dari setoran (hafalan)
-            $nilaiHafalan = Setoran::where('id_target', $target->id_target)
-                ->avg('nilai');
-
-            // Hitung rata-rata nilai dari histori (muroja'ah)
-            $nilaiMurojaah = Histori::where('id_target', $target->id_target)
-                ->avg('nilai');
+            $nilaiHafalan = Setoran::where('id_target', $target->id_target)->avg('nilai');
+            $nilaiMurojaah = Histori::where('id_target', $target->id_target)->avg('nilai');
 
             $hafalan[] = [
                 'surat' => $namaSurat,
@@ -85,13 +87,24 @@ class NilaiController extends Controller
             ];
         }
 
-        return view('nilai.detail', compact('hafalan', 'murojaah', 'idGroup', 'santri'));
+        return response()->json([
+            'santri' => [
+                'nama' => $santri->nama,
+                'nisn' => $santri->nisn,
+                'kelas' => $santri->kelas->nama_kelas ?? '-'
+            ],
+            'hafalan' => $hafalan,
+            'murojaah' => $murojaah
+        ]);
     }
+
+    /**
+     * Endpoint untuk datatable nilai versi API.
+     */
     public function fnGetData(Request $request)
     {
         $santris = Santri::with('kelas');
 
-        // If there's a search input
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
 
@@ -103,28 +116,22 @@ class NilaiController extends Controller
                     });
             });
         }
-
-        // Paginate the results
-        $santris = $santris->paginate(10); // Adjust the number per page as needed
-
-        // Map the result into the correct format for DataTable
-        $data = $santris->items();
-
-        $data = array_map(function ($santri) {
+        $santrisPaginated = $santris; // simpan pagination info
+        $data = collect($santris->items())->map(function ($santri) {
             return [
                 'nama' => $santri->nama,
                 'nisn' => $santri->nisn,
                 'kelas' => $santri->kelas->nama_kelas ?? '-',
-                'action' => '<a href="' . route('nilai.show', ['idSantri' => $santri->id_santri, 'idGroup' => 1]) . '" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></a>',
+                'id_santri' => $santri->id_santri
             ];
-        }, $data);
+        });
 
         return response()->json([
             'data' => $data,
-            'recordsTotal' => $santris->total(),  // Total records without filter
-            'recordsFiltered' => $santris->total() // Total records after filter
+            'recordsTotal' => $santrisPaginated->total(),
+            'recordsFiltered' => $santrisPaginated->total()
         ]);
+
+
     }
-
-
 }

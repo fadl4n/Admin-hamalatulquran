@@ -23,7 +23,7 @@ class HistoriController extends Controller
 
     public function fnGetData(Request $request)
     {
-        $query = Histori::with(['santri', 'surat', 'target'])
+        $query = Histori::with(['santri.kelas', 'surat', 'target'])
             ->whereIn('id_histori', function ($subquery) {
                 $subquery->selectRaw('MAX(id_histori)')
                     ->from('historis')
@@ -42,7 +42,10 @@ class HistoriController extends Controller
             $searchValue = $request->search_value;
             $query->where(function ($query) use ($searchValue) {
                 $query->whereHas('santri', function ($q) use ($searchValue) {
-                    $q->where('nama', 'like', "%$searchValue%");
+                    $q->where('nama', 'like', "%$searchValue%")
+                      ->orWhereHas('kelas', function ($q2) use ($searchValue) {
+                          $q2->where('nama_kelas', 'like', "%$searchValue%");
+                      });
                 })
                 ->orWhereHas('surat', function ($q) use ($searchValue) {
                     $q->where('nama_surat', 'like', "%$searchValue%");
