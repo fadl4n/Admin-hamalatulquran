@@ -49,7 +49,7 @@ class AuthController extends Controller
             $role = 'santri';
             $user_id = $user->id_santri;
             $foto_profil = $user->foto_santri ? url($user->foto_santri) : null;
-            $jenis_kelamin = $user->jenis_kelamin == 1 ? 'Laki-laki' : 'Perempuan';
+            $jenis_kelamin = $user->jenis_kelamin;
         } else {
             return response()->json([
                 'success' => false,

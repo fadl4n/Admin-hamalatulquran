@@ -37,19 +37,18 @@ class Target extends Model
         return $this->belongsTo(Kelas::class, 'id_kelas', 'id_kelas');
     }
 
- public function surat()
-{
-    return $this->belongsTo(Surat::class, 'id_surat', 'id_surat');
-}
+    public function surat()
+    {
+        return $this->belongsTo(Surat::class, 'id_surat', 'id_surat');
+    }
 
     public function pengajar()
     {
         return $this->belongsTo(Pengajar::class, 'id_pengajar');
     }
     // Model Target
-public function setoran()
-{
-    return $this->hasMany(Setoran::class, 'id_target');
-}
-
+    public function setoran()
+    {
+        return $this->hasMany(Setoran::class, 'id_target');
+    }
 }

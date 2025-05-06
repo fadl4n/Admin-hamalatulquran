@@ -1,22 +1,18 @@
 <?php
 
 use App\Http\Controllers\API\AuthController;
-<<<<<<< HEAD
 use App\Http\Controllers\API\PengajarController;
 use App\Http\Controllers\API\SantriController;
 use App\Http\Controllers\API\KelasController;
-=======
+use App\Http\Controllers\API\SuratController;
 use App\Http\Controllers\API\TargetController;
 use App\Http\Controllers\API\SetoranController;
+use App\Http\Controllers\API\HistoriController;
 use App\Http\Controllers\API\NilaiController;
-use App\Http\Controllers\API\KelasController;
 use App\Http\Controllers\API\ArtikelController;
-use App\Http\Controllers\API\SantriController;
->>>>>>> 792bfae4353550c7edf263a5d01606eb61632e86
 use App\Http\Middleware\CheckAuthFrontend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\HistoriController;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Pengajar;
 use App\Models\Santri;
@@ -56,13 +52,13 @@ Route::middleware([])->group(function () {
     });
 });
 
-<<<<<<< HEAD
 // Route untuk get semua santri & santri berdasarkan ID
 Route::controller(SantriController::class)->group(function () {
     Route::get('/santri', 'getAllSantri');        // Get semua santri
     Route::get('/santri/jumlah-aktif', 'countAktif');
     Route::get('/santri/{id}', 'getSantriById');  // Get santri by ID
     Route::get('/santri/by-kelas/{id}', 'getSantriByKelas');  // Get santri by ID
+    Route::get('/santri/{id}/group', 'getGroupFromTarget'); // Get TargetGroup by IdSantri
 });
 
 // Route untuk get semua pengajar & pengajar berdasarkan ID
@@ -76,9 +72,9 @@ Route::controller(KelasController::class)->group(function () {
     Route::get('/kelas/{id}', 'getKelasById'); // Get kelas by ID
 });
 
+Route::get('/surat', [SuratController::class, 'index']);
 
-=======
-Route::middleware('api')->group(function () {
+Route::middleware([])->group(function () {
     Route::get('/target', [TargetController::class, 'index']);
     Route::get('/target/id/{id_target}', [TargetController::class, 'show']);
     Route::get('/target/{id_santri}/{id_group}', [TargetController::class, 'getBySantriGroup']);
@@ -89,7 +85,7 @@ Route::middleware('api')->group(function () {
 });
 
 
-Route::middleware('api')->group(function () {
+Route::middleware([])->group(function () {
     Route::put('/setoran/{id}', [SetoranController::class, 'update']);
     Route::get('/setoran', [SetoranController::class, 'index']); // GET semua setoran
     Route::get('/setoran/{groupKey}', [SetoranController::class, 'showBySantriFormatted']);
@@ -101,10 +97,9 @@ Route::middleware('api')->group(function () {
     Route::get('/setoran/validate-ayat', [SetoranController::class, 'validateAyat']);
     Route::get('/setoran/target-detail', [SetoranController::class, 'getTargetDetailBySurat']);
     Route::get('/get-id-target', [SetoranController::class, 'getIdTarget']);
-
 });
 
-Route::middleware('api')->group(function () {
+Route::middleware([])->group(function () {
     Route::get('/histori', [HistoriController::class, 'index']);
     Route::post('/histori/update-nilai/{id_target}', [HistoriController::class, 'updateNilai']);
     Route::get('/histori/get-preview/{id_target}', [HistoriController::class, 'getPreview']);
@@ -112,27 +107,14 @@ Route::middleware('api')->group(function () {
 });
 
 
-Route::middleware('api')->group(function () {
+Route::middleware([])->group(function () {
     Route::get('/nilai', [NilaiController::class, 'index']);
     Route::get('/nilai/{idSantri}/{idGroup}', [NilaiController::class, 'show']);
     Route::get('/nilai/datatable/data', [NilaiController::class, 'fnGetData']);
 });
 
 Route::middleware('api')->group(function () {
-    Route::get('/santri', [SantriController::class, 'index']);
-    Route::get('/santri/data', [SantriController::class, 'DataSantri']);
-
-});
-
-Route::middleware('api')->group(function () {
-    Route::get('/kelas', [KelasController::class, 'index']);
-    Route::get('/kelas/santri/{id}', [KelasController::class, 'getSantriByKelas']);
-});
-
-Route::middleware('api')->group(function () {
     Route::get('/artikel', [ArtikelController::class, 'index']);
-
 });
 
->>>>>>> 792bfae4353550c7edf263a5d01606eb61632e86
 // end checking auth

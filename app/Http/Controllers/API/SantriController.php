@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Santri;
+use App\Models\Target;
 use Exception;
 
 class SantriController extends Controller
@@ -45,9 +46,17 @@ class SantriController extends Controller
     public function getAllSantri()
     {
         try {
-            $santri = Santri::with('kelas')->get();
+            // Ambil data santri dengan relasi ke kelas dan target
+            $santri = Santri::with(['kelas', 'targets'])->get();
 
+            // Format foto santri
             $this->formatFotoSantri($santri);
+
+            // Menambahkan id_group ke setiap santri berdasarkan target yang ada
+            $santri->map(function ($item) {
+                // Ambil id_group dari target pertama yang terhubung dengan santri
+                $item->id_group = $item->targets->first()->id_group ?? null;
+            });
 
             return response()->json([
                 'status' => true,
@@ -74,7 +83,7 @@ class SantriController extends Controller
                 ], 400);
             }
 
-            $santri = Santri::with('kelas')->find($id);
+            $santri = Santri::with('kelas', 'targets')->find($id);
 
             if (!$santri) {
                 return response()->json([
@@ -85,6 +94,9 @@ class SantriController extends Controller
 
             // Format URL foto
             $this->formatFotoSantri($santri);
+
+            // Menambahkan id_group ke santri berdasarkan target yang ada
+            $santri->id_group = $santri->targets->first()->id_group ?? null;
 
             return response()->json([
                 'status' => true,
@@ -128,5 +140,23 @@ class SantriController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+    public function getGroupFromTarget($id)
+    {
+        $target = Target::where('id_santri', $id)->first();
+
+        if (!$target) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ditemukan target untuk santri ini'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id_group' => $target->id_group,
+            ]
+        ]);
     }
 }

@@ -52,14 +52,19 @@ class TargetController extends Controller
             $first = $group->first();
             $result[] = [
                 'no' => $no++,
+                'id' => $first->id_target,
+                'id_santri' => $first->santri->id_santri,
                 'nama_santri' => $first->santri->nama ?? '-',
                 'kelas' => $first->kelas->nama_kelas ?? '-',
                 'pengajar' => $first->pengajar->nama ?? '-',
                 'target_group' => 'Target ' . $first->id_group,
                 'tgl_mulai' => $first->tgl_mulai,
                 'tgl_target' => $first->tgl_target,
+                'nama_surat' => $first->surat->nama_surat ?? '-',
+                'jumlah_ayat' => $first->surat->jumlah_ayat ?? '-',
             ];
         }
+
 
         return response()->json([
             'success' => true,
@@ -68,68 +73,54 @@ class TargetController extends Controller
     }
 
     public function show($id_target)
-{
-    $target = Target::find($id_target);
+    {
+        $target = Target::find($id_target);
 
-    if (!$target) {
+        if (!$target) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Target tidak ditemukan'
+            ], 404);
+        }
+
         return response()->json([
-            'success' => false,
-            'message' => 'Target tidak ditemukan'
-        ], 404);
+            'success' => true,
+            'data' => $target
+        ]);
     }
 
-    return response()->json([
-        'success' => true,
-        'data' => $target
-    ]);
-}
+    public function getBySantriGroup($id_santri, $id_group)
+    {
+        $targets = Target::with('surat', 'santri')
+            ->where('id_santri', $id_santri)
+            ->where('id_group', $id_group)
+            ->get();
 
-public function getBySantriGroup($id_santri, $id_group)
-{
-    $targets = Target::with('surat', 'santri')
-        ->where('id_santri', $id_santri)
-        ->where('id_group', $id_group)
-        ->get();
+        if ($targets->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada target ditemukan untuk santri dan group ini.'
+            ], 404);
+        }
 
-    if ($targets->isEmpty()) {
+        // Hanya ambil data yang dibutuhkan seperti di detail.php (tanpa aksi)
+        $result = $targets->map(function ($target) {
+            return [
+                'nama_surat' => optional($target->surat)->nama_surat ?? 'Tidak Ditemukan',
+                'ayat_awal' => $target->jumlah_ayat_target_awal ?? '0',
+                'ayat_akhir' => $target->jumlah_ayat_target ?? '0',
+                'jumlah_ayat' => optional($target->surat)->jumlah_ayat ?? '-',
+            ];
+        });
+
         return response()->json([
-            'success' => false,
-            'message' => 'Tidak ada target ditemukan untuk santri dan group ini.'
-        ], 404);
+            'success' => true,
+            'data' => $result
+        ]);
     }
-
-    // Hanya ambil data yang dibutuhkan seperti di detail.php (tanpa aksi)
-    $result = $targets->map(function ($target) {
-        return [
-            'nama_surat' => optional($target->surat)->nama_surat ?? 'Tidak Ditemukan',
-            'ayat_awal' => $target->jumlah_ayat_target_awal ?? '0',
-            'ayat_akhir' => $target->jumlah_ayat_target ?? '0',
-        ];
-    });
-
-    return response()->json([
-        'success' => true,
-        'data' => $result
-    ]);
-}
-
-
-
 
     public function store(Request $request)
     {
-        $authHeader = $request->header('Authorization');
-        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
-            return response()->json(['success' => false, 'message' => 'Token tidak ditemukan'], 401);
-        }
-
-        $token = str_replace('Bearer ', '', $authHeader);
-        $user = $this->getUserFromToken($token);
-
-        if (!$user || $user['role'] !== 'pengajar') {
-            return response()->json(['success' => false, 'message' => 'Hanya pengajar yang dapat menambahkan target'], 403);
-        }
-
         $validator = Validator::make($request->all(), [
             'id_santri' => 'required|exists:santris,id_santri',
             'id_surat' => 'required|exists:surats,id_surat',
@@ -176,9 +167,12 @@ public function getBySantriGroup($id_santri, $id_group)
             return response()->json(['success' => false, 'message' => 'Rentang ayat target tumpang tindih dengan target yang sudah ada'], 422);
         }
 
+        // Asumsi pengajar ID sudah didapatkan dari auth atau nilai tetap
+        $pengajarId = 1; // Misalnya pengajar dengan id 1
+
         $target = Target::create([
             'id_santri' => $request->id_santri,
-            'id_pengajar' => explode('_', $user['id'])[1], // ambil id_pengajar dari "pengajar_1"
+            'id_pengajar' => $pengajarId, // Ganti dengan id_pengajar yang sesuai
             'id_kelas' => $request->id_kelas,
             'id_surat' => $request->id_surat,
             'tgl_mulai' => $request->tgl_mulai,
@@ -203,156 +197,154 @@ public function getBySantriGroup($id_santri, $id_group)
 
         return response()->json(['success' => true, 'message' => 'Target berhasil ditambahkan', 'data' => $target]);
     }
+
     public function update(Request $request, $id_target)
-{
-    $authHeader = $request->header('Authorization');
-    if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
-        return response()->json(['success' => false, 'message' => 'Token tidak ditemukan'], 401);
-    }
+    {
+        $authHeader = $request->header('Authorization');
+        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+            return response()->json(['success' => false, 'message' => 'Token tidak ditemukan'], 401);
+        }
 
-    $token = str_replace('Bearer ', '', $authHeader);
-    $user = $this->getUserFromToken($token);
+        $token = str_replace('Bearer ', '', $authHeader);
+        $user = $this->getUserFromToken($token);
 
-    if (!$user || $user['role'] !== 'pengajar') {
-        return response()->json(['success' => false, 'message' => 'Hanya pengajar yang dapat mengubah target'], 403);
-    }
+        if (!$user || $user['role'] !== 'pengajar') {
+            return response()->json(['success' => false, 'message' => 'Hanya pengajar yang dapat mengubah target'], 403);
+        }
 
-    $target = Target::findOrFail($id_target);
+        $target = Target::findOrFail($id_target);
 
-    $validator = Validator::make($request->all(), [
-        'id_santri' => 'required|exists:santris,id_santri',
-        'id_kelas' => 'required|exists:kelas,id_kelas',
-        'id_surat' => 'required|exists:surats,id_surat',
-        'tgl_mulai' => 'required|date',
-        'jumlah_ayat_target_awal' => 'required|integer|min:1',
-        'jumlah_ayat_target' => 'required|integer|min:1',
-        'tgl_target' => 'required|date',
-        'id_group' => 'nullable|integer'
-    ]);
+        $validator = Validator::make($request->all(), [
+            'id_santri' => 'required|exists:santris,id_santri',
+            'id_kelas' => 'required|exists:kelas,id_kelas',
+            'id_surat' => 'required|exists:surats,id_surat',
+            'tgl_mulai' => 'required|date',
+            'jumlah_ayat_target_awal' => 'required|integer|min:1',
+            'jumlah_ayat_target' => 'required|integer|min:1',
+            'tgl_target' => 'required|date',
+            'id_group' => 'nullable|integer'
+        ]);
 
-    $santri = Santri::find($request->id_santri);
+        $santri = Santri::find($request->id_santri);
         if (!$santri || $santri->id_kelas != $request->id_kelas) {
             return response()->json([
                 'message' => 'Santri tidak terdaftar di kelas yang dipilih. Santri tersebut terdaftar di kelas ' . ($santri?->kelas?->nama_kelas ?? 'tidak diketahui') . '.',
             ], 422);
         }
 
-    if ($validator->fails()) {
-        return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
-    }
-
-    $surat = Surat::findOrFail($request->id_surat);
-
-    if ($request->jumlah_ayat_target_awal > $request->jumlah_ayat_target) {
-        return response()->json(['success' => false, 'message' => 'Ayat awal tidak boleh lebih besar dari jumlah target'], 422);
-    }
-
-    if ($request->jumlah_ayat_target > $surat->jumlah_ayat) {
-        return response()->json(['success' => false, 'message' => 'Jumlah ayat target melebihi jumlah ayat surat'], 422);
-    }
-
-    $jumlah_ayat_target_end = $request->jumlah_ayat_target_awal + $request->jumlah_ayat_target - 1;
-
-    $overlapTarget = Target::where('id_santri', $request->id_santri)
-        ->where('id_group', $request->id_group)
-        ->where('id_surat', $request->id_surat)
-        ->where(function ($query) use ($request, $jumlah_ayat_target_end) {
-            $query->whereBetween('jumlah_ayat_target_awal', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end])
-                ->orWhereBetween('jumlah_ayat_target', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end]);
-        })
-        ->where('id_target', '!=', $id_target)
-        ->exists();
-
-    if ($overlapTarget) {
-        return response()->json(['success' => false, 'message' => 'Rentang ayat target tumpang tindih'], 422);
-    }
-
-    // Update target
-    $target->update([
-        'id_santri' => $request->id_santri,
-        'id_kelas' => $request->id_kelas,
-        'id_surat' => $request->id_surat,
-        'tgl_mulai' => $request->tgl_mulai,
-        'jumlah_ayat_target_awal' => $request->jumlah_ayat_target_awal,
-        'jumlah_ayat_target' => $request->jumlah_ayat_target,
-        'tgl_target' => $request->tgl_target,
-        'id_group' => $request->id_group,
-    ]);
-
-    // Update histori
-    $histori = Histori::where('id_target', $target->id_target)->first();
-    if ($histori) {
-        $totalAyatDisetorkan = \App\Models\Setoran::where('id_target', $target->id_target)
-            ->sum(DB::raw('jumlah_ayat_end - jumlah_ayat_start + 1'));
-
-        $persentaseBaru = number_format(($totalAyatDisetorkan / max(1, $request->jumlah_ayat_target)) * 100, 2);
-
-        $status = Histori::determineStatus($totalAyatDisetorkan, $request->jumlah_ayat_target, $request->tgl_target, $histori->tgl_setoran);
-
-        $histori->update([
-            'id_santri' => $target->id_santri,
-            'id_surat' => $target->id_surat,
-            'id_kelas' => $target->id_kelas,
-            'persentase' => $persentaseBaru,
-            'status' => $status,
-            'tgl_target' => $target->tgl_target,
-        ]);
-    }
-
-    return response()->json(['success' => true, 'message' => 'Target berhasil diperbarui', 'data' => $target]);
-}
-public function destroy(Request $request, $id_target)
-{
-    $authHeader = $request->header('Authorization');
-    if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
-        return response()->json(['success' => false, 'message' => 'Token tidak ditemukan'], 401);
-    }
-
-    $token = str_replace('Bearer ', '', $authHeader);
-    $user = $this->getUserFromToken($token);
-
-    if (!$user || $user['role'] !== 'pengajar') {
-        return response()->json(['success' => false, 'message' => 'Hanya pengajar yang dapat menghapus target'], 403);
-    }
-
-    try {
-        $target = Target::findOrFail($id_target);
-        $target->delete();
-
-        return response()->json(['success' => true, 'message' => 'Target berhasil dihapus']);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => 'Gagal menghapus target'], 500);
-    }
-}
-public function destroyBySantriGroup(Request $request, $id_santri, $id_group)
-{
-    $authHeader = $request->header('Authorization');
-    if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
-        return response()->json(['success' => false, 'message' => 'Token tidak ditemukan'], 401);
-    }
-
-    $token = str_replace('Bearer ', '', $authHeader);
-    $user = $this->getUserFromToken($token);
-
-    if (!$user || $user['role'] !== 'pengajar') {
-        return response()->json(['success' => false, 'message' => 'Hanya pengajar yang dapat menghapus target'], 403);
-    }
-
-    try {
-        $deleted = Target::where('id_santri', $id_santri)
-            ->where('id_group', $id_group)
-            ->delete();
-
-        if ($deleted > 0) {
-            return response()->json(['success' => true, 'message' => 'Target berhasil dihapus berdasarkan id_santri dan id_group']);
-        } else {
-            return response()->json(['success' => false, 'message' => 'Tidak ada target yang cocok ditemukan'], 404);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
         }
 
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => 'Gagal menghapus target'], 500);
+        $surat = Surat::findOrFail($request->id_surat);
+
+        if ($request->jumlah_ayat_target_awal > $request->jumlah_ayat_target) {
+            return response()->json(['success' => false, 'message' => 'Ayat awal tidak boleh lebih besar dari jumlah target'], 422);
+        }
+
+        if ($request->jumlah_ayat_target > $surat->jumlah_ayat) {
+            return response()->json(['success' => false, 'message' => 'Jumlah ayat target melebihi jumlah ayat surat'], 422);
+        }
+
+        $jumlah_ayat_target_end = $request->jumlah_ayat_target_awal + $request->jumlah_ayat_target - 1;
+
+        $overlapTarget = Target::where('id_santri', $request->id_santri)
+            ->where('id_group', $request->id_group)
+            ->where('id_surat', $request->id_surat)
+            ->where(function ($query) use ($request, $jumlah_ayat_target_end) {
+                $query->whereBetween('jumlah_ayat_target_awal', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end])
+                    ->orWhereBetween('jumlah_ayat_target', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end]);
+            })
+            ->where('id_target', '!=', $id_target)
+            ->exists();
+
+        if ($overlapTarget) {
+            return response()->json(['success' => false, 'message' => 'Rentang ayat target tumpang tindih'], 422);
+        }
+
+        // Update target
+        $target->update([
+            'id_santri' => $request->id_santri,
+            'id_kelas' => $request->id_kelas,
+            'id_surat' => $request->id_surat,
+            'tgl_mulai' => $request->tgl_mulai,
+            'jumlah_ayat_target_awal' => $request->jumlah_ayat_target_awal,
+            'jumlah_ayat_target' => $request->jumlah_ayat_target,
+            'tgl_target' => $request->tgl_target,
+            'id_group' => $request->id_group,
+        ]);
+
+        // Update histori
+        $histori = Histori::where('id_target', $target->id_target)->first();
+        if ($histori) {
+            $totalAyatDisetorkan = \App\Models\Setoran::where('id_target', $target->id_target)
+                ->sum(DB::raw('jumlah_ayat_end - jumlah_ayat_start + 1'));
+
+            $persentaseBaru = number_format(($totalAyatDisetorkan / max(1, $request->jumlah_ayat_target)) * 100, 2);
+
+            $status = Histori::determineStatus($totalAyatDisetorkan, $request->jumlah_ayat_target, $request->tgl_target, $histori->tgl_setoran);
+
+            $histori->update([
+                'id_santri' => $target->id_santri,
+                'id_surat' => $target->id_surat,
+                'id_kelas' => $target->id_kelas,
+                'persentase' => $persentaseBaru,
+                'status' => $status,
+                'tgl_target' => $target->tgl_target,
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Target berhasil diperbarui', 'data' => $target]);
     }
-}
+    public function destroy(Request $request, $id_target)
+    {
+        $authHeader = $request->header('Authorization');
+        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+            return response()->json(['success' => false, 'message' => 'Token tidak ditemukan'], 401);
+        }
 
+        $token = str_replace('Bearer ', '', $authHeader);
+        $user = $this->getUserFromToken($token);
 
+        if (!$user || $user['role'] !== 'pengajar') {
+            return response()->json(['success' => false, 'message' => 'Hanya pengajar yang dapat menghapus target'], 403);
+        }
+
+        try {
+            $target = Target::findOrFail($id_target);
+            $target->delete();
+
+            return response()->json(['success' => true, 'message' => 'Target berhasil dihapus']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal menghapus target'], 500);
+        }
+    }
+    public function destroyBySantriGroup(Request $request, $id_santri, $id_group)
+    {
+        $authHeader = $request->header('Authorization');
+        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+            return response()->json(['success' => false, 'message' => 'Token tidak ditemukan'], 401);
+        }
+
+        $token = str_replace('Bearer ', '', $authHeader);
+        $user = $this->getUserFromToken($token);
+
+        if (!$user || $user['role'] !== 'pengajar') {
+            return response()->json(['success' => false, 'message' => 'Hanya pengajar yang dapat menghapus target'], 403);
+        }
+
+        try {
+            $deleted = Target::where('id_santri', $id_santri)
+                ->where('id_group', $id_group)
+                ->delete();
+
+            if ($deleted > 0) {
+                return response()->json(['success' => true, 'message' => 'Target berhasil dihapus berdasarkan id_santri dan id_group']);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Tidak ada target yang cocok ditemukan'], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal menghapus target'], 500);
+        }
+    }
 }
