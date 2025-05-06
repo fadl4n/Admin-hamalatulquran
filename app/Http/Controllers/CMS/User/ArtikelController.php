@@ -37,11 +37,20 @@ class ArtikelController extends Controller
         $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required',
-            'expired_at' => 'nullable|date|after_or_equal:today',
+            'expired_at' => 'required',
+
         ]);
 
+        // Validasi manual tanggal expired
+        if ($request->expired_at) {
+            $expiredDate = Carbon::parse($request->expired_at)->startOfDay();
+            if ($expiredDate->lt(Carbon::today())) {
+                return back()->withErrors(['expired_at' => 'Tanggal kadaluarsa tidak boleh sebelum hari ini.'])->withInput();
+            }
+        }
+
         // Set gambar default
-        $data['gambar'] = asset('assets/image/default.png');
+        $data['gambar'] = asset('assets/image/default-user.png');
 
         // Jika ada file gambar yang diupload
         if ($request->hasFile('gambar')) {
@@ -90,7 +99,8 @@ class ArtikelController extends Controller
         $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required',
-            'expired_at' => 'nullable|date|after_or_equal:today',
+            'expired_at' => 'required',
+
         ]);
 
         // Ambil data artikel berdasarkan ID
@@ -111,7 +121,7 @@ class ArtikelController extends Controller
             }
 
             // Hapus gambar lama jika ada
-            if ($article->gambar && $article->gambar !== asset('assets/image/default.png')) {
+            if ($article->gambar && $article->gambar !== asset('assets/image/default-user.png')) {
                 $oldImagePath = str_replace(url('/'), public_path(), $article->gambar);
                 if (file_exists($oldImagePath)) {
                     unlink($oldImagePath);
