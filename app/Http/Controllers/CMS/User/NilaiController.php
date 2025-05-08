@@ -16,7 +16,7 @@ class NilaiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Santri::with('kelas', 'targets');
+        $query = Santri::with('kelas', 'target');
 
         // Jika ada input pencarian
         if ($request->has('search')) {
@@ -27,7 +27,7 @@ class NilaiController extends Controller
                     ->orWhereHas('kelas', function ($kelasQuery) use ($search) {
                         $kelasQuery->where('nama_kelas', 'like', "%$search%");
                     })
-                    ->orWhereHas('targets', function ($targetQuery) use ($search) {
+                    ->orWhereHas('target', function ($targetQuery) use ($search) {
                         // Deteksi jika input mengandung "Target X" atau angka langsung
                         if (preg_match('/^Target (\d+)$/i', $search, $matches)) {
                             $idGroup = $matches[1]; // Ambil angka setelah "Target "
@@ -55,7 +55,7 @@ class NilaiController extends Controller
     {
         $santri = Santri::findOrFail($idSantri);
         // Ambil target berdasarkan santri dan id_group
-        $targets = Target::where('id_santri', $idSantri)
+        $target = Target::where('id_santri', $idSantri)
             ->where('id_group', $idGroup)
             ->get();
 
@@ -63,7 +63,7 @@ class NilaiController extends Controller
         $hafalan = [];
         $murojaah = [];
 
-        foreach ($targets as $target) {
+        foreach ($target as $target) {
             $namaSurat = $target->surat->nama_surat;
 
             // Hitung rata-rata nilai dari setoran (hafalan)

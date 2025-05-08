@@ -47,7 +47,7 @@
                 { data: 'action', name: 'action', orderable: false, searchable: false }
             ],
             columnDefs: [
-                { className: "text-center", targets: [3] } // Menyenter aksi
+                { className: "text-center", target: [3] } // Menyenter aksi
             ],
 
         });

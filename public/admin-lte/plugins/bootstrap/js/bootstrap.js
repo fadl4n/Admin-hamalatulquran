@@ -3666,7 +3666,7 @@
       this._config = this._getConfig(config);
       this._selector = this._config.target + " " + SELECTOR_NAV_LINKS + "," + (this._config.target + " " + SELECTOR_LIST_ITEMS + ",") + (this._config.target + " " + SELECTOR_DROPDOWN_ITEMS);
       this._offsets = [];
-      this._targets = [];
+      this._target = [];
       this._activeTarget = null;
       this._scrollHeight = 0;
       $__default["default"](this._scrollElement).on(EVENT_SCROLL, function (event) {
@@ -3688,15 +3688,15 @@
       var offsetMethod = this._config.method === 'auto' ? autoMethod : this._config.method;
       var offsetBase = offsetMethod === METHOD_POSITION ? this._getScrollTop() : 0;
       this._offsets = [];
-      this._targets = [];
+      this._target = [];
       this._scrollHeight = this._getScrollHeight();
-      var targets = [].slice.call(document.querySelectorAll(this._selector));
-      targets.map(function (element) {
+      var target = [].slice.call(document.querySelectorAll(this._selector));
+      target.map(function (element) {
         var target;
-        var targetSelector = Util.getSelectorFromElement(element);
+        var targetelector = Util.getSelectorFromElement(element);
 
-        if (targetSelector) {
-          target = document.querySelector(targetSelector);
+        if (targetelector) {
+          target = document.querySelector(targetelector);
         }
 
         if (target) {
@@ -3704,7 +3704,7 @@
 
           if (targetBCR.width || targetBCR.height) {
             // TODO (fat): remove sketch reliance on jQuery position/offset
-            return [$__default["default"](target)[offsetMethod]().top + offsetBase, targetSelector];
+            return [$__default["default"](target)[offsetMethod]().top + offsetBase, targetelector];
           }
         }
 
@@ -3716,7 +3716,7 @@
       }).forEach(function (item) {
         _this2._offsets.push(item[0]);
 
-        _this2._targets.push(item[1]);
+        _this2._target.push(item[1]);
       });
     };
 
@@ -3728,7 +3728,7 @@
       this._config = null;
       this._selector = null;
       this._offsets = null;
-      this._targets = null;
+      this._target = null;
       this._activeTarget = null;
       this._scrollHeight = null;
     } // Private
@@ -3776,7 +3776,7 @@
       }
 
       if (scrollTop >= maxScroll) {
-        var target = this._targets[this._targets.length - 1];
+        var target = this._target[this._target.length - 1];
 
         if (this._activeTarget !== target) {
           this._activate(target);
@@ -3794,10 +3794,10 @@
       }
 
       for (var i = this._offsets.length; i--;) {
-        var isActiveTarget = this._activeTarget !== this._targets[i] && scrollTop >= this._offsets[i] && (typeof this._offsets[i + 1] === 'undefined' || scrollTop < this._offsets[i + 1]);
+        var isActiveTarget = this._activeTarget !== this._target[i] && scrollTop >= this._offsets[i] && (typeof this._offsets[i + 1] === 'undefined' || scrollTop < this._offsets[i + 1]);
 
         if (isActiveTarget) {
-          this._activate(this._targets[i]);
+          this._activate(this._target[i]);
         }
       }
     };

@@ -77,6 +77,7 @@ Route::get('/surat', [SuratController::class, 'index']);
 Route::middleware([])->group(function () {
     Route::get('/target', [TargetController::class, 'index']);
     Route::get('/target/id/{id_target}', [TargetController::class, 'show']);
+    Route::get('/target/santri/{id_santri}', [TargetController::class, 'getAllTargetBySantri']);
     Route::get('/target/{id_santri}/{id_group}', [TargetController::class, 'getBySantriGroup']);
     Route::post('/target', [TargetController::class, 'store']);
     Route::put('/target/{id_target}', [TargetController::class, 'update']);
@@ -86,17 +87,17 @@ Route::middleware([])->group(function () {
 
 
 Route::middleware([])->group(function () {
-    Route::put('/setoran/{id}', [SetoranController::class, 'update']);
     Route::get('/setoran', [SetoranController::class, 'index']); // GET semua setoran
-    Route::get('/setoran/{groupKey}', [SetoranController::class, 'showBySantriFormatted']);
-    Route::post('/setoran', [SetoranController::class, 'store']);
-    Route::delete('/setoran/{id}', [SetoranController::class, 'destroy']);
-    Route::delete('/setoran/{idSantri}/{idGroup}', [SetoranController::class, 'destroyByTarget']);
-    Route::get('/setoran/targets/{id_santri}', [SetoranController::class, 'getTargetsBySantri']);
+    Route::get('/setoran/target/{id_santri}', [SetoranController::class, 'gettargetBySantri']);
+    Route::get('/setoran/{idSantri}/{idGroup}', [SetoranController::class, 'getSetoranBySantriAndGroup']);
+    Route::get('/setoran/get-id-target', [SetoranController::class, 'getIdTarget']);
     Route::get('/setoran/nama-surat/{group_id}/{santri_id}', [SetoranController::class, 'getNamaSurat']);
     Route::get('/setoran/validate-ayat', [SetoranController::class, 'validateAyat']);
     Route::get('/setoran/target-detail', [SetoranController::class, 'getTargetDetailBySurat']);
-    Route::get('/get-id-target', [SetoranController::class, 'getIdTarget']);
+    Route::put('/setoran/{id}', [SetoranController::class, 'update']);
+    Route::post('/setoran', [SetoranController::class, 'store']);
+    Route::delete('/setoran/{id}', [SetoranController::class, 'destroy']);
+    Route::delete('/setoran/{idSantri}/{idGroup}', [SetoranController::class, 'destroyByTarget']);
 });
 
 Route::middleware([])->group(function () {
@@ -113,7 +114,7 @@ Route::middleware([])->group(function () {
     Route::get('/nilai/datatable/data', [NilaiController::class, 'fnGetData']);
 });
 
-Route::middleware('api')->group(function () {
+Route::middleware([])->group(function () {
     Route::get('/artikel', [ArtikelController::class, 'index']);
 });
 

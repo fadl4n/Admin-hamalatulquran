@@ -163,7 +163,7 @@
                 ],
                 columnDefs: [{
                     className: "text-center",
-                    targets: "_all"
+                    target: "_all"
                 }]
             });
 

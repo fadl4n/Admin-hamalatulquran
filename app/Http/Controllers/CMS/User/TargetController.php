@@ -25,12 +25,12 @@ class TargetController extends Controller
     public function index()
     {
         // Mengambil data dan mengelompokkan berdasarkan kriteria yang sama
-        $targets = Target::with(['santri', 'kelas', 'surat', 'pengajar'])
+        $target = Target::with(['santri', 'kelas', 'surat', 'pengajar'])
             ->get()
             ->groupBy(function ($item) {
                 return $item->id_santri . '-' . $item->id_group;
             });
-        return view('target.show', compact('targets'));
+        return view('target.show', compact('target'));
     }
     public function create()
     {
@@ -155,13 +155,13 @@ class TargetController extends Controller
     private function validateTargetOverlap(Request $request, $jumlah_ayat_target_end)
     {
         // Ambil target yang sudah ada
-        $targets = Target::where('id_surat', $request->id_surat)
+        $target = Target::where('id_surat', $request->id_surat)
             ->where('id_santri', $request->id_santri)
             ->get();
 
         $jumlah_tumpang_tindih = 0;
 
-        foreach ($targets as $existingTarget) {
+        foreach ($target as $existingTarget) {
             if (
                 ($request->jumlah_ayat_target_awal >= $existingTarget->jumlah_ayat_target_awal &&
                     $request->jumlah_ayat_target_awal <= $existingTarget->jumlah_ayat_target_end) ||
@@ -342,10 +342,10 @@ class TargetController extends Controller
     // Untuk DataTables
     public function fnGetData()
     {
-        $targets = Target::with(['santri', 'pengajar', 'kelas', 'surat'])
-            ->select('targets.*');
+        $target = Target::with(['santri', 'pengajar', 'kelas', 'surat'])
+            ->select('target.*');
 
-        return DataTables::of($targets)
+        return DataTables::of($target)
             ->addIndexColumn()
             ->addColumn('nama_santri', function ($row) {
                 return $row->santri->nama;
@@ -389,7 +389,7 @@ class TargetController extends Controller
         $id_santri = $request->query('id_santri'); // Bisa juga pakai $request->input('id_santri')
 
         // Query untuk mengambil data berdasarkan filter id_group dan id_santri
-        $targets = Target::with(['santri', 'kelas', 'surat', 'pengajar'])
+        $target = Target::with(['santri', 'kelas', 'surat', 'pengajar'])
             ->when($id_group, function ($query, $id_group) {
                 return $query->where('id_group', $id_group);
             })
@@ -400,10 +400,10 @@ class TargetController extends Controller
             ->get();
 
         // Lakukan pengelompokan berdasarkan id_santri dan id_group
-        $targets = $targets->groupBy(function ($item) {
+        $target = $target->groupBy(function ($item) {
             return $item->id_santri . '-' . $item->id_group;
         });
 
-        return view('target.detail', compact('targets'));
+        return view('target.detail', compact('target'));
     }
 }

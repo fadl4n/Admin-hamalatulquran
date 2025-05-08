@@ -29,7 +29,8 @@
                                             <select name="id_santri" id="id_santri" class="form-control" required>
                                                 <option value="">- Pilih Santri -</option>
                                                 @foreach ($santris as $santri)
-                                                    <option value="{{ $santri->id_santri }}">
+                                                    <option value="{{ $santri->id_santri }}"
+                                                        data-id_kelas="{{ $santri->id_kelas }}">
                                                         {{ $santri->nama }} | {{ $santri->nisn }}
                                                     </option>
                                                 @endforeach
@@ -44,7 +45,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="kelas">Kelas</label>
-                                            <select name="id_kelas" class="form-control" required>
+                                            <select name="id_kelas" class="form-control" id="id_kelas" required>
                                                 <option value="">- Pilih Kelas -</option>
                                                 @foreach ($kelas as $kelass)
                                                     <option value="{{ $kelass->id_kelas }}">{{ $kelass->nama_kelas }}
@@ -52,8 +53,8 @@
                                                 @endforeach
                                             </select>
                                             @error('id_kelas')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                     </div>
                                 </div>
@@ -157,7 +158,8 @@
                                 <!-- Keterangan -->
                                 <div class="form-group">
                                     <label for="keterangan">Keterangan</label>
-                                    <textarea name="keterangan" id="keterangan" rows="3" class="form-control" placeholder="Masukkan keterangan..."></textarea>
+                                    <textarea name="keterangan" id="keterangan" rows="3" class="form-control"
+                                        placeholder="Masukkan keterangan..."></textarea>
                                 </div>
 
                                 <div class="d-flex justify-content-end">
@@ -181,6 +183,14 @@
     <script src="{{ asset('/bower_components/admin-lte/plugins/select2/js/select2.full.min.js') }}"></script>
     <script>
         $(document).ready(function() {
+            $('#id_santri').on('change', function() {
+                var selectedOption = $(this).find('option:selected');
+                var idKelas = selectedOption.data('id_kelas');
+
+                // Set value dropdown kelas
+                $('#id_kelas').val(idKelas);
+            });
+
             // Inisialisasi Select2
             $('.select2').select2();
 
@@ -191,15 +201,15 @@
 
                 if (santriId) {
                     $.ajax({
-                        url: "{{ route('setoran.getTargetsBySantri', ':santri_id') }}".replace(
+                        url: "{{ route('setoran.gettargetBySantri', ':santri_id') }}".replace(
                             ':santri_id', santriId),
                         type: 'GET',
                         success: function(data) {
                             console.log("Data target diterima:", data);
 
                             let uniqueGroups = new Set();
-                            if (data.targets.length > 0) {
-                                data.targets.forEach(function(target) {
+                            if (data.target.length > 0) {
+                                data.target.forEach(function(target) {
                                     if (!uniqueGroups.has(target.id_group)) {
                                         uniqueGroups.add(target.id_group);
                                         $('#id_group').append('<option value="' + target
@@ -260,7 +270,6 @@
                     });
                 }
             });
-
 
             // Ketika nama surat dipilih, lakukan validasi jumlah ayat
             $('#nama_surat').on('change', function() {

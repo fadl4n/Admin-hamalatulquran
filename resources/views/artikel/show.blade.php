@@ -111,7 +111,7 @@
             ],
             columnDefs: [{
                     className: "text-center",
-                    targets: [0, 1, 2, 3, 4, 5]
+                    target: [0, 1, 2, 3, 4, 5]
                 }, // ✅ Pusatkan teks di kolom tertentu
             ],
             searching: true // ✅ Enable search

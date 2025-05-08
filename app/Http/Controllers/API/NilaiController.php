@@ -26,7 +26,7 @@ class NilaiController extends Controller
                     ->orWhereHas('kelas', function ($kelasQuery) use ($search) {
                         $kelasQuery->where('nama_kelas', 'like', "%$search%");
                     })
-                    ->orWhereHas('targets', function ($targetQuery) use ($search) {
+                    ->orWhereHas('target', function ($targetQuery) use ($search) {
                         if (preg_match('/^Target (\d+)$/i', $search, $matches)) {
                             $idGroup = $matches[1];
                             $targetQuery->where('id_group', $idGroup);
@@ -63,14 +63,14 @@ class NilaiController extends Controller
     {
         $santri = Santri::with('kelas')->findOrFail($idSantri);
 
-        $targets = Target::where('id_santri', $idSantri)
+        $target = Target::where('id_santri', $idSantri)
             ->where('id_group', $idGroup)
             ->get();
 
         $hafalan = [];
         $murojaah = [];
 
-        foreach ($targets as $target) {
+        foreach ($target as $target) {
             $namaSurat = $target->surat->nama_surat;
 
             $nilaiHafalan = Setoran::where('id_target', $target->id_target)->avg('nilai');

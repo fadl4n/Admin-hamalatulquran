@@ -204,7 +204,7 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::put('update/{setoran}', 'update')->name('update');
             Route::delete('delete-target/{id_santri}/{idGroup}', 'destroyByTarget')->name('destroyByTarget'); // Gunakan id_santri dan idGroup
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
-            Route::get('get-santri-targets/{id_santri}', 'getSantriTargets')->name('getSantriTargets');
+            Route::get('get-santri-target/{id_santri}', 'getSantritarget')->name('getSantritarget');
             Route::get('get-nama-surat', 'getNamaSuratByGroup')->name('getNamaSuratByGroup');
             Route::delete('destroy/{idSetoran}', 'destroy')->name('destroy');
             Route::get('detail/{groupKey}', 'show')->name('show');
@@ -259,7 +259,7 @@ Route::middleware([CheckAuth::class])->group(function () {
 
 
     // web.php
-Route::get('/setoran/targets/{santri_id}', [SetoranController::class, 'getTargetsBySantri'])->name('setoran.getTargetsBySantri');
+Route::get('/setoran/target/{santri_id}', [SetoranController::class, 'gettargetBySantri'])->name('setoran.gettargetBySantri');
 Route::get('/get-nama-surat', [SetoranController::class, 'getNamaSurat']);
 
 Route::get('get-ayats-validation', [SetoranController::class, 'validateAyat']);

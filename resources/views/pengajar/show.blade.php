@@ -98,7 +98,7 @@
             ],
             columnDefs: [{
                 className: "text-center",
-                targets: [0, 2, 3, 4]
+                target: [0, 2, 3, 4]
             }]
         });
 

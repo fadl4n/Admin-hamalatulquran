@@ -32,13 +32,13 @@ class TargetController extends Controller
 
     public function index()
     {
-        $targets = Target::with(['santri', 'kelas', 'pengajar', 'surat'])
+        $target = Target::with(['santri', 'kelas', 'pengajar', 'surat'])
             ->get()
             ->groupBy(function ($item) {
                 return $item->id_santri . '-' . $item->id_group;
             });
 
-        if ($targets->isEmpty()) {
+        if ($target->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Belum ada target yang tersedia'
@@ -48,7 +48,7 @@ class TargetController extends Controller
         $result = [];
         $no = 1;
 
-        foreach ($targets as $group) {
+        foreach ($target as $group) {
             $first = $group->first();
             $result[] = [
                 'no' => $no++,
@@ -89,14 +89,48 @@ class TargetController extends Controller
         ]);
     }
 
+    public function getAllTargetBySantri($id_santri)
+    {
+        $target = Target::with('surat', 'santri')
+            ->where('id_santri', $id_santri)
+            ->get();
+
+        if ($target->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada target ditemukan untuk santri ini.'
+            ], 404);
+        }
+
+        $result = $target->map(function ($target) {
+            return [
+                'id_target' => $target->id_target,
+                'nama_surat' => optional($target->surat)->nama_surat ?? 'Tidak Ditemukan',
+                'ayat_awal' => $target->jumlah_ayat_target_awal ?? '0',
+                'ayat_akhir' => $target->jumlah_ayat_target ?? '0',
+                'jumlah_ayat' => optional($target->surat)->jumlah_ayat ?? '-',
+                'tgl_mulai' => $target->tgl_mulai ?? '0',
+                'tgl_target' => $target->tgl_target ?? '0',
+                'id_pengajar' => $target->id_pengajar ?? '0',
+                'nama_pengajar' => optional($target->pengajar)->nama ?? '-',
+                'jenis_kelamin_pengajar' => optional($target->pengajar)->jenis_kelamin ?? '-',
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $result
+        ]);
+    }
+
     public function getBySantriGroup($id_santri, $id_group)
     {
-        $targets = Target::with('surat', 'santri')
+        $target = Target::with('surat', 'santri')
             ->where('id_santri', $id_santri)
             ->where('id_group', $id_group)
             ->get();
 
-        if ($targets->isEmpty()) {
+        if ($target->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Tidak ada target ditemukan untuk santri dan group ini.'
@@ -104,12 +138,17 @@ class TargetController extends Controller
         }
 
         // Hanya ambil data yang dibutuhkan seperti di detail.php (tanpa aksi)
-        $result = $targets->map(function ($target) {
+        $result = $target->map(function ($target) {
             return [
                 'nama_surat' => optional($target->surat)->nama_surat ?? 'Tidak Ditemukan',
                 'ayat_awal' => $target->jumlah_ayat_target_awal ?? '0',
                 'ayat_akhir' => $target->jumlah_ayat_target ?? '0',
                 'jumlah_ayat' => optional($target->surat)->jumlah_ayat ?? '-',
+                'tgl_mulai' => $target->tgl_mulai ?? '0',
+                'tgl_target' => $target->tgl_target ?? '0',
+                'id_pengajar' => $target->id_pengajar ?? '0',
+                'nama_pengajar' => optional($target->pengajar)->nama ?? '-',
+                'jenis_kelamin_pengajar' => optional($target->pengajar)->jenis_kelamin ?? '-',
             ];
         });
 
@@ -125,12 +164,14 @@ class TargetController extends Controller
             'id_santri' => 'required|exists:santris,id_santri',
             'id_surat' => 'required|exists:surats,id_surat',
             'id_kelas' => 'required|exists:kelas,id_kelas',
+            'id_pengajar' => 'required|exists:pengajars,id_pengajar',
             'tgl_mulai' => 'required|date',
             'jumlah_ayat_target_awal' => 'required|integer|min:1',
             'jumlah_ayat_target' => 'required|integer|min:1',
             'tgl_target' => 'required|date',
             'id_group' => 'nullable|integer'
         ]);
+
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
@@ -167,12 +208,10 @@ class TargetController extends Controller
             return response()->json(['success' => false, 'message' => 'Rentang ayat target tumpang tindih dengan target yang sudah ada'], 422);
         }
 
-        // Asumsi pengajar ID sudah didapatkan dari auth atau nilai tetap
-        $pengajarId = 1; // Misalnya pengajar dengan id 1
 
         $target = Target::create([
             'id_santri' => $request->id_santri,
-            'id_pengajar' => $pengajarId, // Ganti dengan id_pengajar yang sesuai
+            'id_pengajar' => $request->id_pengajar,
             'id_kelas' => $request->id_kelas,
             'id_surat' => $request->id_surat,
             'tgl_mulai' => $request->tgl_mulai,
