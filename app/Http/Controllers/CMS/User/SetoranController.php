@@ -21,10 +21,10 @@ class SetoranController extends Controller
         // Mengambil data setoran dengan relasi
         $setorans = Setoran::with(['santri', 'kelas', 'pengajar', 'targets', 'surat'])->get();
 
-        // Mengelompokkan setoran berdasarkan id_santri dan id_group dari tabel targets
+        // Mengelompokkan setoran berdasarkan id_santri dan id_group dari tabel target
         $setoransGrouped = $setorans->groupBy(function ($setoran) {
-            // Menggunakan id_santri dari relasi santri dan id_group dari relasi targets
-            return $setoran->santri->id_santri . '-' . $setoran->targets->first()->id_group;
+            // Menggunakan id_santri dari relasi santri dan id_group dari relasi target
+            return $setoran->santri->id_santri . '-' . $setoran->target->first()->id_group;
         });
 
         return view('setoran.show', compact('setoransGrouped'));
@@ -35,11 +35,11 @@ class SetoranController extends Controller
         // Pecah groupKey menjadi id_santri dan id_group
         list($idSantri, $idGroup) = explode('-', $groupKey);
         // Ambil semua setoran yang berhubungan dengan id_santri dan id_group
-        $setorans = Setoran::with(['santri', 'kelas', 'pengajar', 'targets', 'surat'])
+        $setorans = Setoran::with(['santri', 'kelas', 'pengajar', 'target', 'surat'])
             ->whereHas('santri', function ($query) use ($idSantri) {
                 $query->where('id_santri', $idSantri);
             })
-            ->whereHas('targets', function ($query) use ($idGroup) {
+            ->whereHas('target', function ($query) use ($idGroup) {
                 $query->where('id_group', $idGroup); // Menggunakan id_group bukan id_target
             })
             ->get();
@@ -50,9 +50,9 @@ class SetoranController extends Controller
 
     public function destroyByTarget($idSantri, $idGroup)
     {
-        // Temukan semua setoran yang memiliki id_santri dan id_group tertentu melalui relasi ke targets
+        // Temukan semua setoran yang memiliki id_santri dan id_group tertentu melalui relasi ke target
         $setorans = Setoran::where('id_santri', $idSantri)
-            ->whereHas('targets', function ($query) use ($idGroup) {
+            ->whereHas('target', function ($query) use ($idGroup) {
                 $query->where('id_group', $idGroup);
             })->get();
 
@@ -140,17 +140,17 @@ class SetoranController extends Controller
         $kelas = Kelas::all();
         $surats = Surat::all();
         $pengajars = Pengajar::all();
-        $targets = Target::all(); // Ambil data target
-        return view('setoran.create', compact('santris', 'kelas', 'pengajars', 'targets', 'surats'));
+        $target = Target::all(); // Ambil data target
+        return view('setoran.create', compact('santris', 'kelas', 'pengajars', 'target', 'surats'));
     }
-    public function getTargetsBySantri($santri_id)
+    public function gettargetBySantri($santri_id)
     {
-        $targets = Target::where('id_santri', $santri_id)
+        $target = Target::where('id_santri', $santri_id)
             ->groupBy('id_group')
             ->get(['id_group']);
 
         return response()->json([
-            'targets' => $targets
+            'target' => $target
         ]);
     }
     public function getIdTarget(Request $request)
@@ -270,12 +270,12 @@ class SetoranController extends Controller
         $santriId = $request->input('id_santri'); // Ambil ID Santri
 
         // Cari target dengan id_group dan id_santri yang diberikan
-        $targets = Target::where('id_group', $groupId)
+        $target = Target::where('id_group', $groupId)
             ->where('id_santri', $santriId)
             ->get();
 
         // Ambil daftar id_surat yang unik dari target, pastikan id_target di tabel setoran belum selesai (status != 1)
-        $surats = $targets->map(function ($target) use ($santriId) {
+        $surats = $target->map(function ($target) use ($santriId) {
             // Mengecek apakah id_target terkait sudah selesai (status 1) di tabel setoran
             $setoran = Setoran::where('id_target', $target->id_target)
                 ->where('id_santri', $santriId)
@@ -306,7 +306,7 @@ class SetoranController extends Controller
             'nilai' => 'required|numeric|min:0|max:100',
             'jumlah_ayat_start' => 'required|numeric',
             'jumlah_ayat_end' => 'required|numeric',
-            'id_group' => 'required', // Tidak divalidasi dengan exists, karena hanya ada di targets
+            'id_group' => 'required', // Tidak divalidasi dengan exists, karena hanya ada di target
         ]);
 
         // Pengecekan apakah id_kelas sesuai dengan santri
@@ -501,8 +501,8 @@ class SetoranController extends Controller
         $kelas = Kelas::all();
         $surats = Surat::all();
         $pengajars = Pengajar::all();
-        $targets = Target::all(); // Ambil data target
-        return view('setoran.edit', compact('setoran', 'santris', 'kelas', 'pengajars', 'targets', 'surats'));
+        $target = Target::all(); // Ambil data target
+        return view('setoran.edit', compact('setoran', 'santris', 'kelas', 'pengajars', 'target', 'surats'));
     }
 
     public function update(Request $request, Setoran $setoran)
@@ -697,7 +697,7 @@ class SetoranController extends Controller
 
     public function fnGetData()
     {
-        $setorans = Setoran::with(['santri', 'kelas', 'targets', 'pengajar'])->get();
+        $setorans = Setoran::with(['santri', 'kelas', 'target', 'pengajar'])->get();
         return DataTables::of($setorans)
             ->addIndexColumn()
             ->addColumn('santri', function ($row) {

@@ -130,7 +130,7 @@
                 ],
                 columnDefs: [{
                     className: "text-center",
-                    targets: [0, 1, 2, 3]
+                    target: [0, 1, 2, 3]
                 }]
             });
             $('#formTambahKelas').on('submit', function(e) {

@@ -925,7 +925,7 @@
                                 data + '</span>' +
                                 pill + '</div>';
                         },
-                        targets: 0,
+                        target: 0,
                         // Accessing the private datatables property to set type based on the original table.
                         // This is null if not defined by the user, meaning that automatic type detection
                         //  would take place
@@ -938,13 +938,13 @@
                         data: 'shown',
                         orderData: [1, 2],
                         searchable: false,
-                        targets: 1,
+                        target: 1,
                         visible: false
                     },
                     {
                         data: 'total',
                         searchable: false,
-                        targets: 2,
+                        target: 2,
                         visible: false
                     }
                 ],

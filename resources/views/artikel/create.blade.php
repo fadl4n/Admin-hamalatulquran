@@ -24,15 +24,19 @@
 
                                 <div class="form-group">
                                     <label>Tanggal Expired</label>
-                                    <input type="date" name="expired_at" class="form-control">
+                                    <input type="date" name="expired_at" class="form-control"
+                                        value="{{ old('expired_at') }}">
+
+                                    @error('expired_at')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
 
                                 <div class="form-group">
                                     <label for="gambar">Gambar Artikel</label>
                                     <input type="file" name="gambar" id="gambar"
                                         class="form-control @error('gambar') is-invalid @enderror"
-                                        accept="image/png, image/jpeg"
-                                        onchange="previewImage(event)">
+                                        accept="image/png, image/jpeg" onchange="previewImage(event)">
 
                                     <small class="text-muted">Kosongkan jika tidak ingin mengunggah foto.</small>
 
@@ -41,15 +45,12 @@
                                     @enderror
 
                                     <!-- Pratinjau Gambar -->
-                                   <!-- Pratinjau Gambar -->
-<div class="mt-2">
-    <img id="preview"
-        src="{{ asset('assets/image/default-user.png') }}"
-        alt="Gambar Artikel"
-        class="img-thumbnail"
-        width="150"
-        onerror="this.onerror=null;this.src='{{ asset('assets/image/default.png') }}'">
-</div>
+                                    <!-- Pratinjau Gambar -->
+                                    <div class="mt-2">
+                                        <img id="preview" src="{{ asset('assets/image/default-user.png') }}"
+                                            alt="Gambar Artikel" class="img-thumbnail" width="150"
+                                            onerror="this.onerror=null;this.src='{{ asset('assets/image/default.png') }}'">
+                                    </div>
 
                                 </div>
 
@@ -65,7 +66,7 @@
     <script>
         function previewImage(event) {
             var reader = new FileReader();
-            reader.onload = function(){
+            reader.onload = function() {
                 var output = document.getElementById('preview');
                 output.src = reader.result;
             };

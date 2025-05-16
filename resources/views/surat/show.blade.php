@@ -110,7 +110,7 @@
                 { data: 'action', name: 'action', orderable: false, searchable: false, className: 'aksi' }
             ],
             columnDefs: [
-                { className: "text-center", targets: [0, 2, 4] }
+                { className: "text-center", target: [0, 2, 4] }
             ]
         });
 

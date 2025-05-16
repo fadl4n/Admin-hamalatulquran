@@ -11,6 +11,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
 
 class SantriController extends Controller
 {
@@ -18,8 +19,8 @@ class SantriController extends Controller
     {
         if ($request->ajax()) {
             $data = Santri::with('kelas')
-            ->orderBy('id_kelas')
-            ->get();
+                ->orderBy('id_kelas')
+                ->get();
             return DataTables::of($data)
                 ->addColumn('nama_kelas', function ($row) {
                     return $row->kelas ? $row->kelas->nama_kelas : 'Tidak Ada Kelas';
@@ -57,12 +58,15 @@ class SantriController extends Controller
             'tgl_lahir' => 'required|date',
             'alamat' => 'nullable|string|max:255',
             'email' => 'nullable|string|max:255',
-            'angkatan' => 'nullable|string|max:50',
+            'angkatan' => 'nullable|integer|min:2000|max:'.(date('Y') + 1),
             'id_kelas' => 'nullable|exists:kelas,id_kelas',
             'jenis_kelamin' => 'required|integer|in:1,2',
             'status' => 'required|integer|in:0,1',
             'password' => 'required|string|min:6',
-            'foto_santri' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto_santri' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:7168',
+        ], [
+            'foto_santri.mimes' => 'Format file tidak didukung! Gunakan PNG, JPG, atau JPEG.',
+            'foto_santri.max' => 'Ukuran file terlalu besar! Maksimal 7MB.',
         ]);
 
         // Pengecekan manual untuk NISN dan Email
@@ -77,28 +81,27 @@ class SantriController extends Controller
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
 
-        $data['foto_santri'] = asset('assets/image/default-user.png'); // Gambar default
+        $data['foto_santri'] = Storage::url('uploadedFile/image/default-user.png');
 
         if ($request->hasFile('foto_santri')) {
-            $file = $request->file('foto_santri');
-            $allowedFileTypes = ['png', 'jpg', 'jpeg'];
-            $extension = $file->getClientOriginalExtension();
+            $image = $request->file('foto_santri');
 
-            // Validasi tipe file
-            if (!in_array($extension, $allowedFileTypes)) {
-                return redirect()->back()->with('error', 'File type not allowed. Only png and jpg files are allowed.');
-            }
+            $filename = time() . '.' . $image->getClientOriginalExtension();
 
-            // Buat nama file unik
-            $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
+            // Create new ImageManager instance with 'gd' driver
+            $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
 
-            // Simpan file ke folder public
-            $file->move(public_path('uploadedFile/image/santri'), $name_original);
+            $img = $manager->read($image->getPathname());
 
-            // Simpan path gambar
-            $data['foto_santri'] = url('uploadedFile/image/santri') . '/' . $name_original;
+            // Encode to JPG (or use $img->toPng() / ->toWebp())
+            $encodedImage = $img->toJpeg(75); // kualitas 75%
+
+            // Simpan ke storage/public
+            $path = 'uploadedFile/image/santri/' . $filename;
+            Storage::disk('public')->put($path, (string) $encodedImage);
+
+            $data['foto_santri'] = asset('storage/' . $path);
         }
-
 
         Santri::create($data);
 
@@ -129,11 +132,11 @@ class SantriController extends Controller
             'email' => 'nullable|string|max:255',
             'alamat' => 'nullable|string|max:255',
             'angkatan' => 'nullable|string|max:50',
-            'id_kelas' => 'nullable|exists:kelas,id_kelas',
+            'id_kelas' => 'required|exists:kelas,id_kelas',
             'jenis_kelamin' => 'required|integer|in:1,2',
             'status' => 'required|integer|in:0,1',
             'password' => 'nullable|string|min:6',
-            'foto_santri' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto_santri' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:7168',
             'nama_ayah' => 'nullable|string|max:255',
             'pekerjaan_ayah' => 'nullable|string|max:255',
             'pendidikan_ayah' => 'nullable|string|max:255',
@@ -163,57 +166,48 @@ class SantriController extends Controller
         $santri = Santri::findOrFail($id);
         $data = $request->except('password', 'foto_santri');
 
-        // Pengecekan manual untuk NISN dan Email
+        // Cek duplikasi NISN & email
         if (Santri::where('nisn', $request->nisn)->where('id_santri', '!=', $santri->id_santri)->exists()) {
             return redirect()->back()->withInput()->with('error', 'NISN sudah digunakan oleh santri lain.');
         }
-
         if (Santri::where('email', $request->email)->where('id_santri', '!=', $santri->id_santri)->exists()) {
             return redirect()->back()->withInput()->with('error', 'Email sudah digunakan oleh santri lain.');
         }
 
-        // Handle password update
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
 
-      // Handle foto santri upload
-if ($request->hasFile('foto_santri')) {
-    $file = $request->file('foto_santri');
-    $allowedFileTypes = ['png', 'jpg', 'jpeg'];
-    $extension = $file->getClientOriginalExtension();
+        // Handle foto santri baru
+        if ($request->hasFile('foto_santri')) {
+            $image = $request->file('foto_santri');
+            $filename = time() . '.' . $image->getClientOriginalExtension();
 
-    // Validasi tipe file
-    if (!in_array($extension, $allowedFileTypes)) {
-        return redirect()->back()->with('error', 'File type not allowed. Only PNG, JPG, and JPEG files are allowed.');
-    }
+            $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $img = $manager->read($image->getPathname());
+            $encodedImage = $img->toJpeg(75);
 
-    // Hapus file lama jika ada
-    if (!empty($santri->foto_santri) && $santri->foto_santri !== asset('assets/image/default-user.png')) {
-        $oldFilePath = public_path('uploadedFile/image/santri/' . basename($santri->foto_santri));
-        if (file_exists($oldFilePath)) {
-            unlink($oldFilePath);
+            // Hapus file lama
+            $defaultFoto = Storage::url('uploadedFile/image/default-user.png');
+            if (!empty($santri->foto_santri) && $santri->foto_santri !== $defaultFoto) {
+                Storage::disk('public')->delete($santri->foto_santri);
+            }
+
+            $path = 'uploadedFile/image/santri/' . $filename;
+            Storage::disk('public')->put($path, (string) $encodedImage);
+            $data['foto_santri'] = asset('storage/' . $path);
         }
-    }
 
-    // Simpan file gambar baru dengan nama unik
-    $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
-    $file->move(public_path('uploadedFile/image/santri'), $name_original);
+        // Kalo gak upload gambar, keep yang lama
+        if (empty($data['foto_santri'])) {
+            $data['foto_santri'] = $santri->foto_santri ?? $defaultFoto;
+        }
 
-    // Simpan path gambar baru ke dalam data
-    $data['foto_santri'] = url('uploadedFile/image/santri/' . $name_original);
-} else {
-    // Jika tidak ada gambar baru, tetap gunakan gambar lama
-    $data['foto_santri'] = $santri->foto_santri ?? asset('assets/image/default-user.png');
-}
-
-
-        // Update data keluarga (ayah, ibu, wali)
+        // Update data keluarga
         $this->updateKeluarga($santri->id_santri, 1, $request->all(), 'ayah');
         $this->updateKeluarga($santri->id_santri, 2, $request->all(), 'ibu');
         $this->updateKeluarga($santri->id_santri, 3, $request->all(), 'wali');
 
-        // Update data santri
         $santri->update($data);
 
         return redirect()->route('santri.index')->with('success', 'Santri berhasil diperbarui.');
@@ -238,10 +232,6 @@ if ($request->hasFile('foto_santri')) {
             $keluargaData
         );
     }
-
-
-
-
 
     public function destroy($id)
     {
@@ -300,9 +290,4 @@ if ($request->hasFile('foto_santri')) {
             ->rawColumns(['action'])
             ->make(true);
     }
-
-
-
 }
-
-

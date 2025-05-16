@@ -40,7 +40,7 @@
                                     </thead>
                                     <tbody>
                                         @php $no = 1; @endphp
-                                        @foreach($targets as $groupKey => $group)
+                                        @foreach($target as $groupKey => $group)
                                         @php $first = $group->first(); @endphp
                                         <tr>
                                             <td>{{ $no++ }}</td>

@@ -463,11 +463,11 @@ var ColReorder = function( dt, opts )
 		 * insert. Array of objects with the properties:
 		 *   x: x-axis position
 		 *   to: insert point
-		 *  @property aoTargets
+		 *  @property aotarget
 		 *  @type     array
 		 *  @default  []
 		 */
-		"aoTargets": []
+		"aotarget": []
 	};
 
 
@@ -1007,7 +1007,7 @@ $.extend( ColReorder.prototype, {
 		var target;
 		var lastToIndex = this.s.mouse.toIndex;
 		var cursorXPosiotion = this._fnCursorPosition(e, 'pageX');
-		var targetsPrev = function (i) {
+		var targetPrev = function (i) {
 			while (i >= 0) {
 				i--;
 
@@ -1015,33 +1015,33 @@ $.extend( ColReorder.prototype, {
 					return null;
 				}
 
-				if (that.s.aoTargets[i+1].x !== that.s.aoTargets[i].x) {
-					return that.s.aoTargets[i];
+				if (that.s.aotarget[i+1].x !== that.s.aotarget[i].x) {
+					return that.s.aotarget[i];
 				}
 			}
 		};
 		var firstNotHidden = function () {
-			for (var i=0 ; i<that.s.aoTargets.length-1 ; i++) {
-				if (that.s.aoTargets[i].x !== that.s.aoTargets[i+1].x) {
-					return that.s.aoTargets[i];
+			for (var i=0 ; i<that.s.aotarget.length-1 ; i++) {
+				if (that.s.aotarget[i].x !== that.s.aotarget[i+1].x) {
+					return that.s.aotarget[i];
 				}
 			}
 		};
 		var lastNotHidden = function () {
-			for (var i=that.s.aoTargets.length-1 ; i>0 ; i--) {
-				if (that.s.aoTargets[i].x !== that.s.aoTargets[i-1].x) {
-					return that.s.aoTargets[i];
+			for (var i=that.s.aotarget.length-1 ; i>0 ; i--) {
+				if (that.s.aotarget[i].x !== that.s.aotarget[i-1].x) {
+					return that.s.aotarget[i];
 				}
 			}
 		};
 
-        for (var i = 1; i < this.s.aoTargets.length; i++) {
-			var prevTarget = targetsPrev(i);
+        for (var i = 1; i < this.s.aotarget.length; i++) {
+			var prevTarget = targetPrev(i);
 			if (! prevTarget) {
 				prevTarget = firstNotHidden();
 			}
 
-			var prevTargetMiddle = prevTarget.x + (this.s.aoTargets[i].x - prevTarget.x) / 2;
+			var prevTargetMiddle = prevTarget.x + (this.s.aotarget[i].x - prevTarget.x) / 2;
 
             if (this._fnIsLtr()) {
                 if (cursorXPosiotion < prevTargetMiddle ) {
@@ -1137,7 +1137,7 @@ $.extend( ColReorder.prototype, {
 	{
 		var aoColumns = this.s.dt.aoColumns;
         var isLTR = this._fnIsLtr();
-		this.s.aoTargets.splice(0, this.s.aoTargets.length);
+		this.s.aotarget.splice(0, this.s.aotarget.length);
 		var lastBound = $(this.s.dt.nTable).offset().left;
 
         var aoColumnBounds = [];
@@ -1168,7 +1168,7 @@ $.extend( ColReorder.prototype, {
         var firstColumn = aoColumnBounds[0];
 		var firstColumnWidth = $(aoColumns[firstColumn.index].nTh).outerWidth();
 
-        this.s.aoTargets.push({
+        this.s.aotarget.push({
             to: 0,
 			x: firstColumn.bound - firstColumnWidth
         });
@@ -1185,7 +1185,7 @@ $.extend( ColReorder.prototype, {
                 iToPoint++;
             }
 
-            this.s.aoTargets.push({
+            this.s.aotarget.push({
 				to: iToPoint,
                 x: columnBound.bound
             });
@@ -1194,13 +1194,13 @@ $.extend( ColReorder.prototype, {
 		/* Disallow columns for being reordered by drag and drop, counting right to left */
 		if ( this.s.fixedRight !== 0 )
 		{
-			this.s.aoTargets.splice( this.s.aoTargets.length - this.s.fixedRight );
+			this.s.aotarget.splice( this.s.aotarget.length - this.s.fixedRight );
 		}
 
 		/* Disallow columns for being reordered by drag and drop, counting left to right */
 		if ( this.s.fixed !== 0 )
 		{
-			this.s.aoTargets.splice( 0, this.s.fixed );
+			this.s.aotarget.splice( 0, this.s.fixed );
 		}
 	},
 

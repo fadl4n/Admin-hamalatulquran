@@ -2,19 +2,16 @@
 
 namespace App\Http\Controllers\CMS\User;
 
-
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Pengajar;
 use Illuminate\Support\Facades\Hash;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
 
 class PengajarController extends Controller
 {
-    /**
-     * Menampilkan daftar pengajar.
-     */
     public function index(Request $request)
     {
         if ($request->ajax()) {
@@ -32,20 +29,15 @@ class PengajarController extends Controller
                 ->rawColumns(['action'])
                 ->make(true);
         }
+
         return view('pengajar.show');
     }
 
-    /**
-     * Menampilkan halaman tambah pengajar.
-     */
     public function create()
     {
         return view('pengajar.create');
     }
 
-    /**
-     * Menyimpan data pengajar baru ke database.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -100,7 +92,7 @@ class PengajarController extends Controller
             'email' => $request->email,
             'tempat_lahir' => $request->tempat_lahir,
             'tgl_lahir' => $request->tgl_lahir,
-            'foto_pengajar' => $fotoPath,
+            'foto_pengajar' => $fotoPath, // cuma path (biar Storage::url bisa dipake di frontend)
             'no_telp' => $request->no_telp,
             'jenis_kelamin' => $request->jenis_kelamin,
             'alamat' => $request->alamat,
@@ -109,8 +101,6 @@ class PengajarController extends Controller
 
         return redirect()->route('pengajar.index')->with('success', 'Pengajar berhasil ditambahkan.');
     }
-
-
 
     /**
      * Menampilkan detail pengajar.
@@ -121,18 +111,12 @@ class PengajarController extends Controller
         return view('pengajar.detail', compact('pengajar'));
     }
 
-    /**
-     * Menampilkan halaman edit pengajar.
-     */
     public function edit($id)
     {
         $pengajar = Pengajar::findOrFail($id);
         return view('pengajar.edit', compact('pengajar'));
     }
 
-    /**
-     * Mengupdate data pengajar di database.
-     */
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -191,13 +175,11 @@ class PengajarController extends Controller
             $data['password'] = Hash::make($request->password);
         }
 
+        // Update data pengajar
         $pengajar->update($data);
 
         return redirect()->route('pengajar.index')->with('success', 'Pengajar berhasil diperbarui.');
     }
-
-
-
 
     /**
      * Menghapus pengajar dari database.
@@ -209,9 +191,6 @@ class PengajarController extends Controller
         return response()->json(['success' => 'Pengajar berhasil dihapus.']);
     }
 
-    /**
-     * Mendapatkan data pengajar untuk DataTables.
-     */
     public function fnGetData(Request $request)
     {
         $pengajar = Pengajar::select(['id_pengajar', 'nama', 'nip', 'email']);

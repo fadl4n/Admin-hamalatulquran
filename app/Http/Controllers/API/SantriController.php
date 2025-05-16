@@ -83,7 +83,7 @@ class SantriController extends Controller
                 ], 400);
             }
 
-            $santri = Santri::with('kelas')->find($id);
+            $santri = Santri::with('kelas', 'target')->find($id);
 
             if (!$santri) {
                 return response()->json([

@@ -75,7 +75,7 @@
                                 <div class="form-group">
                                     <label>Group</label>
                                     <select name="id_group" class="form-control @error('id_group') is-invalid @enderror" required>
-                                        @foreach($targets as $target)
+                                        @foreach($target as $target)
                                             <option value="{{ $target->id_group }}" {{ old('id_group', $setoran->id_target) == $target->id_group ? 'selected' : '' }}>
                                                 {{ $target->id_group }}
                                             </option>

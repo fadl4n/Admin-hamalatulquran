@@ -2595,7 +2595,7 @@
 		var i, iLen, j, jLen, k, kLen, def;
 		var columns = oSettings.aoColumns;
 	
-		// Column definitions with aTargets
+		// Column definitions with atarget
 		if ( aoColDefs )
 		{
 			/* Loop over the definitions array - loop in reverse so first instance has priority */
@@ -2604,40 +2604,40 @@
 				def = aoColDefs[i];
 	
 				/* Each definition can target multiple columns, as it is an array */
-				var aTargets = def.targets !== undefined ?
-					def.targets :
-					def.aTargets;
+				var atarget = def.target !== undefined ?
+					def.target :
+					def.atarget;
 	
-				if ( ! Array.isArray( aTargets ) )
+				if ( ! Array.isArray( atarget ) )
 				{
-					aTargets = [ aTargets ];
+					atarget = [ atarget ];
 				}
 	
-				for ( j=0, jLen=aTargets.length ; j<jLen ; j++ )
+				for ( j=0, jLen=atarget.length ; j<jLen ; j++ )
 				{
-					if ( typeof aTargets[j] === 'number' && aTargets[j] >= 0 )
+					if ( typeof atarget[j] === 'number' && atarget[j] >= 0 )
 					{
 						/* Add columns that we don't yet know about */
-						while( columns.length <= aTargets[j] )
+						while( columns.length <= atarget[j] )
 						{
 							_fnAddColumn( oSettings );
 						}
 	
 						/* Integer, basic index */
-						fn( aTargets[j], def );
+						fn( atarget[j], def );
 					}
-					else if ( typeof aTargets[j] === 'number' && aTargets[j] < 0 )
+					else if ( typeof atarget[j] === 'number' && atarget[j] < 0 )
 					{
 						/* Negative integer, right to left column counting */
-						fn( columns.length+aTargets[j], def );
+						fn( columns.length+atarget[j], def );
 					}
-					else if ( typeof aTargets[j] === 'string' )
+					else if ( typeof atarget[j] === 'string' )
 					{
 						/* Class name matching on TH element */
 						for ( k=0, kLen=columns.length ; k<kLen ; k++ )
 						{
-							if ( aTargets[j] == "_all" ||
-							     $(columns[k].nTh).hasClass( aTargets[j] ) )
+							if ( atarget[j] == "_all" ||
+							     $(columns[k].nTh).hasClass( atarget[j] ) )
 							{
 								fn( k, def );
 							}
@@ -10399,12 +10399,12 @@
 	
 		/**
 		 * Very similar to `columns`, `columnDefs` allows you to target a specific
-		 * column, multiple columns, or all columns, using the `targets` property of
+		 * column, multiple columns, or all columns, using the `target` property of
 		 * each object in the array. This allows great flexibility when creating
 		 * tables, as the `columnDefs` arrays can be of any length, targeting the
 		 * columns you specifically want. `columnDefs` may use any of the column
 		 * options available: {@link DataTable.defaults.column}, but it _must_
-		 * have `targets` defined in each object in the array. Values in the `targets`
+		 * have `target` defined in each object in the array. Values in the `target`
 		 * array may be:
 		 *   <ul>
 		 *     <li>a string - class name will be matched on the TH for the column</li>
@@ -12278,9 +12278,9 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [
-		 *          { "orderData": [ 0, 1 ], "targets": [ 0 ] },
-		 *          { "orderData": [ 1, 0 ], "targets": [ 1 ] },
-		 *          { "orderData": 2, "targets": [ 2 ] }
+		 *          { "orderData": [ 0, 1 ], "target": [ 0 ] },
+		 *          { "orderData": [ 1, 0 ], "target": [ 1 ] },
+		 *          { "orderData": 2, "target": [ 2 ] }
 		 *        ]
 		 *      } );
 		 *    } );
@@ -12318,9 +12318,9 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [
-		 *          { "orderSequence": [ "asc" ], "targets": [ 1 ] },
-		 *          { "orderSequence": [ "desc", "asc", "asc" ], "targets": [ 2 ] },
-		 *          { "orderSequence": [ "desc" ], "targets": [ 3 ] }
+		 *          { "orderSequence": [ "asc" ], "target": [ 1 ] },
+		 *          { "orderSequence": [ "desc", "asc", "asc" ], "target": [ 2 ] },
+		 *          { "orderSequence": [ "desc" ], "target": [ 3 ] }
 		 *        ]
 		 *      } );
 		 *    } );
@@ -12355,7 +12355,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [
-		 *          { "searchable": false, "targets": [ 0 ] }
+		 *          { "searchable": false, "target": [ 0 ] }
 		 *        ] } );
 		 *    } );
 		 *
@@ -12388,7 +12388,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [
-		 *          { "orderable": false, "targets": [ 0 ] }
+		 *          { "orderable": false, "target": [ 0 ] }
 		 *        ] } );
 		 *    } );
 		 *
@@ -12421,7 +12421,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [
-		 *          { "visible": false, "targets": [ 0 ] }
+		 *          { "visible": false, "target": [ 0 ] }
 		 *        ] } );
 		 *    } );
 		 *
@@ -12460,7 +12460,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [ {
-		 *          "targets": [3],
+		 *          "target": [3],
 		 *          "createdCell": function (td, cellData, rowData, row, col) {
 		 *            if ( cellData == "1.7" ) {
 		 *              $(td).css('color', 'blue')
@@ -12605,7 +12605,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [ {
-		 *          "targets": [ 0 ],
+		 *          "target": [ 0 ],
 		 *          "data": function ( source, type, val ) {
 		 *            if (type === 'set') {
 		 *              source.price = val;
@@ -12632,7 +12632,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [ {
-		 *          "targets": [ 0 ],
+		 *          "target": [ 0 ],
 		 *          "data": null,
 		 *          "defaultContent": "Click to edit"
 		 *        } ]
@@ -12644,7 +12644,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [ {
-		 *          "targets": [ 0 ],
+		 *          "target": [ 0 ],
 		 *          "data": "name[, ]"
 		 *        } ]
 		 *      } );
@@ -12731,7 +12731,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [ {
-		 *          "targets": [ 0 ],
+		 *          "target": [ 0 ],
 		 *          "data": null, // Use the full data source object for the renderer's source
 		 *          "render": "browserName()"
 		 *        } ]
@@ -12748,7 +12748,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [ {
-		 *          "targets": [ 0 ],
+		 *          "target": [ 0 ],
 		 *          "data": null, // Use the full data source object for the renderer's source
 		 *          "render": {
 		 *            "_": "phone",
@@ -12764,7 +12764,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [ {
-		 *          "targets": [ 0 ],
+		 *          "target": [ 0 ],
 		 *          "data": "download_link",
 		 *          "render": function ( data, type, full ) {
 		 *            return '<a href="'+data+'">Download</a>';
@@ -12791,7 +12791,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [ {
-		 *          "targets": [ 0 ],
+		 *          "target": [ 0 ],
 		 *          "cellType": "th"
 		 *        } ]
 		 *      } );
@@ -12813,7 +12813,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [
-		 *          { "class": "my_class", "targets": [ 0 ] }
+		 *          { "class": "my_class", "target": [ 0 ] }
 		 *        ]
 		 *      } );
 		 *    } );
@@ -12886,7 +12886,7 @@
 		 *          {
 		 *            "data": null,
 		 *            "defaultContent": "Edit",
-		 *            "targets": [ -1 ]
+		 *            "target": [ -1 ]
 		 *          }
 		 *        ]
 		 *      } );
@@ -12929,11 +12929,11 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [
-		 *          { "name": "engine", "targets": [ 0 ] },
-		 *          { "name": "browser", "targets": [ 1 ] },
-		 *          { "name": "platform", "targets": [ 2 ] },
-		 *          { "name": "version", "targets": [ 3 ] },
-		 *          { "name": "grade", "targets": [ 4 ] }
+		 *          { "name": "engine", "target": [ 0 ] },
+		 *          { "name": "browser", "target": [ 1 ] },
+		 *          { "name": "platform", "target": [ 2 ] },
+		 *          { "name": "version", "target": [ 3 ] },
+		 *          { "name": "grade", "target": [ 4 ] }
 		 *        ]
 		 *      } );
 		 *    } );
@@ -12971,10 +12971,10 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [
-		 *          { "orderDataType": "dom-text", "targets": [ 2, 3 ] },
-		 *          { "type": "numeric", "targets": [ 3 ] },
-		 *          { "orderDataType": "dom-select", "targets": [ 4 ] },
-		 *          { "orderDataType": "dom-checkbox", "targets": [ 5 ] }
+		 *          { "orderDataType": "dom-text", "target": [ 2, 3 ] },
+		 *          { "type": "numeric", "target": [ 3 ] },
+		 *          { "orderDataType": "dom-select", "target": [ 4 ] },
+		 *          { "orderDataType": "dom-checkbox", "target": [ 5 ] }
 		 *        ]
 		 *      } );
 		 *    } );
@@ -13011,7 +13011,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [
-		 *          { "title": "My column title", "targets": [ 0 ] }
+		 *          { "title": "My column title", "target": [ 0 ] }
 		 *        ]
 		 *      } );
 		 *    } );
@@ -13052,7 +13052,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [
-		 *          { "type": "html", "targets": [ 0 ] }
+		 *          { "type": "html", "target": [ 0 ] }
 		 *        ]
 		 *      } );
 		 *    } );
@@ -13090,7 +13090,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "columnDefs": [
-		 *          { "width": "20%", "targets": [ 0 ] }
+		 *          { "width": "20%", "target": [ 0 ] }
 		 *        ]
 		 *      } );
 		 *    } );

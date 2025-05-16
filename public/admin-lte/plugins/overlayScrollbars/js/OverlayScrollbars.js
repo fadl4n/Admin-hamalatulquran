@@ -1432,7 +1432,7 @@
             return FakejQuery;
         })();
         var INSTANCES = (function () {
-            var _targets = [];
+            var _target = [];
             var _instancePropertyString = '__overlayScrollbars__';
 
             /**
@@ -1440,7 +1440,7 @@
              * Register: Pass the target and the instance.
              * Unregister: Pass the target and null.
              * Get Instance: Pass the target from which the instance shall be got.
-             * Get Targets: Pass no arguments.
+             * Get target: Pass no arguments.
              * @param target The target to which the instance shall be registered / from which the instance shall be unregistered / the instance shall be got
              * @param instance The instance.
              * @returns {*|void} Returns the instance from the given target.
@@ -1448,26 +1448,26 @@
             return function (target, instance) {
                 var argLen = arguments[LEXICON.l];
                 if (argLen < 1) {
-                    //return all targets
-                    return _targets;
+                    //return all target
+                    return _target;
                 }
                 else {
                     if (instance) {
                         //register instance
                         target[_instancePropertyString] = instance;
-                        _targets.push(target);
+                        _target.push(target);
                     }
                     else {
-                        var index = COMPATIBILITY.inA(target, _targets);
+                        var index = COMPATIBILITY.inA(target, _target);
                         if (index > -1) {
                             if (argLen > 1) {
                                 //unregister instance
                                 delete target[_instancePropertyString];
-                                _targets.splice(index, 1);
+                                _target.splice(index, 1);
                             }
                             else {
                                 //get instance from target
-                                return _targets[index][_instancePropertyString];
+                                return _target[index][_instancePropertyString];
                             }
                         }
                     }

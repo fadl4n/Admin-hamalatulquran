@@ -52,37 +52,32 @@ class Setoran extends Model
         return $this->belongsTo(Pengajar::class, 'id_pengajar');
     }
 
-    // Relasi ke Targets (menggunakan `hasMany` karena satu setoran bisa memiliki banyak target)
-    public function targets()
-    {
-        return $this->hasMany(Target::class, 'id_target', 'id_target');
-    }
     public function histori()
     {
         return $this->hasOne(Histori::class, 'id_setoran');
     }
     public function target()
     {
-        return $this->belongsTo(Target::class, 'id_target');
+        return $this->belongsTo(Target::class, 'id_target', 'id_target');
     }
 
     public function getPersentaseAttribute()
     {
         // Ambil semua target terkait dengan setoran ini
-        $targets = $this->targets;
+        $target = $this->target;
 
-        if ($targets->isEmpty()) {
+        if ($target->isEmpty()) {
             return 0; // Jika tidak ada target, persentase 0%
         }
 
-        // Cek semua target dengan id_santri dan id_group yang sama di tabel targets
-        $matchingTargets = Target::where('id_santri', $targets->first()->id_santri)
-            ->where('id_group', $targets->first()->id_group)
+        // Cek semua target dengan id_santri dan id_group yang sama di tabel target
+        $matchingtarget = Target::where('id_santri', $target->first()->id_santri)
+            ->where('id_group', $target->first()->id_group)
             ->get();
 
         // Hitung total ayat yang perlu dicapai
         $total_target = 0;
-        foreach ($matchingTargets as $target) {
+        foreach ($matchingtarget as $target) {
             $jumlah_ayat_target = $target->jumlah_ayat_target;
             $jumlah_ayat_target_awal = $target->jumlah_ayat_target_awal;
 
@@ -96,7 +91,7 @@ class Setoran extends Model
         $ayat_dicapai = 0;
         $totalProgress = 0; // Variabel untuk menghitung total progres
 
-        foreach ($matchingTargets as $target) {
+        foreach ($matchingtarget as $target) {
             $setoranData = Setoran::where('id_target', $target->id_target)
                 ->selectRaw('SUM(jumlah_ayat_end - jumlah_ayat_start + 1) as total_ayat_dicapai')
                 ->first();
@@ -115,11 +110,11 @@ class Setoran extends Model
 
         // Hitung persentase berdasarkan total progres
         $persentase = 0;
-        $totalTargets = $matchingTargets->count();
+        $totaltarget = $matchingtarget->count();
 
-        if ($totalTargets > 0) {
+        if ($totaltarget > 0) {
             // Persentase dihitung berdasarkan total progres
-            $persentase = ($totalProgress / $totalTargets) * 100;
+            $persentase = ($totalProgress / $totaltarget) * 100;
         }
 
         // Pastikan persentase tidak lebih dari 100%

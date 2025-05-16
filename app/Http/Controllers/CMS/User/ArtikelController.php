@@ -11,24 +11,24 @@ use Illuminate\Support\Facades\Storage;
 class ArtikelController extends Controller
 {
     public function index()
-{
-    // Ambil semua artikel yang belum expired atau tidak memiliki expired_at
-    $articles = Artikel::where(function ($query) {
-        $query->whereNull('expired_at')
-              ->orWhere('expired_at', '>=', Carbon::now());
-    })
-    ->latest()
-    ->get();
+    {
+        // Ambil semua artikel yang belum expired atau tidak memiliki expired_at
+        $articles = Artikel::where(function ($query) {
+            $query->whereNull('expired_at')
+                ->orWhere('expired_at', '>=', Carbon::now());
+        })
+            ->latest()
+            ->get();
 
-    // Kirim data artikel ke view `show.blade.php`
-    return view('artikel.show', compact('articles'));
-}
+        // Kirim data artikel ke view `show.blade.php`
+        return view('artikel.show', compact('articles'));
+    }
 
-public function create()
-{
-    // Langsung tampilkan form tambah artikel
-    return view('artikel.create');
-}
+    public function create()
+    {
+        // Langsung tampilkan form tambah artikel
+        return view('artikel.create');
+    }
 
 
     public function store(Request $request)
@@ -37,11 +37,20 @@ public function create()
         $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required',
-            'expired_at' => 'nullable|date|after_or_equal:today',
+            'expired_at' => 'required',
+
         ]);
 
+        // Validasi manual tanggal expired
+        if ($request->expired_at) {
+            $expiredDate = Carbon::parse($request->expired_at)->startOfDay();
+            if ($expiredDate->lt(Carbon::today())) {
+                return back()->withErrors(['expired_at' => 'Tanggal kadaluarsa tidak boleh sebelum hari ini.'])->withInput();
+            }
+        }
+
         // Set gambar default
-        $data['gambar'] = asset('assets/image/default.png');
+        $data['gambar'] = asset('assets/image/default-user.png');
 
         // Jika ada file gambar yang diupload
         if ($request->hasFile('gambar')) {
@@ -85,61 +94,62 @@ public function create()
     }
 
     public function update(Request $request, $id)
-{
-    // Validasi input termasuk gambar
-    $request->validate([
-        'judul' => 'required|string|max:255',
-        'deskripsi' => 'required',
-        'expired_at' => 'nullable|date|after_or_equal:today',
-    ]);
+    {
+        // Validasi input termasuk gambar
+        $request->validate([
+            'judul' => 'required|string|max:255',
+            'deskripsi' => 'required',
+            'expired_at' => 'required',
 
-    // Ambil data artikel berdasarkan ID
-    $article = Artikel::findOrFail($id);
+        ]);
 
-    // Jika tidak ada gambar baru yang diunggah, gunakan gambar yang lama
-    $gambar = $article->gambar;
+        // Ambil data artikel berdasarkan ID
+        $article = Artikel::findOrFail($id);
 
-    // Jika ada file gambar yang diupload
-    if ($request->hasFile('gambar')) {
-        $file = $request->file('gambar');
-        $allowedFileTypes = ['png', 'jpg', 'jpeg'];
-        $extension = $file->getClientOriginalExtension();
+        // Jika tidak ada gambar baru yang diunggah, gunakan gambar yang lama
+        $gambar = $article->gambar;
 
-        // Validasi tipe file
-        if (!in_array($extension, $allowedFileTypes)) {
-            return redirect()->back()->with('error', 'Tipe file tidak diizinkan. Hanya file png, jpg, dan jpeg yang diizinkan.');
-        }
+        // Jika ada file gambar yang diupload
+        if ($request->hasFile('gambar')) {
+            $file = $request->file('gambar');
+            $allowedFileTypes = ['png', 'jpg', 'jpeg'];
+            $extension = $file->getClientOriginalExtension();
 
-        // Hapus gambar lama jika ada
-        if ($article->gambar && $article->gambar !== asset('assets/image/default.png')) {
-            $oldImagePath = str_replace(url('/'), public_path(), $article->gambar);
-            if (file_exists($oldImagePath)) {
-                unlink($oldImagePath);
+            // Validasi tipe file
+            if (!in_array($extension, $allowedFileTypes)) {
+                return redirect()->back()->with('error', 'Tipe file tidak diizinkan. Hanya file png, jpg, dan jpeg yang diizinkan.');
             }
+
+            // Hapus gambar lama jika ada
+            if ($article->gambar && $article->gambar !== asset('assets/image/default-user.png')) {
+                $oldImagePath = str_replace(url('/'), public_path(), $article->gambar);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+
+            // Buat nama file unik
+            $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
+
+            // Simpan file ke folder public
+            $file->move(public_path('uploadedFile/image/santri'), $name_original);
+
+            // Simpan path gambar baru
+            $gambar = url('uploadedFile/image/santri') . '/' . $name_original;
         }
 
-        // Buat nama file unik
-        $name_original = date('YmdHis') . '_' . $file->getClientOriginalName();
+        // Update data artikel
+        $article->update([
+            'judul' => $request->judul,
+            'deskripsi' => $request->deskripsi,
+            'gambar' => $gambar, // Simpan path gambar
+            'expired_at' => $request->expired_at
+                ? Carbon::parse($request->expired_at)->endOfDay() // Set jam ke 23:59:59
+                : null,
+        ]);
 
-        // Simpan file ke folder public
-        $file->move(public_path('uploadedFile/image/santri'), $name_original);
-
-        // Simpan path gambar baru
-        $gambar = url('uploadedFile/image/santri') . '/' . $name_original;
+        return redirect()->route('artikel.index')->with('success', 'Artikel berhasil diperbarui');
     }
-
-    // Update data artikel
-    $article->update([
-        'judul' => $request->judul,
-        'deskripsi' => $request->deskripsi,
-        'gambar' => $gambar, // Simpan path gambar
-        'expired_at' => $request->expired_at
-            ? Carbon::parse($request->expired_at)->endOfDay() // Set jam ke 23:59:59
-            : null,
-    ]);
-
-    return redirect()->route('artikel.index')->with('success', 'Artikel berhasil diperbarui');
-}
 
 
 
@@ -156,14 +166,14 @@ public function create()
         // Ambil hanya artikel yang belum expired
         $articles = Artikel::where(function ($query) {
             $query->whereNull('expired_at')
-                  ->orWhere('expired_at', '>=', Carbon::now());
+                ->orWhere('expired_at', '>=', Carbon::now());
         })
-        ->latest()
-        ->select(['id', 'judul', 'deskripsi', 'gambar', 'expired_at']);
+            ->latest()
+            ->select(['id', 'judul', 'deskripsi', 'gambar', 'expired_at']);
 
         return datatables()->of($articles)
-        ->addIndexColumn()
-        ->addColumn('action', function ($article) {
+            ->addIndexColumn()
+            ->addColumn('action', function ($article) {
                 return '
                     <a href="' . route('artikel.edit', $article->id) . '" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
                     <form action="' . route('artikel.destroy', $article->id) . '" method="POST" class="d-inline">
@@ -188,7 +198,4 @@ public function create()
             ->rawColumns(['action', 'gambar'])
             ->make(true);
     }
-
-
-
 }
