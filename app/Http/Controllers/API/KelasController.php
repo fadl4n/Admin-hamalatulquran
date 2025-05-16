@@ -9,11 +9,11 @@ use Exception;
 
 class KelasController extends Controller
 {
-    // Get all Kelas
+    // Get all Kelas with santri count
     public function getAllKelas()
     {
         try {
-            $kelas = Kelas::all();
+            $kelas = Kelas::withCount('santri')->get();
 
             return response()->json([
                 'status' => 'success',
@@ -28,11 +28,10 @@ class KelasController extends Controller
         }
     }
 
-    // Get Kelas by ID
+    // Get Kelas by ID (with santri count too)
     public function getKelasById($id)
     {
         try {
-            // Cek apakah ID valid (harus angka)
             if (!filter_var($id, FILTER_VALIDATE_INT)) {
                 return response()->json([
                     'status' => 'error',
@@ -40,7 +39,7 @@ class KelasController extends Controller
                 ], 400);
             }
 
-            $kelas = Kelas::find($id);
+            $kelas = Kelas::withCount('santri')->find($id);
 
             if (!$kelas) {
                 return response()->json([

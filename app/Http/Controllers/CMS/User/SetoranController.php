@@ -240,7 +240,7 @@ class SetoranController extends Controller
         // Validasi input
         $request->validate([
             'group_id' => 'required|exists:groups,id_group',
-            'santri_id' => 'required|exists:santris,id_santri',
+            'id_santri' => 'required|exists:santris,id_santri',
             'surat_id' => 'required|exists:surats,id_surat',
         ]);
 
@@ -267,7 +267,7 @@ class SetoranController extends Controller
     public function getNamaSurat(Request $request)
     {
         $groupId = $request->input('group_id');
-        $santriId = $request->input('santri_id'); // Ambil ID Santri
+        $santriId = $request->input('id_santri'); // Ambil ID Santri
 
         // Cari target dengan id_group dan id_santri yang diberikan
         $targets = Target::where('id_group', $groupId)

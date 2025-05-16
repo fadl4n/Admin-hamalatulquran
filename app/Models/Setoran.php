@@ -14,14 +14,14 @@ class Setoran extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'id_santri',
         'tgl_setoran',
-        'status',
-        'id_kelas',
-        'keterangan',
+        'id_target',
+        'id_santri',
         'id_surat',
         'id_pengajar',
-        'id_target',
+        'id_kelas',
+        'keterangan',
+        'status',
         'persentase',
         'jumlah_ayat_start',
         'jumlah_ayat_end',
@@ -31,7 +31,7 @@ class Setoran extends Model
     // Relasi ke Santri
     public function santri()
     {
-        return $this->belongsTo(Santri::class, 'id_santri', 'id_santri');
+        return $this->belongsTo(Santri::class, 'id_santri');
     }
 
     // Relasi ke Kelas
@@ -63,9 +63,8 @@ class Setoran extends Model
     }
     public function target()
     {
-        return $this->hasMany(Target::class, 'id_target', 'id_target');
+        return $this->belongsTo(Target::class, 'id_target');
     }
-
 
     public function getPersentaseAttribute()
     {

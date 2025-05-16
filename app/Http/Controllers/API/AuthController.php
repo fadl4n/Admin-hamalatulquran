@@ -21,6 +21,7 @@ class AuthController extends Controller
 {
     public function doLogin(Request $request)
     {
+
         $validator = Validator::make($request->all(), [
             'identifier' => 'required',
             'password' => 'required',
@@ -32,6 +33,7 @@ class AuthController extends Controller
                 'message' => $validator->errors()->first(),
             ], 400);
         }
+        // return $pengajar;
 
         // Cek apakah identifier itu NIP (Pengajar) atau NISN (Santri)
         $pengajar = Pengajar::where('nip', $request->identifier)->first();
@@ -40,11 +42,15 @@ class AuthController extends Controller
         if ($pengajar && Hash::check($request->password, $pengajar->password)) {
             $user = $pengajar;
             $role = 'pengajar';
-            $user_id = "pengajar_" . $user->id_pengajar;
+            $user_id = $user->id_pengajar;
+            $foto_profil = $user->foto_pengajar ? url($user->foto_pengajar) : null;
+            $jenis_kelamin = $user->jenis_kelamin;
         } elseif ($santri && Hash::check($request->password, $santri->password)) {
             $user = $santri;
             $role = 'santri';
-            $user_id = "santri_" . $user->id_santri;
+            $user_id = $user->id_santri;
+            $foto_profil = $user->foto_santri ? url($user->foto_santri) : null;
+            $jenis_kelamin = $user->jenis_kelamin;
         } else {
             return response()->json([
                 'success' => false,
@@ -71,59 +77,72 @@ class AuthController extends Controller
                 'id' => $user_id, // Kirim ID dengan prefix
                 'nama' => $user->nama,
                 'role' => $role,
+                'foto_profil' => $foto_profil,
+                'jenis_kelamin' => $jenis_kelamin
             ],
             'token' => $token,
         ], 200);
     }
 
-    public function profile(Request $request, $identifier)
+    public function profile($role, $identifier, Request $request)
     {
-        // Ambil role dari query parameter
-        $role = $request->query('role');
+        // Cek apakah token ada di header
+        $token = $request->header('Authorization');
 
-        // Cek apakah role valid
-        if (!in_array($role, ['pengajar', 'santri'])) {
-            Log::error("Role tidak valid: $role");
+        if (!$token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Role tidak valid'
-            ], 400);
+                'message' => 'Token tidak ditemukan'
+            ], 401);
         }
 
-        Log::info("Mencari $role dengan ID: $identifier");
+        try {
+            // Decode token untuk validasi
+            $decoded = JWT::decode(str_replace("Bearer ", "", $token), new Key(env('JWT_SECRET'), 'HS256'));
 
-        if ($role === 'pengajar') {
-            Log::info("Query: mencari pengajar dengan id_pengajar = $identifier");
-            $pengajar = Pengajar::where('id_pengajar', $identifier)->first();
+            Log::info("Mencari $role dengan ID: $identifier");
 
-            if ($pengajar) {
-                Log::info("Pengajar ditemukan:", ['data' => $pengajar]);
+            // Cek berdasarkan role
+            if ($role === 'pengajar') {
+                $pengajar = Pengajar::where('id_pengajar', $identifier)->first();
+
+                if (!$pengajar) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Pengajar tidak ditemukan'
+                    ], 404);
+                }
+
                 return response()->json([
                     'status' => 'success',
                     'data' => [
-                        'id' => "pengajar_" . $pengajar->id_pengajar,
+                        'id' => $pengajar->id_pengajar,
                         'nama' => $pengajar->nama,
                         'nip' => $pengajar->nip,
                         'tempat_tanggal_lahir' => $pengajar->tempat_lahir . ', ' . date('d M Y', strtotime($pengajar->tgl_lahir)),
                         'jenis_kelamin' => $pengajar->jenis_kelamin,
                         'no_telp' => $pengajar->no_telp,
                         'alamat' => $pengajar->alamat,
-                        'role' => 'pengajar'
+                        'role' => 'pengajar',
+                        'foto_profil' => !empty($pengajar->foto_pengajar) ? url($pengajar->foto_pengajar) : "" // ✅ Pastikan selalu String
                     ]
                 ]);
-            } else {
-                Log::error("Pengajar tidak ditemukan dengan ID: $identifier");
             }
-        } elseif ($role === 'santri') {
-            Log::info("Query: mencari santri dengan id_santri = $identifier");
-            $santri = Santri::where('id_santri', $identifier)->first();
 
-            if ($santri) {
-                Log::info("Santri ditemukan:", ['data' => $santri]);
+            if ($role === 'santri') {
+                $santri = Santri::where('id_santri', $identifier)->first();
+
+                if (!$santri) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Santri tidak ditemukan'
+                    ], 404);
+                }
+
                 return response()->json([
                     'status' => 'success',
                     'data' => [
-                        'id' => "santri_" . $santri->id_santri,
+                        'id' => $santri->id_santri,
                         'nama' => $santri->nama,
                         'nisn' => $santri->nisn,
                         'tempat_tanggal_lahir' => $santri->tempat_lahir . ', ' . date('d M Y', strtotime($santri->tgl_lahir)),
@@ -131,20 +150,22 @@ class AuthController extends Controller
                         'no_telp' => $santri->no_telp,
                         'alamat' => $santri->alamat,
                         'kelas' => $santri->id_kelas,
-                        'role' => 'santri'
+                        'role' => 'santri',
+                        'foto_profil' => !empty($santri->foto_santri) ? url($santri->foto_santri) : "" // ✅ Pastikan selalu String
                     ]
                 ]);
-            } else {
-                Log::error("Santri tidak ditemukan dengan ID: $identifier");
             }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User tidak ditemukan'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token tidak valid: ' . $e->getMessage()
+            ], 401);
         }
-
-        Log::error("User tidak ditemukan untuk role $role dengan ID: $identifier");
-
-        return response()->json([
-            'status' => 'error',
-            'message' => 'User tidak ditemukan'
-        ], 404);
     }
 
     public function profileUpdate(Request $request)
