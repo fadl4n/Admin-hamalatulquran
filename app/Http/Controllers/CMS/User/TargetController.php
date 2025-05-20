@@ -28,7 +28,7 @@ class TargetController extends Controller
         $targets = Target::with(['santri', 'kelas', 'surat', 'pengajar'])
             ->get()
             ->groupBy(function ($item) {
-                return $item->id_santri . '-' . $item->id_group;
+                return $item->id_santri . '-' . $item->id_target;
             });
         return view('target.show', compact('targets'));
     }
@@ -72,7 +72,7 @@ class TargetController extends Controller
 
         // Cek apakah kombinasi id_santri, id_group, id_surat, dan jumlah ayat sudah ada
         $existingTarget = Target::where('id_santri', $request->id_santri)
-            ->where('id_group', $request->id_group)
+            ->where('id_target', $request->id_target)
             ->where('id_surat', $request->id_surat)
             ->where('jumlah_ayat_target_awal', $request->jumlah_ayat_target_awal)
             ->where('jumlah_ayat_target', $request->jumlah_ayat_target)
@@ -84,7 +84,7 @@ class TargetController extends Controller
 
         // Validasi untuk menghindari tumpang tindih rentang ayat
         $overlapTarget = Target::where('id_santri', $request->id_santri)
-            ->where('id_group', $request->id_group)
+            ->where('id_target', $request->id_target)
             ->where('id_surat', $request->id_surat)
             ->where(function ($query) use ($request, $jumlah_ayat_target_end) {
                 $query->whereBetween('jumlah_ayat_target_awal', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end])
@@ -95,21 +95,27 @@ class TargetController extends Controller
         if ($overlapTarget) {
             return back()->withErrors(['jumlah_ayat_target' => 'Rentang jumlah ayat tumpang tindih dengan target yang sudah ada.'])->withInput();
         }
-        // Cek apakah ada target yang sama dengan id_santri, id_surat, id_group tetapi berbeda tgl_mulai dan tgl_target
-        $existingTargetDates = Target::where('id_santri', $request->id_santri)
-            ->where('id_group', $request->id_group)
-            ->where(function ($query) use ($request) {
-                $query->where('tgl_mulai', '!=', $request->tgl_mulai)
-                    ->orWhere('tgl_target', '!=', $request->tgl_target);
-            })
-            ->first();
 
-        if ($existingTargetDates) {
-            return back()->withErrors([
-                'tgl_mulai' => 'Sudah ada target untuk santri ini dengan tanggal mulai ' . Carbon::parse($existingTargetDates->tgl_mulai)->format('d-m-Y') . '.',
-                'tgl_target' => 'Sudah ada target untuk santri ini dengan tanggal target ' . Carbon::parse($existingTargetDates->tgl_target)->format('d-m-Y') . '.'
-            ])->withInput();
-        }
+        if (Carbon::parse($request->tgl_mulai)->gt(Carbon::parse($request->tgl_target))) {
+    return back()->withErrors([
+        'tgl_mulai' => 'Tanggal mulai tidak boleh lebih besar dari tanggal target.',
+    ])->withInput();
+}
+        // // Cek apakah ada target yang sama dengan id_santri, id_surat, id_group tetapi berbeda tgl_mulai dan tgl_target
+        // $existingTargetDates = Target::where('id_santri', $request->id_santri)
+        //     ->where('id_group', $request->id_group)
+        //     ->where(function ($query) use ($request) {
+        //         $query->where('tgl_mulai', '!=', $request->tgl_mulai)
+        //             ->orWhere('tgl_target', '!=', $request->tgl_target);
+        //     })
+        //     ->first();
+
+        // if ($existingTargetDates) {
+        //     return back()->withErrors([
+        //         'tgl_mulai' => 'Sudah ada target untuk santri ini dengan tanggal mulai ' . Carbon::parse($existingTargetDates->tgl_mulai)->format('d-m-Y') . '.',
+        //         'tgl_target' => 'Sudah ada target untuk santri ini dengan tanggal target ' . Carbon::parse($existingTargetDates->tgl_target)->format('d-m-Y') . '.'
+        //     ])->withInput();
+        // }
         // Pengecekan apakah id_kelas sesuai dengan santri
         // Pengecekan apakah id_kelas sesuai dengan santri
         $santri = Santri::findOrFail($request->id_santri);
@@ -155,13 +161,13 @@ class TargetController extends Controller
     private function validateTargetOverlap(Request $request, $jumlah_ayat_target_end)
     {
         // Ambil target yang sudah ada
-        $targets = Target::where('id_surat', $request->id_surat)
+        $target = Target::where('id_surat', $request->id_surat)
             ->where('id_santri', $request->id_santri)
             ->get();
 
         $jumlah_tumpang_tindih = 0;
 
-        foreach ($targets as $existingTarget) {
+        foreach ($target as $existingTarget) {
             if (
                 ($request->jumlah_ayat_target_awal >= $existingTarget->jumlah_ayat_target_awal &&
                     $request->jumlah_ayat_target_awal <= $existingTarget->jumlah_ayat_target_end) ||
@@ -225,7 +231,7 @@ class TargetController extends Controller
 
         // Cek apakah kombinasi id_santri, id_group, id_surat, dan jumlah ayat sudah ada
         $existingTarget = Target::where('id_santri', $request->id_santri)
-            ->where('id_group', $request->id_group)
+            ->where('id_target', $request->id_target)
             ->where('id_surat', $request->id_surat)
             ->where('jumlah_ayat_target_awal', $request->jumlah_ayat_target_awal)
             ->where('jumlah_ayat_target', $request->jumlah_ayat_target)
@@ -238,7 +244,7 @@ class TargetController extends Controller
 
         // Validasi untuk menghindari tumpang tindih rentang ayat
         $overlapTarget = Target::where('id_santri', $request->id_santri)
-            ->where('id_group', $request->id_group)
+            ->where('id_target', $request->id_target)
             ->where('id_surat', $request->id_surat)
             ->where(function ($query) use ($request, $jumlah_ayat_target_end) {
                 $query->whereBetween('jumlah_ayat_target_awal', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end])
@@ -251,22 +257,28 @@ class TargetController extends Controller
             return back()->withErrors(['jumlah_ayat_target' => 'Rentang jumlah ayat tumpang tindih dengan target yang sudah ada.'])->withInput();
         }
 
-        // Cek apakah ada target yang sama dengan id_santri, id_surat, id_group tetapi berbeda tgl_mulai dan tgl_target
-        $existingTargetDates = Target::where('id_santri', $request->id_santri)
-            ->where('id_group', $request->id_group)
-            ->where(function ($query) use ($request) {
-                $query->where('tgl_mulai', '!=', $request->tgl_mulai)
-                    ->orWhere('tgl_target', '!=', $request->tgl_target);
-            })
-            ->where('id_target', '!=', $target->id_target)  // Menghindari perbaruan target yang sama
-            ->first();
+        if (Carbon::parse($request->tgl_mulai)->gt(Carbon::parse($request->tgl_target))) {
+    return back()->withErrors([
+        'tgl_mulai' => 'Tanggal mulai tidak boleh lebih besar dari tanggal target.',
+    ])->withInput();
+}
 
-        if ($existingTargetDates) {
-            return back()->withErrors([
-                'tgl_mulai' => 'Sudah ada target untuk santri ini dengan tanggal mulai ' . Carbon::parse($existingTargetDates->tgl_mulai)->format('d-m-Y') . '.',
-                'tgl_target' => 'Sudah ada target untuk santri ini dengan tanggal target ' . Carbon::parse($existingTargetDates->tgl_target)->format('d-m-Y') . '.'
-            ])->withInput();
-        }
+        // // Cek apakah ada target yang sama dengan id_santri, id_surat, id_group tetapi berbeda tgl_mulai dan tgl_target
+        // $existingTargetDates = Target::where('id_santri', $request->id_santri)
+        //     ->where('id_group', $request->id_group)
+        //     ->where(function ($query) use ($request) {
+        //         $query->where('tgl_mulai', '!=', $request->tgl_mulai)
+        //             ->orWhere('tgl_target', '!=', $request->tgl_target);
+        //     })
+        //     ->where('id_target', '!=', $target->id_target)  // Menghindari perbaruan target yang sama
+        //     ->first();
+
+        // if ($existingTargetDates) {
+        //     return back()->withErrors([
+        //         'tgl_mulai' => 'Sudah ada target untuk santri ini dengan tanggal mulai ' . Carbon::parse($existingTargetDates->tgl_mulai)->format('d-m-Y') . '.',
+        //         'tgl_target' => 'Sudah ada target untuk santri ini dengan tanggal target ' . Carbon::parse($existingTargetDates->tgl_target)->format('d-m-Y') . '.'
+        //     ])->withInput();
+        // }
 
         // Pengecekan apakah id_kelas sesuai dengan santri
         $santri = Santri::findOrFail($request->id_santri);
@@ -304,27 +316,26 @@ class TargetController extends Controller
     }
 
 
-    public function destroy($id_santri, $id_group)
-    {
-        try {
-            // Mencari target berdasarkan id_santri dan id_group
-            $target = Target::where('id_santri', $id_santri)
-                ->where('id_group', $id_group)
-                ->first();
+   public function destroy($id_target)
+{
+    try {
+        // Mencari target berdasarkan id_target
+        $target = Target::find($id_target);
 
-            // Pastikan target ditemukan
-            if (!$target) {
-                return response()->json(['error' => 'Target tidak ditemukan'], 404);
-            }
-
-            // Hapus target
-            $target->delete();
-
-            return response()->json(['success' => 'Target berhasil dihapus']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Gagal menghapus target'], 500);
+        // Pastikan target ditemukan
+        if (!$target) {
+            return response()->json(['error' => 'Target tidak ditemukan'], 404);
         }
+
+        // Hapus target
+        $target->delete();
+
+        return response()->json(['success' => 'Target berhasil dihapus']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Gagal menghapus target'], 500);
     }
+}
+
     public function destroyByIdTarget($id_target)
     {
         try {
@@ -342,10 +353,10 @@ class TargetController extends Controller
     // Untuk DataTables
     public function fnGetData()
     {
-        $targets = Target::with(['santri', 'pengajar', 'kelas', 'surat'])
-            ->select('targets.*');
+        $target = Target::with(['santri', 'pengajar', 'kelas', 'surat'])
+            ->select('target.*');
 
-        return DataTables::of($targets)
+        return DataTables::of($target)
             ->addIndexColumn()
             ->addColumn('nama_santri', function ($row) {
                 return $row->santri->nama;
@@ -371,9 +382,7 @@ class TargetController extends Controller
             ->addColumn('tgl_target', function ($row) {
                 return $row->tgl_target;
             })
-            ->addColumn('id_group', function ($row) {
-                return $row->id_group ?: '-';
-            })
+
             ->addColumn('action', function ($row) {
                 return '
                 <a href="' . route('target.edit', $row->id) . '" class="btn btn-sm btn-warning">Edit</a>
@@ -383,15 +392,15 @@ class TargetController extends Controller
             ->rawColumns(['action'])
             ->make(true);
     }
-    public function detail(Request $request, $id_group)
+    public function detail(Request $request, $id_target)
     {
         // Ambil parameter id_santri dari query string
         $id_santri = $request->query('id_santri'); // Bisa juga pakai $request->input('id_santri')
 
-        // Query untuk mengambil data berdasarkan filter id_group dan id_santri
+        // Query untuk mengambil data berdasarkan filter id_target dan id_santri
         $targets = Target::with(['santri', 'kelas', 'surat', 'pengajar'])
-            ->when($id_group, function ($query, $id_group) {
-                return $query->where('id_group', $id_group);
+            ->when($id_target, function ($query, $id_target) {
+                return $query->where('id_target', $id_target);
             })
             ->when($id_santri, function ($query, $id_santri) {
                 return $query->where('id_santri', $id_santri);
@@ -401,9 +410,9 @@ class TargetController extends Controller
 
         // Lakukan pengelompokan berdasarkan id_santri dan id_group
         $targets = $targets->groupBy(function ($item) {
-            return $item->id_santri . '-' . $item->id_group;
+            return $item->id_santri . '-' . $item->id_target;
         });
 
-        return view('target.detail', compact('targets'));
+        return view('target.detail', compact('target'));
     }
 }

@@ -47,18 +47,16 @@
                                             <td>{{ $first->santri->nama }}</td>
                                             <td>{{ $first->kelas->nama_kelas }}</td>
                                             <td>{{ $first->pengajar->nama }}</td>
-                                            <td>{{'Target '}} {{$first->id_group}}</td>
+                                            <td>{{'Target '}} {{$first->id_target}}</td>
                                             <td>{{ $first->tgl_mulai }}</td>
                                             <td>{{ $first->tgl_target }}</td>
                                             <td class="text-center">
-                                                <a href="{{ route('target.detail', ['id_group' => $first->id_group]) }}?id_santri={{ $first->id_santri }}" class="btn btn-primary btn-sm">
+                                                <a href="{{ route('target.detail', ['id_target' => $first->id_target]) }}?id_santri={{ $first->id_santri }}" class="btn btn-primary btn-sm">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <button class="btn btn-danger btn-sm btnDelete"
-                                                        data-id_santri="{{ $first->santri->id_santri }}"
-                                                        data-id_group="{{ $first->id_group }}">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
+                                               <button class="btn btn-danger btn-sm btnDelete" data-id="{{ $first->id_target }}">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
                                             </td>
                                         </tr>
                                         @endforeach
@@ -101,13 +99,11 @@ $(document).ready(function() {
 
     $('.btnDelete').on('click', function (e) {
         e.preventDefault();
-
-        var id_santri = $(this).data('id_santri');
-        var id_group = $(this).data('id_group');
+ var id_target = $(this).data('id');
 
         Swal.fire({
             title: "Konfirmasi",
-            text: "Apakah kamu ingin menghapus target ini?",
+            text: "Apakah Anda yakin ingin menghapus target ini?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonText: "Ya, hapus!",
@@ -115,17 +111,17 @@ $(document).ready(function() {
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: "/target/delete/" + id_santri + "/" + id_group,
+                    url: "/target/delete/" + id_target,
                     type: 'DELETE',
                     data: {
                         _token: '{{ csrf_token() }}',
                     },
                     success: function(response) {
-                        Swal.fire('Sukses!', 'Target berhasil terhapus!', 'sukses');
+                        Swal.fire('Berhasil!', 'Target berhasil dihapus!', 'success');
                         location.reload();
                     },
                     error: function(xhr, status, error) {
-                        Swal.fire('Failed!', 'There was an error while deleting the data', 'error');
+                        Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus data', 'error');
                     }
                 });
             }

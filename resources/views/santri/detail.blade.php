@@ -12,9 +12,25 @@
                 <div class="col-md-10 offset-md-1">
                     <div class="card">
                         <div class="card-body">
+                            <div class="mt-4 d-flex justify-content-between align-items-center">
+                                <h4>Data Santri</h4>
+                                <a href="{{ route('santri.index') }}" class="btn btn-outline-secondary"> Kembali </a>
+                            </div>
+
                             <div class="row mt-4">
+                                <!-- Foto Santri -->
+                                <div class="col-md-4 d-flex align-items-start justify-content-center">
+                                    <div style="max-width: 100%; max-height: 350px; overflow: hidden;">
+                                        <img src="{{ $santri->foto_santri ? asset($santri->foto_santri) : asset('assets/image/default-user.png') }}"
+                                            alt="Foto Santri"
+                                            class="img-fluid border rounded w-100 h-100"
+                                            style="object-fit: cover;">
+                                    </div>
+                                </div>
+
+                                <!-- Data Santri -->
                                 <div class="col-md-8">
-                                    <table class="table table-bordered">
+                                    <table class="table table-striped">
                                         <tr>
                                             <th width="40%">Nama</th>
                                             <td>{{ $santri->nama }}</td>
@@ -53,14 +69,8 @@
                                         </tr>
                                     </table>
                                 </div>
-                                <div class="col-md-4 text-center">
-                                    <img src="{{ $santri->foto_santri ? asset($santri->foto_santri) : asset('assets/image/default-user.png') }}" alt="Foto Santri" class="img-fluid rounded" width="150">
-                                </div>
                             </div>
 
-                            <div class="mt-4 d-flex justify-content-between align-items-center">
-                                <h4>Data Orang Tua:</h4>
-                            </div>
 
                             @php
                                 $ayah = $santri->keluarga->firstWhere('hubungan', 1);
@@ -68,8 +78,12 @@
                                 $wali = $santri->keluarga->firstWhere('hubungan', 3);
                             @endphp
 
-                            <!-- Tabel Ayah dan Ibu -->
-                            <table class="table table-bordered">
+                            <!-- Tabel Ayah -->
+                            <table class="table table-striped">
+                                <div class="mt-4 d-flex justify-content-between align-items-center">
+                                    <h4>Data Ayah:</h4>
+                                </div>
+
                                 <tr>
                                     <th width="40%">Nama Ayah</th>
                                     <td>{{ $ayah->nama ?? '' }}</td>
@@ -98,8 +112,15 @@
                                     <th>Tempat, Tanggal Lahir </th>
                                     <td>{{ $ayah->tempat_lahir ?? '' }}, {{ $ayah->tgl_lahir ?? '' }}</td>
                                 </tr>
+                            </table>
+                            <!-- Tabel Ibu -->
+                            <table class="table table-striped">
+                                <div class="mt-4 d-flex justify-content-between align-items-center">
+                                    <h4>Data Ibu:</h4>
+                                </div>
+
                                 <tr>
-                                    <th>Nama Ibu</th>
+                                    <th width="40%">Nama Ibu</th>
                                     <td>{{ $ibu->nama ?? '' }}</td>
                                 </tr>
                                 <tr>
@@ -133,7 +154,7 @@
                                 <h4>Data Wali:</h4>
                             </div>
 
-                            <table class="table table-bordered">
+                            <table class="table table-striped">
                                 <tr>
                                     <th width="40%">Nama Wali</th>
                                     <td>{{ $wali->nama ?? '' }}</td>
@@ -164,11 +185,11 @@
                                 </tr>
                             </table>
 
-                            <!-- Tombol Kembali di Bawah -->
+                            <!-- Tombol Kembali di Bawah
                             <div class="mt-4">
-                                <a href="{{ route('santri.index') }}" class="btn btn-secondary"> Kembali
+                                <a href="{{ route('santri.index') }}" class="btn btn-outline-secondary"> Kembali
                                 </a>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>

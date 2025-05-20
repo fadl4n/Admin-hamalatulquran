@@ -16,7 +16,7 @@ class NilaiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Santri::with('kelas', 'targets');
+        $query = Santri::with('kelas', 'target');
 
         // Jika ada input pencarian
         if ($request->has('search')) {
@@ -27,15 +27,15 @@ class NilaiController extends Controller
                     ->orWhereHas('kelas', function ($kelasQuery) use ($search) {
                         $kelasQuery->where('nama_kelas', 'like', "%$search%");
                     })
-                    ->orWhereHas('targets', function ($targetQuery) use ($search) {
+                    ->orWhereHas('target', function ($targetQuery) use ($search) {
                         // Deteksi jika input mengandung "Target X" atau angka langsung
                         if (preg_match('/^Target (\d+)$/i', $search, $matches)) {
-                            $idGroup = $matches[1]; // Ambil angka setelah "Target "
-                            $targetQuery->where('id_group', $idGroup);
+                            $idtarget = $matches[1]; // Ambil angka setelah "Target "
+                            $targetQuery->where('id_target', $idtarget);
                         } elseif (is_numeric($search)) {
-                            $targetQuery->where('id_group', $search);
+                            $targetQuery->where('id_target', $search);
                         } else {
-                            $targetQuery->where('id_group', 'like', "%$search%");
+                            $targetQuery->where('id_target', 'like', "%$search%");
                         }
                     });
             });
@@ -44,19 +44,18 @@ class NilaiController extends Controller
         $santris = $query->get();
 
         return view('nilai.show', compact('santris'));
-    }   
+    }
 
 
 
     /**
-     * Menampilkan detail nilai hafalan dan muroja'ah untuk seorang santri berdasarkan id_group.
+     * Menampilkan detail nilai hafalan dan muroja'ah untuk seorang santri berdasarkan id_target.
      */
-    public function show($idSantri, $idGroup)
+    public function show($idSantri, $idtarget)
     {
         $santri = Santri::findOrFail($idSantri);
-        // Ambil target berdasarkan santri dan id_group
+        // Ambil target berdasarkan santri dan id_target
         $targets = Target::where('id_santri', $idSantri)
-            ->where('id_group', $idGroup)
             ->get();
 
         // Buat array untuk menyimpan nilai hafalan dan muroja'ah
@@ -85,7 +84,7 @@ class NilaiController extends Controller
             ];
         }
 
-        return view('nilai.detail', compact('hafalan', 'murojaah', 'idGroup', 'santri'));
+        return view('nilai.detail', compact('hafalan', 'murojaah', 'idtarget', 'santri'));
     }
     public function fnGetData(Request $request)
     {
@@ -115,7 +114,7 @@ class NilaiController extends Controller
                 'nama' => $santri->nama,
                 'nisn' => $santri->nisn,
                 'kelas' => $santri->kelas->nama_kelas ?? '-',
-                'action' => '<a href="' . route('nilai.show', ['idSantri' => $santri->id_santri, 'idGroup' => 1]) . '" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></a>',
+                'action' => '<a href="' . route('nilai.show', ['idSantri' => $santri->id_santri, 'idtarget' => 1]) . '" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></a>',
             ];
         }, $data);
 

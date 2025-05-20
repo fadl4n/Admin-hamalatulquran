@@ -74,14 +74,14 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Group</label>
-                                    <select name="id_group" class="form-control @error('id_group') is-invalid @enderror" required>
+                                    <select name="id_target" class="form-control @error('id_target') is-invalid @enderror" required>
                                         @foreach($targets as $target)
-                                            <option value="{{ $target->id_group }}" {{ old('id_group', $setoran->id_target) == $target->id_group ? 'selected' : '' }}>
-                                                {{ $target->id_group }}
+                                            <option value="{{ $target->id_target }}" {{ old('id_target', $setoran->id_target) == $target->id_target ? 'selected' : '' }}>
+                                                {{ $target->id_target }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('id_group')<span class="text-danger">{{ $message }}</span>@enderror
+                                    @error('id_target')<span class="text-danger">{{ $message }}</span>@enderror
                                 </div>
                             </div>
 

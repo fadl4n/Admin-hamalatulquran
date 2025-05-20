@@ -106,15 +106,7 @@
                                     <input type="date" name="tgl_target" class="form-control" value="{{ old('tgl_target', $target->tgl_target) }}" required>
                                 </div>
 
-                                <div class="form-group">
-                                    <label>Group ID</label>
-                                    <input type="number" name="id_group" class="form-control @error('id_group') is-invalid @enderror"
-                                           min="1" value="{{ old('id_group', $target->id_group) }}" placeholder="Masukkan ID Grup" required>
-                                    @error('id_group')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-
+                            
                                 <button type="submit" class="btn btn-primary">Simpan</button>
                                 <a href="{{ route('target.index') }}" class="btn btn-secondary">Batal</a>
                             </form>

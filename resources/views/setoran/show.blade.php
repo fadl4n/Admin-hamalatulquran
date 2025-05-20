@@ -47,9 +47,9 @@
                                     <tbody>
                                         @foreach ($setoransGrouped as $groupKey => $setoranGroup)
                                             @php
-                                                [$idSantri, $idGroup] = explode('-', $groupKey);
+                                                [$idSantri, $idtarget] = explode('-', $groupKey);
                                                 $santri = \App\Models\Santri::find($idSantri);
-                                                $target = \App\Models\Target::where('id_group', $idGroup)->first();
+                                                $target = \App\Models\Target::where('id_target', $idtarget)->first();
                                                 $kelasList = $setoranGroup->pluck('kelas.nama_kelas')->unique()->implode(', ');
                                                 $statusList = $setoranGroup->pluck('status')->unique()->map(fn($status) => $status == 1 ? 'Selesai' : 'Proses')->values()->all();
                                                 $averagePersentase = $setoranGroup->pluck('persentase')->avg();
@@ -59,7 +59,7 @@
                                                 <td class="text-center">{{ $loop->iteration }}</td>
                                                 <td>{{ $santri->nama }} | {{ $santri->nisn }}</td>
                                                 <td class="text-center">{{ $kelasList }}</td>
-                                                <td class="text-center">{{ 'target '.$idGroup }}</td>
+                                                <td class="text-center">{{ 'target '.$idtarget }}</td>
                                                 <td class="text-center">
                                                     <span class="badge {{ $status == 'Proses' ? 'bg-warning' : 'bg-success' }}">{{ $status }}</span>
                                                 </td>
@@ -68,7 +68,7 @@
                                                     <a href="{{ route('setoran.show', $groupKey) }}" class="btn btn-sm btn-info">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <button class="btn btn-sm btn-danger btnDelete" data-id_group="{{ $idGroup }}" data-id_santri="{{ $idSantri }}">
+                                                    <button class="btn btn-sm btn-danger btnDelete" data-id_target="{{ $idtarget }}" data-id_santri="{{ $idSantri }}">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </td>
@@ -106,11 +106,11 @@
 
         // Event handler untuk tombol hapus
         $('.setoran-list').on('click', '.btnDelete', function () {
-            let id_group = $(this).data('id_group'); // Ambil id_group dari tombol delete
+            let id_target = $(this).data('id_target'); // Ambil id_target dari tombol delete
             let id_santri = $(this).data('id_santri'); // Ambil id_santri dari tombol delete
             let row = $(this).closest('tr'); // Ambil baris terkait
 
-            if (!id_group || !id_santri) {
+            if (!id_target || !id_santri) {
                 Swal.fire("Error", "ID Group atau ID Santri tidak ditemukan!", "error");
                 return;
             }
@@ -125,7 +125,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('setoran.destroyByTarget', ['id_santri' => ':id_santri', 'idGroup' => ':id_group']) }}".replace(':id_santri', id_santri).replace(':id_group', id_group),
+                        url: "{{ route('setoran.destroyByTarget', ['id_santri' => ':id_santri', 'idtarget' => ':id_target']) }}".replace(':id_santri', id_santri).replace(':id_target', id_target),
                         type: "DELETE",
                         headers: {
                             'X-CSRF-TOKEN': "{{ csrf_token() }}"

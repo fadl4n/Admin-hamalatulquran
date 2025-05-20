@@ -1,0 +1,39 @@
+[33m6bffbf1[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: commit: perbaikan data
+[33m3cbd265[m HEAD@{1}: commit: perbaikan pengajar
+[33m2c7c72b[m HEAD@{2}: commit: perbaikan artikel
+[33m792bfae[m HEAD@{3}: commit: perbaikan status histori
+[33meb43346[m HEAD@{4}: commit: tambahan api
+[33mfa0e0c1[m HEAD@{5}: commit: API SAJA
+[33mcdb2ffe[m HEAD@{6}: reset: moving to cdb2ffe
+[33m9af0d6c[m HEAD@{7}: reset: moving to 9af0d6c
+[33mcdb2ffe[m HEAD@{8}: commit: API
+[33m9af0d6c[m HEAD@{9}: commit: tampilan sidebar
+[33m292e63e[m HEAD@{10}: commit: perbaikan tampilan dashboard
+[33m894e3ca[m HEAD@{11}: commit: tampilan dashboard
+[33mbb91478[m HEAD@{12}: commit: perubahan dashboard
+[33m124b9cb[m HEAD@{13}: commit: perbaiki foto santri
+[33m47380ef[m HEAD@{14}: commit: perbaikan status histori
+[33md08a7ff[m HEAD@{15}: pull origin main: Merge made by the 'ort' strategy.
+[33ma5b4960[m HEAD@{16}: commit: perbaikan data santri
+[33m98e9b0f[m HEAD@{17}: commit: perbaikan sidebar
+[33mafcdde6[m HEAD@{18}: commit: edit santri
+[33m6f15e8d[m HEAD@{19}: commit: perubahan status di tabel histori
+[33m3d633d7[m HEAD@{20}: pull origin main: Fast-forward
+[33m7275bc4[m HEAD@{21}: commit: perbaikan tabel
+[33mbba4648[m HEAD@{22}: commit: perbaikan tampilan
+[33m5f75a06[m HEAD@{23}: commit: crud nilai
+[33mcdf9807[m HEAD@{24}: commit: memperbaiki crud setoran
+[33m092d7b1[m HEAD@{25}: commit: ctud target
+[33m71a6937[m HEAD@{26}: commit: crud histori
+[33m9867fb7[m HEAD@{27}: commit: crud setoran hafalan
+[33mb04e8e2[m HEAD@{28}: commit: nambah crud setoran hafalan
+[33mc61f6f5[m HEAD@{29}: commit: mengubah tampilan data santri
+[33m21699b6[m HEAD@{30}: commit: nambah crud artikel
+[33mfbeddfb[m HEAD@{31}: pull origin main: Fast-forward
+[33m7ac89ce[m HEAD@{32}: commit: crud surat
+[33m30abbd1[m HEAD@{33}: commit: nambah crud keluarga
+[33m018c27c[m HEAD@{34}: commit: nambah crud pengajar
+[33mab1d58c[m HEAD@{35}: commit: crud pengajar
+[33mc9f7344[m HEAD@{36}: Branch: renamed refs/heads/master to refs/heads/main
+[33mc9f7344[m HEAD@{38}: commit: nambah crud santri dan kelas
+[33m993c767[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{39}: clone: from https://github.com/helviqi001/magang-laravel
