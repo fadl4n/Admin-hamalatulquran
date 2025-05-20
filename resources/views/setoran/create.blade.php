@@ -22,15 +22,14 @@
                             <form action="{{ route('setoran.store') }}" method="POST">
                                 @csrf
                                 <div class="row">
-                                    <!-- Nama Santri -->
+                                   
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="santri">Nama Santri</label>
+                                            <label for="id_santri">Nama Santri</label>
                                             <select name="id_santri" id="id_santri" class="form-control" required>
                                                 <option value="">- Pilih Santri -</option>
                                                 @foreach ($santris as $santri)
-                                                    <option value="{{ $santri->id_santri }}"
-                                                        data-id_kelas="{{ $santri->id_kelas }}">
+                                                    <option value="{{ $santri->id_santri }}">
                                                         {{ $santri->nama }} | {{ $santri->nisn }}
                                                     </option>
                                                 @endforeach
@@ -41,14 +40,15 @@
                                         </div>
                                     </div>
 
-                                    <!-- Kelas -->
+                                    {{-- Nama Kelas --}}
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="kelas">Kelas</label>
-                                            <select name="id_kelas" class="form-control" id="id_kelas" required>
+                                            <label for="id_kelas">Kelas</label>
+                                            <select name="id_kelas" id="id_kelas" class="form-control" required>
                                                 <option value="">- Pilih Kelas -</option>
                                                 @foreach ($kelas as $kelass)
-                                                    <option value="{{ $kelass->id_kelas }}">{{ $kelass->nama_kelas }}
+                                                    <option value="{{ $kelass->id_kelas }}">
+                                                        {{ $kelass->nama_kelas }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -57,6 +57,8 @@
                                             @enderror
                                         </div>
                                     </div>
+
+
                                 </div>
 
                                 <div class="row">
@@ -72,11 +74,11 @@
                                     <!-- Target -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="id_group">Target</label>
-                                            <select name="id_group" id="id_group" class="form-control" required>
+                                            <label for="id_target">Target</label>
+                                            <select name="id_target" id="id_target" class="form-control" required>
                                                 <option value="">- Pilih Target -</option>
                                             </select>
-                                            @error('id_group')
+                                            @error('id_target')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
@@ -158,8 +160,7 @@
                                 <!-- Keterangan -->
                                 <div class="form-group">
                                     <label for="keterangan">Keterangan</label>
-                                    <textarea name="keterangan" id="keterangan" rows="3" class="form-control"
-                                        placeholder="Masukkan keterangan..."></textarea>
+                                    <textarea name="keterangan" id="keterangan" rows="3" class="form-control" placeholder="Masukkan keterangan..."></textarea>
                                 </div>
 
                                 <div class="d-flex justify-content-end">
@@ -193,43 +194,63 @@
 
             // Inisialisasi Select2
             $('.select2').select2();
-
             $('#id_santri').on('change', function() {
                 var santriId = $(this).val();
-                $('#id_group').empty().append('<option value="">- Pilih Target -</option>');
+
+                // Reset dropdown target, surat, dan kelas dulu
+                $('#id_target').empty().append('<option value="">- Pilih Target -</option>');
                 $('#id_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
+                $('#id_kelas').val(null).trigger('change.select2');
 
                 if (santriId) {
+                    // Ambil target
                     $.ajax({
-                        url: "{{ route('setoran.gettargetBySantri', ':santri_id') }}".replace(
+                        url: "{{ route('setoran.gettargetsBySantri', ':santri_id') }}".replace(
                             ':santri_id', santriId),
                         type: 'GET',
                         success: function(data) {
-                            console.log("Data target diterima:", data);
-
-                            let uniqueGroups = new Set();
                             if (data.target.length > 0) {
-                                data.target.forEach(function(target) {
-                                    if (!uniqueGroups.has(target.id_group)) {
-                                        uniqueGroups.add(target.id_group);
-                                        $('#id_group').append('<option value="' + target
-                                            .id_group + '">Target ' + target
-                                            .id_group + '</option>');
-                                    }
+                                data.target.forEach(function(target, index) {
+                                    $('#id_target').append(
+                                        '<option value="' + target.id_target +
+                                        '">Target ' + (index + 1) + '</option>'
+                                    );
                                 });
                             } else {
-                                $('#id_group').append(
+                                $('#id_target').append(
                                     '<option value="">- Tidak ada target -</option>');
                             }
+
                         },
                         error: function(xhr, status, error) {
                             console.error("Error mengambil target:", error);
                         }
                     });
+
+                    // Ambil kelas
+                    $.ajax({
+                        url: "{{ route('setoran.getKelasBySantri', ':id') }}".replace(':id',
+                            santriId),
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success && response.id_kelas) {
+                                $('#id_kelas').val(response.id_kelas).trigger('change.select2');
+                            } else {
+                                $('#id_kelas').val(null).trigger('change.select2');
+                            }
+                        },
+                        error: function() {
+                            $('#id_kelas').val(null).trigger('change.select2');
+                        }
+                    });
                 }
             });
+
+
+
             // Ketika target dipilih, update nama surat yang terkait
-            $('#id_group').on('change', function() {
+            $('#id_target').on('change', function() {
                 var groupId = $(this).val();
                 var santriId = $('#id_santri').val(); // Ambil ID Santri yang dipilih
 
@@ -275,7 +296,7 @@
             $('#nama_surat').on('change', function() {
                 var idSurat = $(this).val();
                 var idSantri = $('#id_santri').val();
-                var idGroup = $('#id_group').val();
+                var idGroup = $('#id_target').val();
 
                 if (idSurat && idSantri && idGroup) {
                     $.ajax({
@@ -284,7 +305,7 @@
                         data: {
                             id_surat: idSurat,
                             id_santri: idSantri,
-                            id_group: idGroup
+                            id_target: idGroup
                         },
                         success: function(data) {
                             console.log("Validasi target diterima:", data); // Debugging

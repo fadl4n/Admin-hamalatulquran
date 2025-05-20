@@ -1,6 +1,6 @@
-@extends('admin_template')
+    @extends('admin_template')
 
-@section('content')
+    @section('content')
     <section class="content">
         <div class="container-fluid">
             <div class="card">
@@ -17,35 +17,48 @@
                         @method('PUT')
 
                         <div class="row">
+                            {{-- Nama Santri --}}
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Nama Santri</label>
-                                    <select name="id_santri" class="form-control @error('id_santri') is-invalid @enderror" required>
+                                    <label for="id_santri">Nama Santri</label>
+                                    <select name="id_santri" id="id_santri" class="form-control select2 @error('id_santri') is-invalid @enderror" required>
+                                        <option value="">- Pilih Santri -</option>
                                         @foreach ($santris as $santri)
-                                            <option value="{{ $santri->id_santri }}" {{ old('id_santri', $setoran->id_santri) == $santri->id_santri ? 'selected' : '' }}>
+                                            <option
+                                                value="{{ $santri->id_santri }}"
+                                                data-id_kelas="{{ $santri->id_kelas }}"
+                                                {{ old('id_santri', $setoran->id_santri) == $santri->id_santri ? 'selected' : '' }}>
                                                 {{ $santri->nama }} | {{ $santri->nisn }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('id_santri')<span class="text-danger">{{ $message }}</span>@enderror
+                                    @error('id_santri')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
 
+                            {{-- Kelas --}}
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Kelas</label>
-                                    <select name="id_kelas" class="form-control @error('id_kelas') is-invalid @enderror" required>
+                                    <label for="id_kelas">Kelas</label>
+                                    <select name="id_kelas" id="id_kelas" class="form-control select2 @error('id_kelas') is-invalid @enderror" required>
+                                        <option value="">- Pilih Kelas -</option>
                                         @foreach ($kelas as $kelass)
-                                            <option value="{{ $kelass->id_kelas }}" {{ old('id_kelas', $setoran->id_kelas) == $kelass->id_kelas ? 'selected' : '' }}>
+                                            <option value="{{ $kelass->id_kelas }}"
+                                                {{ old('id_kelas', $setoran->id_kelas) == $kelass->id_kelas ? 'selected' : '' }}>
                                                 {{ $kelass->nama_kelas }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('id_kelas')<span class="text-danger">{{ $message }}</span>@enderror
+                                    @error('id_kelas')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
 
+                        {{-- Tanggal & Pengajar --}}
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -70,26 +83,30 @@
                             </div>
                         </div>
 
+                        {{-- Target & Surat --}}
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Group</label>
-                                    <select name="id_group" class="form-control @error('id_group') is-invalid @enderror" required>
-                                        @foreach($target as $target)
-                                            <option value="{{ $target->id_group }}" {{ old('id_group', $setoran->id_target) == $target->id_group ? 'selected' : '' }}>
-                                                {{ $target->id_group }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('id_group')<span class="text-danger">{{ $message }}</span>@enderror
+                                    <label>Target</label>
+                                   <select name="id_target" id="id_target" class="form-control select2 @error('id_target') is-invalid @enderror" required>
+    <option value="">- Pilih Target -</option>
+    @foreach($targets as $target)
+        <option value="{{ $target->id_target }}"
+            {{ old('id_target', $setoran->id_target) == $target->id_target ? 'selected' : '' }}>
+            Target {{ $loop->iteration }}
+        </option>
+    @endforeach
+</select>
+
+                                    @error('id_target')<span class="text-danger">{{ $message }}</span>@enderror
                                 </div>
                             </div>
-
 
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Surat</label>
-                                    <select name="id_surat" class="form-control @error('id_surat') is-invalid @enderror" required>
+                                    <select name="id_surat" id="id_surat" class="form-control select2 @error('id_surat') is-invalid @enderror" required>
+                                        <option value="">- Pilih Nama Surat -</option>
                                         @foreach($surats as $surat)
                                             <option value="{{ $surat->id_surat }}" {{ old('id_surat', $setoran->id_surat) == $surat->id_surat ? 'selected' : '' }}>
                                                 {{ $surat->nama_surat }}
@@ -101,23 +118,25 @@
                             </div>
                         </div>
 
+                        {{-- Ayat --}}
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Ayat Mulai</label>
-                                    <input type="number" name="jumlah_ayat_start" class="form-control @error('jumlah_ayat_start') is-invalid @enderror" value="{{ old('jumlah_ayat_start', $setoran->jumlah_ayat_start) }}" required>
+                                    <input type="number" id="jumlah_ayat_start" name="jumlah_ayat_start" class="form-control @error('jumlah_ayat_start') is-invalid @enderror" value="{{ old('jumlah_ayat_start', $setoran->jumlah_ayat_start) }}" required>
                                     @error('jumlah_ayat_start')<span class="text-danger">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Ayat Akhir</label>
-                                    <input type="number" name="jumlah_ayat_end" class="form-control @error('jumlah_ayat_end') is-invalid @enderror" value="{{ old('jumlah_ayat_end', $setoran->jumlah_ayat_end) }}" required>
+                                    <input type="number" id="jumlah_ayat_end" name="jumlah_ayat_end" class="form-control @error('jumlah_ayat_end') is-invalid @enderror" value="{{ old('jumlah_ayat_end', $setoran->jumlah_ayat_end) }}" required>
                                     @error('jumlah_ayat_end')<span class="text-danger">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                         </div>
 
+                        {{-- Nilai --}}
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Nilai</label>
@@ -126,7 +145,7 @@
                             </div>
                         </div>
 
-
+                        {{-- Keterangan --}}
                         <div class="form-group">
                             <label>Keterangan</label>
                             <textarea name="keterangan" class="form-control @error('keterangan') is-invalid @enderror" rows="3">{{ old('keterangan', $setoran->keterangan) }}</textarea>
@@ -140,4 +159,150 @@
             </div>
         </div>
     </section>
-@endsection
+    @endsection
+
+
+    @section('script')
+    <script>
+        $(document).ready(function () {
+            // Inisialisasi Select2
+            $('.select2').select2();
+
+            // Saat Santri dipilih
+            $('#id_santri').on('change', function () {
+                const selectedSantri = $(this).find('option:selected');
+                const santriId = $(this).val();
+                const idKelas = selectedSantri.data('id_kelas');
+
+                // Reset dropdown
+                $('#id_target').empty().append('<option value="">- Pilih Target -</option>');
+                $('#id_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
+                $('#id_kelas').val(null).trigger('change.select2');
+
+                // Fallback: set kelas jika ada di data attribute
+                if (idKelas) {
+                    $('#id_kelas').val(idKelas).trigger('change.select2');
+                }
+
+                if (santriId) {
+                    // Ambil target
+                    $.ajax({
+                        url: "{{ route('setoran.gettargetsBySantri', ':santri_id') }}".replace(':santri_id', santriId),
+                        type: 'GET',
+                        success: function (data) {
+                            if (data.target.length > 0) {
+                                data.target.forEach(function (target, index) {
+                                    $('#id_target').append(`<option value="${target.id_target}">Target ${index + 1}</option>`);
+                                });
+                            } else {
+                                $('#id_target').append('<option value="">- Tidak ada target -</option>');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error mengambil target:", error);
+                        }
+                    });
+
+                    // Ambil kelas
+                    $.ajax({
+                        url: "{{ route('setoran.getKelasBySantri', ':id') }}".replace(':id', santriId),
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (response) {
+                            if (response.success && response.id_kelas) {
+                                $('#id_kelas').val(response.id_kelas).trigger('change.select2');
+                            } else {
+                                $('#id_kelas').val(null).trigger('change.select2');
+                            }
+                        },
+                        error: function () {
+                            $('#id_kelas').val(null).trigger('change.select2');
+                        }
+                    });
+                }
+            });
+
+            // Ketika target dipilih, ambil nama surat
+            $('#id_target').on('change', function () {
+                var groupId = $(this).val();
+                var santriId = $('#id_santri').val();
+
+                $('#id_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
+
+                if (groupId && santriId) {
+                    $.ajax({
+                        url: "{{ url('get-nama-surat') }}",
+                        type: 'GET',
+                        data: {
+                            group_id: groupId,
+                            santri_id: santriId
+                        },
+                        success: function (data) {
+                            let uniqueSurats = new Set();
+
+                            if (data.surats && data.surats.length > 0) {
+                                data.surats.forEach(function (surat) {
+                                    if (surat.id_surat && !uniqueSurats.has(surat.id_surat)) {
+                                        uniqueSurats.add(surat.id_surat);
+                                        $('#id_surat').append(`<option value="${surat.id_surat}">${surat.nama_surat}</option>`);
+                                    }
+                                });
+                            } else {
+                                $('#id_surat').append('<option value="">- Tidak ada surat -</option>');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error mengambil surat:", error);
+                        }
+                    });
+                }
+            });
+
+            // Validasi jumlah ayat saat surat dipilih
+            $('#id_surat').on('change', function () {
+                var idSurat = $(this).val();
+                var idSantri = $('#id_santri').val();
+                var idGroup = $('#id_target').val();
+
+                if (idSurat && idSantri && idtarget) {
+                    $.ajax({
+                        url: "{{ url('get-ayats-validation') }}",
+                        type: 'GET',
+                        data: {
+                            id_surat: idSurat,
+                            id_santri: idSantri,
+                            id_target: idtarget
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                var jumlahAwal = data.jumlah_ayat_target_awal;
+                                var jumlahAkhir = data.jumlah_ayat_target;
+
+                                $('#jumlah_ayat_start').on('input', function () {
+                                    var start = $(this).val();
+                                    if (start < jumlahAwal || start > jumlahAkhir) {
+                                        alert('Jumlah ayat start tidak boleh di luar rentang ' + jumlahAwal + ' - ' + jumlahAkhir + '.');
+                                    }
+                                });
+
+                                $('#jumlah_ayat_end').on('input', function () {
+                                    var end = $(this).val();
+                                    if (end < jumlahAwal || end > jumlahAkhir) {
+                                        alert('Jumlah ayat end tidak boleh di luar rentang ' + jumlahAwal + ' - ' + jumlahAkhir + '.');
+                                    }
+                                });
+                            } else {
+                                alert(data.message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error validasi target:", error);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+
+    @endsection

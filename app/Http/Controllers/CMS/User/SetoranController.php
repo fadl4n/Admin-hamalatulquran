@@ -21,10 +21,10 @@ class SetoranController extends Controller
         // Mengambil data setoran dengan relasi
         $setorans = Setoran::with(['santri', 'kelas', 'pengajar', 'targets', 'surat'])->get();
 
-        // Mengelompokkan setoran berdasarkan id_santri dan id_group dari tabel target
+        // Mengelompokkan setoran berdasarkan id_santri dan id_target dari tabel targets
         $setoransGrouped = $setorans->groupBy(function ($setoran) {
-            // Menggunakan id_santri dari relasi santri dan id_group dari relasi target
-            return $setoran->santri->id_santri . '-' . $setoran->target->first()->id_group;
+            // Menggunakan id_santri dari relasi santri dan id_target dari relasi targets
+            return $setoran->santri->id_santri . '-' . $setoran->targets->first()->id_target;
         });
 
         return view('setoran.show', compact('setoransGrouped'));
@@ -32,15 +32,15 @@ class SetoranController extends Controller
 
     public function show($groupKey)
     {
-        // Pecah groupKey menjadi id_santri dan id_group
-        list($idSantri, $idGroup) = explode('-', $groupKey);
-        // Ambil semua setoran yang berhubungan dengan id_santri dan id_group
-        $setorans = Setoran::with(['santri', 'kelas', 'pengajar', 'target', 'surat'])
+        // Pecah groupKey menjadi id_santri dan id_target
+        list($idSantri, $idtarget) = explode('-', $groupKey);
+        // Ambil semua setoran yang berhubungan dengan id_santri dan id_target
+        $setorans = Setoran::with(['santri', 'kelas', 'pengajar', 'targets', 'surat'])
             ->whereHas('santri', function ($query) use ($idSantri) {
                 $query->where('id_santri', $idSantri);
             })
-            ->whereHas('target', function ($query) use ($idGroup) {
-                $query->where('id_group', $idGroup); // Menggunakan id_group bukan id_target
+            ->whereHas('targets', function ($query) use ($idtarget) {
+                $query->where('id_target', $idtarget); // Menggunakan id_target bukan id_target
             })
             ->get();
 
@@ -48,12 +48,12 @@ class SetoranController extends Controller
         return view('setoran.detail', compact('setorans'));
     }
 
-    public function destroyByTarget($idSantri, $idGroup)
+    public function destroyByTarget($idSantri, $idtarget)
     {
-        // Temukan semua setoran yang memiliki id_santri dan id_group tertentu melalui relasi ke target
+        // Temukan semua setoran yang memiliki id_santri dan id_target tertentu melalui relasi ke targets
         $setorans = Setoran::where('id_santri', $idSantri)
-            ->whereHas('target', function ($query) use ($idGroup) {
-                $query->where('id_group', $idGroup);
+            ->whereHas('targets', function ($query) use ($idtarget) {
+                $query->where('id_target', $idtarget);
             })->get();
 
         // Perbarui histori terkait dengan setoran yang akan dihapus
@@ -146,21 +146,22 @@ class SetoranController extends Controller
     public function gettargetBySantri($santri_id)
     {
         $target = Target::where('id_santri', $santri_id)
-            ->groupBy('id_group')
-            ->get(['id_group']);
+            ->orderBy('id_target') // atau tgl_mulai kalau ada
+            ->get(['id_target']);
 
         return response()->json([
             'target' => $target
         ]);
     }
+
     public function getIdTarget(Request $request)
     {
-        $id_group = $request->id_group;
+        $id_target = $request->id_target;
         $id_santri = $request->id_santri;
         $id_surat = $request->id_surat;
 
-        // Cari id_target berdasarkan id_group, id_santri, dan id_surat
-        $target = Target::where('id_group', $id_group)
+        // Cari id_target berdasarkan id_target, id_santri, dan id_surat
+        $target = Target::where('id_target', $id_target)
             ->where('id_santri', $id_santri)
             ->where('id_surat', $id_surat)
             ->first();
@@ -183,20 +184,20 @@ class SetoranController extends Controller
         // Ambil parameter yang dikirimkan
         $id_surat = $request->input('id_surat');
         $id_santri = $request->input('id_santri');
-        $id_group = $request->input('id_group');
+        $id_target = $request->input('id_target');
 
         // Query untuk mendapatkan data dari tabel target
         $target = Target::where('id_surat', $id_surat)
             ->where('id_santri', $id_santri)
-            ->where('id_group', $id_group)
+            ->where('id_target', $id_target)
             ->first();
 
         // Jika target ditemukan, lanjutkan validasi
         if ($target) {
-            // Query untuk mendapatkan setoran berdasarkan id_surat, id_santri, dan id_group
+            // Query untuk mendapatkan setoran berdasarkan id_surat, id_santri, dan id_target
             $setoran = Setoran::where('id_surat', $id_surat)
                 ->where('id_santri', $id_santri)
-                ->where('id_group', $id_group)
+                ->where('id_target', $id_target)
                 ->first();
 
             // Jika setoran ditemukan, lakukan validasi jumlah ayat
@@ -234,18 +235,35 @@ class SetoranController extends Controller
             'message' => 'Target tidak ditemukan.',
         ]);
     }
+    public function getKelasBySantri($id_santri)
+{
+    $santri = Santri::select('id_santri', 'id_kelas')->find($id_santri);
+
+    if ($santri) {
+        return response()->json([
+            'success' => true,
+            'id_kelas' => $santri->id_kelas,
+        ]);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Santri tidak ditemukan'
+        ]);
+    }
+}
+
 
     public function getTargetDetailBySurat(Request $request)
     {
         // Validasi input
         $request->validate([
-            'group_id' => 'required|exists:groups,id_group',
-            'id_santri' => 'required|exists:santris,id_santri',
+            'target_id' => 'required|exists:targets,id_target',
+            'santri_id' => 'required|exists:santris,id_santri',
             'surat_id' => 'required|exists:surats,id_surat',
         ]);
 
         // Ambil target berdasarkan group_id, santri_id, dan surat_id
-        $target = Target::where('id_group', $request->group_id)
+        $target = Target::where('id_target', $request->target_id)
             ->where('id_santri', $request->santri_id)
             ->where('id_surat', $request->surat_id)
             ->first();
@@ -266,16 +284,16 @@ class SetoranController extends Controller
 
     public function getNamaSurat(Request $request)
     {
-        $groupId = $request->input('group_id');
-        $santriId = $request->input('id_santri'); // Ambil ID Santri
+        $targetId = $request->input('group_id');
+        $santriId = $request->input('santri_id'); // Ambil ID Santri
 
-        // Cari target dengan id_group dan id_santri yang diberikan
-        $target = Target::where('id_group', $groupId)
+        // Cari target dengan id_target dan id_santri yang diberikan
+        $targets = Target::where('id_target', $targetId)
             ->where('id_santri', $santriId)
             ->get();
 
         // Ambil daftar id_surat yang unik dari target, pastikan id_target di tabel setoran belum selesai (status != 1)
-        $surats = $target->map(function ($target) use ($santriId) {
+        $surats = $targets->map(function ($target) use ($santriId) {
             // Mengecek apakah id_target terkait sudah selesai (status 1) di tabel setoran
             $setoran = Setoran::where('id_target', $target->id_target)
                 ->where('id_santri', $santriId)
@@ -306,7 +324,7 @@ class SetoranController extends Controller
             'nilai' => 'required|numeric|min:0|max:100',
             'jumlah_ayat_start' => 'required|numeric',
             'jumlah_ayat_end' => 'required|numeric',
-            'id_group' => 'required', // Tidak divalidasi dengan exists, karena hanya ada di target
+            'id_target' => 'required', // Tidak divalidasi dengan exists, karena hanya ada di targets
         ]);
 
         // Pengecekan apakah id_kelas sesuai dengan santri
@@ -324,7 +342,7 @@ class SetoranController extends Controller
             ['id_santri', '=', $request->id_santri],
             ['id_kelas', '=', $request->id_kelas],
             ['id_surat', '=', $request->id_surat],
-            ['id_group', '=', $request->id_group]
+            ['id_target', '=', $request->id_target]
         ])->first();
 
         // Validasi jika jumlah_ayat_start lebih besar dari jumlah_ayat_end
@@ -501,8 +519,8 @@ class SetoranController extends Controller
         $kelas = Kelas::all();
         $surats = Surat::all();
         $pengajars = Pengajar::all();
-        $target = Target::all(); // Ambil data target
-        return view('setoran.edit', compact('setoran', 'santris', 'kelas', 'pengajars', 'target', 'surats'));
+        $targets = Target::all(); // Ambil data target
+        return view('setoran.edit', compact('setoran', 'santris', 'kelas', 'pengajars', 'targets', 'surats'));
     }
 
     public function update(Request $request, Setoran $setoran)
@@ -518,7 +536,7 @@ class SetoranController extends Controller
             'nilai' => 'required|numeric|min:0|max:100',
             'jumlah_ayat_start' => 'required|numeric',
             'jumlah_ayat_end' => 'required|numeric',
-            'id_group' => 'nullable', // Bisa kosong jika tidak diubah
+            'id_target' => 'nullable', // Bisa kosong jika tidak diubah
         ]);
 
         // Pengecekan apakah id_kelas sesuai dengan santri
@@ -535,7 +553,7 @@ class SetoranController extends Controller
             ['id_santri', '=', $request->id_santri],
             ['id_kelas', '=', $request->id_kelas],
             ['id_surat', '=', $request->id_surat],
-            ['id_group', '=', $request->id_group ?? $setoran->target->id_group] // Jika id_group tidak ada, gunakan grup yang lama
+            ['id_target', '=', $request->id_target ?? $setoran->target->id_target] // Jika id_target tidak ada, gunakan grup yang lama
         ])->first();
 
         // Validasi jika jumlah_ayat_start lebih besar dari jumlah_ayat_end

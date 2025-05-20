@@ -62,14 +62,12 @@
                             <label for="image">Profile Picture</label>
                             <div class="d-flex flex-column align-items-center">
                                 <img id="imgPreview" src="{{ $data->image }}" alt="Profile Picture" class="profile-img mb-2">
-                                
                                 <div class="form-group text-center">
                                     <!-- Sembunyikan input file -->
                                     <input type="file" name="image" id="image" class="d-none">
 
                                     <!-- Label custom sebagai tombol -->
                                     <label for="image" class="btn btn-outline-primary btn-sm custom-file-button">Choose Image</label>
-                                    
                                     <small class="file-label d-block mt-2">Image preview is 150px, original dimensions are kept.</small>
                                 </div>
                             </div>
@@ -92,12 +90,11 @@
                             <div class="form-group">
                                 <label for="password">New Password</label>
                                 <div class="input-group">
-                                    <input type="password" class="form-control" id="password" placeholder="Password"
-                                           name="password">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text reveal-password" style="cursor: pointer;">
-                                            <i class="fas fa-eye"></i>
-                                        </span>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Password baru" autocomplete="new-password">
+                            <div class="input-group-append">
+                                <span class="input-group-text reveal-password" style="cursor: pointer;">
+                                    <i class="fas fa-eye"></i>
+                                </span>
                                     </div>
                                 </div>
                                 <small class="text-muted">Leave empty if you don't want to change password.</small>

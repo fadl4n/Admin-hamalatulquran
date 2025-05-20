@@ -93,7 +93,7 @@ class AuthController extends Controller
             return redirect()->back();
         }
 
-        $param = $request->except('_token', 'password', 'passwordConfirmation', 'image');
+        $param = $request->except('_token', 'password', 'passwordConfirmation', 'image','role_id');
 
         // image handling
         if ($request->hasFile('image')) {
@@ -112,8 +112,11 @@ class AuthController extends Controller
 
             $param['image'] = $files;
         } else {
-            $param['image'] = asset('assets/image/default-user.png');
-        }
+    // ambil image lama dari database
+    $existingUser = User::where('id', Session::get('user')['id'])->first();
+    $param['image'] = $existingUser->image;
+}
+
 
         if ($request->password != null) {
             $param['password'] = Hash::make($request->password);
@@ -127,7 +130,7 @@ class AuthController extends Controller
             $request->session()->put('user',
             [
                 'id' => $user->id,
-                'role_id' => $user->userRoleid,
+                'role_id' => $user->role_id,
                 'name' => $user->name,
                 'image' => $user->image,
             ]);

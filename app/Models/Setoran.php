@@ -14,14 +14,14 @@ class Setoran extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'tgl_setoran',
-        'id_target',
         'id_santri',
-        'id_surat',
-        'id_pengajar',
+        'tgl_setoran',
+        'status',
         'id_kelas',
         'keterangan',
-        'status',
+        'id_surat',
+        'id_pengajar',
+        'id_target',
         'persentase',
         'jumlah_ayat_start',
         'jumlah_ayat_end',
@@ -31,7 +31,7 @@ class Setoran extends Model
     // Relasi ke Santri
     public function santri()
     {
-        return $this->belongsTo(Santri::class, 'id_santri');
+        return $this->belongsTo(Santri::class, 'id_santri', 'id_santri');
     }
 
     // Relasi ke Kelas
@@ -52,14 +52,20 @@ class Setoran extends Model
         return $this->belongsTo(Pengajar::class, 'id_pengajar');
     }
 
+    // Relasi ke Targets (menggunakan `hasMany` karena satu setoran bisa memiliki banyak target)
+    // public function targets()
+    // {
+    //     return $this->hasMany(Target::class, 'id_target', 'id_target');
+    // }
     public function histori()
     {
         return $this->hasOne(Histori::class, 'id_setoran');
     }
     public function target()
     {
-        return $this->belongsTo(Target::class, 'id_target', 'id_target');
+        return $this->hasMany(Target::class, 'id_target', 'id_target');
     }
+
 
     public function getPersentaseAttribute()
     {
@@ -110,11 +116,11 @@ class Setoran extends Model
 
         // Hitung persentase berdasarkan total progres
         $persentase = 0;
-        $totaltarget = $matchingtarget->count();
+        $totalTargets = $matchingtarget->count();
 
-        if ($totaltarget > 0) {
+        if ($totalTargets > 0) {
             // Persentase dihitung berdasarkan total progres
-            $persentase = ($totalProgress / $totaltarget) * 100;
+            $persentase = ($totalProgress / $totalTargets) * 100;
         }
 
         // Pastikan persentase tidak lebih dari 100%

@@ -202,23 +202,25 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::post('store', 'store')->name('store');
             Route::get('edit/{setoran}', 'edit')->name('edit');
             Route::put('update/{setoran}', 'update')->name('update');
-            Route::delete('delete-target/{id_santri}/{idGroup}', 'destroyByTarget')->name('destroyByTarget'); // Gunakan id_santri dan idGroup
+            Route::delete('delete-target/{id_santri}/{idtarget}', 'destroyByTarget')->name('destroyByTarget'); // Gunakan id_santri dan idGroup
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
             Route::get('get-santri-target/{id_santri}', 'getSantritarget')->name('getSantritarget');
             Route::get('get-nama-surat', 'getNamaSuratByGroup')->name('getNamaSuratByGroup');
             Route::delete('destroy/{idSetoran}', 'destroy')->name('destroy');
             Route::get('detail/{groupKey}', 'show')->name('show');
+            Route::get('get-kelas-by-santri/{id_santri}', 'getKelasBySantri')->name('getKelasBySantri');
         });
     });
 
 
     Route::prefix('nilai')->name('nilai.')->group(function () {
         Route::get('/', [NilaiController::class, 'index'])->name('index');
-        Route::get('/{idSantri}/{idGroup}', [NilaiController::class, 'show'])->name('show');
+        Route::get('/{idSantri}/{idtarget}', [NilaiController::class, 'show'])->name('show');
 
         // Route untuk mendapatkan data menggunakan AJAX
         Route::get('/fn-get-data', [NilaiController::class, 'fnGetData'])->name('fn-get-data');
     });
+
 
 
 
@@ -230,13 +232,12 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::post('store', 'store')->name('store');
             Route::get('edit/{target}', 'edit')->name('edit');
             Route::put('update/{target}', 'update')->name('update');
-            Route::delete('delete/{id_santri}/{id_group}', 'destroy')->name('destroy');
+            Route::delete('delete/{id_target}', 'destroy')->name('destroy');
             Route::delete('delete/{id_target}', 'destroyByIdTarget')->name('destroyByIdTarget'); // Route untuk hapus berdasarkan id_target
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
-            Route::get('detail/{id_group}', 'detail')->name('detail');
+            Route::get('detail/{id_target}', 'detail')->name('detail');
         });
     });
-
     Route::prefix('artikel')->group(function () {
         Route::get('/', [ArtikelController::class, 'index'])->name('artikel.index');
         Route::get('/create', [ArtikelController::class, 'create'])->name('artikel.create');
@@ -259,7 +260,8 @@ Route::middleware([CheckAuth::class])->group(function () {
 
 
     // web.php
-Route::get('/setoran/target/{santri_id}', [SetoranController::class, 'gettargetBySantri'])->name('setoran.gettargetBySantri');
+Route::get('/setoran/targets/{santri_id}', [SetoranController::class, 'gettargetBySantri'])->name('setoran.gettargetsBySantri');
+
 Route::get('/get-nama-surat', [SetoranController::class, 'getNamaSurat']);
 
 Route::get('get-ayats-validation', [SetoranController::class, 'validateAyat']);

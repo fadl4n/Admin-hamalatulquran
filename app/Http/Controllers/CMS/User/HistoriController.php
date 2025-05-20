@@ -12,8 +12,9 @@ class HistoriController extends Controller
 {
     public function index()
     {
-        // Ambil semua data histori dengan relasi yang diperlukan
-        $histori = Histori::with(['santri', 'surat'])->get();
+        $histori = Histori::with(['santri', 'surat'])
+                ->orderBy('id_surat')
+                ->get();
 
         // Ambil daftar santri untuk filter
         $santris = Santri::all();

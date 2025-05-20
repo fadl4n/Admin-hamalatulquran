@@ -7,10 +7,10 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-                    <h5> @isset($target){{ $target->first()->first()->santri->nama }}@endisset</h5>
+                    <h5> @isset($targest){{ $targets->first()->first()->santri->nama }}@endisset</h5>
                     <div class="card">
                         <div class="card-body">
-                            @if($target->isEmpty())
+                            @if($targets->isEmpty())
                                 <p class="text-center text-danger">Data tidak ditemukan.</p>
                             @else
                                 <table class="table table-bordered">
@@ -22,7 +22,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($target as $groupKey => $group)
+                                        @foreach ($targets as $groupKey => $group)
                                             @php
                                                 $firstTarget = $group->first();
                                             @endphp
