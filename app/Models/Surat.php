@@ -20,7 +20,7 @@ class Surat extends Model
 
     public $timestamps = true; // Menggunakan created_at & updated_at
 
-    public function targets()
+    public function target()
     {
         return $this->hasMany(Target::class, 'id_surat');
     }

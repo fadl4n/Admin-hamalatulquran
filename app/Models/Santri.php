@@ -14,8 +14,18 @@ class Santri extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'nama', 'nisn', 'tempat_lahir', 'password', 'foto_santri','email',
-        'tgl_lahir', 'alamat', 'angkatan', 'id_kelas', 'jenis_kelamin', 'status'
+        'nama',
+        'nisn',
+        'tempat_lahir',
+        'password',
+        'foto_santri',
+        'email',
+        'tgl_lahir',
+        'alamat',
+        'angkatan',
+        'id_kelas',
+        'jenis_kelamin',
+        'status'
     ];
 
     /**
@@ -30,14 +40,16 @@ class Santri extends Model
      * Relasi One-to-Many dengan model Keluarga.
      */
     public function keluarga()
-{
-    return $this->hasMany(Keluarga::class, 'id_santri', 'id_santri');
-}
-public function targets()
-{
-    return $this->hasMany(Target::class, 'id_santri'); // Relasi ke target berdasarkan id_santri
-}
+    {
+        return $this->hasMany(Keluarga::class, 'id_santri', 'id_santri');
+    }
+    public function targets()
+    {
+        return $this->hasMany(Target::class, 'id_santri'); // Relasi ke target berdasarkan id_santri
+    }
 
-
-
+    public function setoran()
+    {
+        return $this->hasMany(Setoran::class);
+    }
 }

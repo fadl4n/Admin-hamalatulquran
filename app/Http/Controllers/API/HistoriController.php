@@ -28,7 +28,7 @@ class HistoriController extends Controller
                 'ayat' => optional($item->surat) ? $item->surat->jumlah_ayat . ' ayat' : '-',
                 'persentase' => $item->persentase . '%',
                 'status' => $item->status,
-                'status_label' => match($item->status) {
+                'status_label' => match ($item->status) {
                     0 => 'Belum Mulai',
                     1 => 'Proses',
                     2 => 'Selesai',
@@ -45,6 +45,25 @@ class HistoriController extends Controller
         ]);
     }
 
+    public function showBySantri($id_santri)
+    {
+        $histori = Histori::with(['target.surat'])
+            ->where('id_santri', $id_santri)
+            ->get()
+            ->map(function ($h) {
+                return [
+                    'id_histori' => $h->id_histori,
+                    'id_setoran' => $h->id_setoran,
+                    'id_target' => $h->id_target,
+                    'nama_surat' => $h->target->surat->nama_surat ?? '-',
+                    'jumlah_ayat' => $h->target->jumlah_ayat_target,
+                    'persentase' => $h->persentase,
+                    'status' => $h->status,
+                ];
+            });
+
+        return response()->json($histori);
+    }
 
     public function updateNilai(Request $request, $id_target)
     {
@@ -58,7 +77,7 @@ class HistoriController extends Controller
         $histori->id_target = $id_target;
         $histori->nilai = $request->nilai;
         $histori->persentase = $lastHistori->persentase ?? 0;
-        $histori->id_santri = $lastHistori->id_santri ?? null;
+        $histori->santri_id = $lastHistori->santri_id ?? null;
         $histori->id_surat = $lastHistori->id_surat ?? null;
         $histori->id_kelas = $lastHistori->id_kelas ?? null;
         $histori->id_setoran = $lastHistori->id_setoran ?? null;
@@ -129,7 +148,7 @@ class HistoriController extends Controller
         );
 
         $persentaseBaru = number_format(($totalAyatDisetorkan / max(1, $jumlahAyatTarget)) * 100, 2);
-        $santriId = $target->id_santri;
+        $santriId = $target->santri_id;
 
         Histori::updateOrCreate(
             ['id_target' => $target->id_target, 'id_santri' => $santriId],

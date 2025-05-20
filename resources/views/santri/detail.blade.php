@@ -57,8 +57,15 @@
                                         </tr>
                                         <tr>
                                             <th>Jenis Kelamin</th>
-                                            <td>{{ $santri->jenis_kelamin == 1 ? 'Laki-laki' : 'Perempuan' }}</td>
+                                            <td>
+                                                {{ match ($santri->jenis_kelamin) {
+                                                    1 => 'Laki-laki',
+                                                    2 => 'Perempuan',
+                                                    default => 'Tidak diketahui',
+                                                } }}
+                                            </td>
                                         </tr>
+
                                         <tr>
                                             <th>Nama Kelas</th>
                                             <td>{{ $santri->kelas ? $santri->kelas->nama_kelas : 'Tidak Ada Kelas' }}</td>

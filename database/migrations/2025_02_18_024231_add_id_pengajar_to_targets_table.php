@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('targets', function (Blueprint $table) {
+        Schema::table('target', function (Blueprint $table) {
             $table->unsignedBigInteger('id_pengajar');
 
             $table->foreign('id_pengajar')->references('id_pengajar')->on('pengajars')->onDelete('cascade');
@@ -24,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('targets', function (Blueprint $table) {
+        Schema::table('target', function (Blueprint $table) {
             $table->dropForeign(['id_pengajar']); // Hapus foreign key
             $table->dropColumn('id_pengajar'); // Hapus kolom
         });

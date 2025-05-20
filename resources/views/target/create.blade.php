@@ -160,6 +160,7 @@
                 jumlahAyatInput.value = "";
                 errorText.textContent = "";
             });
+<<<<<<< HEAD
         });
         document.addEventListener("DOMContentLoaded", function () {
         const santriSelect = document.getElementById("id_santri");
@@ -185,6 +186,8 @@
         document.addEventListener("DOMContentLoaded", function() {
             const btnContinue = document.getElementById("btnContinue");
             const form = document.querySelector("form");
+=======
+>>>>>>> 935c067f274c92b63a81fcba184d7d4a9bc72915
 
             // Handle tombol "Continue"
             if (btnContinue) {

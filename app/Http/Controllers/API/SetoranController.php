@@ -41,7 +41,7 @@ class SetoranController extends Controller
             $averagePersentase = round($groupSetorans->avg('persentase'), 2);
             $status = $averagePersentase >= 100 ? 'Selesai' : 'Proses';
 
-            $result[] = [
+            $result = [
                 'id_santri' => $idSantri,
                 'id_target' => $idTarget,
                 'nama_santri' => $santri->nama,
@@ -58,30 +58,18 @@ class SetoranController extends Controller
             'data' => $result
         ]);
     }
+
     public function store(Request $request)
     {
-        $authHeader = $request->header('Authorization');
-        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
-            return response()->json(['success' => false, 'message' => 'Token tidak ditemukan'], 401);
-        }
-
-        $token = str_replace('Bearer ', '', $authHeader);
-        $user = $this->getUserFromToken($token);
-
-        if (!$user || $user['role'] !== 'pengajar') {
-            return response()->json(['success' => false, 'message' => 'Hanya pengajar yang dapat menambahkan target'], 403);
-        }
-
-
         $validator = Validator::make($request->all(), [
             'id_santri' => 'required|exists:santris,id_santri',
-            'tgl_setoran' => 'required|date',
             'id_kelas' => 'required|exists:kelas,id_kelas',
-            'id_surat' => 'required',
+            'id_surat' => 'required|exists:surats,id_surat',
+            'id_pengajar' => 'required|exists:pengajars,id_pengajar',
+            'tgl_setoran' => 'required|date',
             'nilai' => 'required|numeric|min:0|max:100',
             'jumlah_ayat_start' => 'required|numeric',
             'jumlah_ayat_end' => 'required|numeric',
-            'id_group' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -95,12 +83,10 @@ class SetoranController extends Controller
             ], 422);
         }
 
-
         $target = Target::where([
             ['id_santri', '=', $request->id_santri],
             ['id_kelas', '=', $request->id_kelas],
             ['id_surat', '=', $request->id_surat],
-            ['id_group', '=', $request->id_group],
         ])->first();
 
         if (!$target) {
@@ -129,32 +115,28 @@ class SetoranController extends Controller
             ->orderBy('jumlah_ayat_start')
             ->get();
 
-   // Ambil semua setoran yang tumpang tindih
-$overlappingSetorans = Setoran::where('id_target', $target->id_target)
-->where(function ($query) use ($request) {
-    $query->whereBetween('jumlah_ayat_start', [$request->jumlah_ayat_start, $request->jumlah_ayat_end])
-          ->orWhereBetween('jumlah_ayat_end', [$request->jumlah_ayat_start, $request->jumlah_ayat_end])
-          ->orWhere(function ($q) use ($request) {
-              $q->where('jumlah_ayat_start', '<=', $request->jumlah_ayat_start)
-                ->where('jumlah_ayat_end', '>=', $request->jumlah_ayat_end);
-          });
-})
-->get();
+        // Ambil semua setoran yang tumpang tindih
+        $overlappingSetorans = Setoran::where('id_target', $target->id_target)
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('jumlah_ayat_start', [$request->jumlah_ayat_start, $request->jumlah_ayat_end])
+                    ->orWhereBetween('jumlah_ayat_end', [$request->jumlah_ayat_start, $request->jumlah_ayat_end])
+                    ->orWhere(function ($q) use ($request) {
+                        $q->where('jumlah_ayat_start', '<=', $request->jumlah_ayat_start)
+                            ->where('jumlah_ayat_end', '>=', $request->jumlah_ayat_end);
+                    });
+            })
+            ->get();
 
-if ($overlappingSetorans->count() > 0) {
-$overlapRanges = $overlappingSetorans->map(function ($s) {
-    return $s->jumlah_ayat_start . ' - ' . $s->jumlah_ayat_end;
-})->implode(', ');
+        if ($overlappingSetorans->count() > 0) {
+            $overlapRanges = $overlappingSetorans->map(function ($s) {
+                return $s->jumlah_ayat_start . ' - ' . $s->jumlah_ayat_end;
+            })->implode(', ');
 
-return response()->json([
-    'message' => 'Ayat yang dimasukkan bertabrakan dengan setoran sebelumnya.',
-    'detail' => 'Rentang ayat yang sudah disetorkan: ' . $overlapRanges,
-], 422);
-}
-
-
-
-
+            return response()->json([
+                'message' => 'Ayat yang dimasukkan bertabrakan dengan setoran sebelumnya.',
+                'detail' => 'Rentang ayat yang sudah disetorkan: ' . $overlapRanges,
+            ], 422);
+        }
 
         // Hitung persentase dan status
         $totalAyat = max(1, $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1);
@@ -162,17 +144,17 @@ return response()->json([
         $status = $persentase >= 100 ? '1' : '0';
 
         $setoran = Setoran::create([
-            'id_santri' => $request->id_santri,
-            'tgl_setoran' => $request->tgl_setoran,
-            'status' => $status,
-            'id_kelas' => $request->id_kelas,
-            'persentase' => $persentase,
             'id_target' => $target->id_target,
             'id_surat' => $request->id_surat,
-            'nilai' => $request->nilai,
+            'id_santri' => $request->id_santri,
+            'id_kelas' => $request->id_kelas,
+            'id_pengajar' => $request->id_pengajar,
             'jumlah_ayat_start' => $request->jumlah_ayat_start,
             'jumlah_ayat_end' => $request->jumlah_ayat_end,
-            'id_pengajar' => explode('_', $user['id'])[1],
+            'tgl_setoran' => $request->tgl_setoran,
+            'status' => $status,
+            'persentase' => $persentase,
+            'nilai' => $request->nilai,
             'keterangan' => $request->keterangan,
         ]);
 
@@ -192,11 +174,13 @@ return response()->json([
             'id_santri' => $request->id_santri,
             'id_target' => $target->id_target,
             'id_surat' => $request->id_surat,
+            'id_kelas' => $request->id_kelas,
         ]);
 
         $persentaseBaru = number_format(($totalAyatTercapai / $totalAyat) * 100, 2);
         $histori->persentase = $persentaseBaru;
         $histori->id_setoran = $setoran->id_setoran;
+        $histori->ayat = $totalAyatTercapai;
 
         if ($request->tgl_setoran > $target->tgl_target) {
             $histori->status = 3;
@@ -214,6 +198,7 @@ return response()->json([
             'histori' => $histori,
         ]);
     }
+
     public function update(Request $request, $id)
     {
 
@@ -363,7 +348,7 @@ return response()->json([
     public function destroy($idSetoran, Request $request)
     {
         // Validasi token
-      
+
 
         // Cek setoran
         $setoran = Setoran::find($idSetoran);
@@ -378,7 +363,7 @@ return response()->json([
         }
 
         // Ambil relasi target (pakai ->first() jika relasi-nya many)
-        $target = method_exists($setoran, 'targets') ? $setoran->targets->first() : $setoran->target;
+        $target = method_exists($setoran, 'targets') ? $setoran->target->first() : $setoran->target;
 
         // Hapus setoran
         $setoran->delete();
@@ -456,70 +441,126 @@ return response()->json([
         return response()->json(['success' => true, 'message' => 'Semua setoran dan histori terkait berhasil dihapus.']);
     }
 
-    public function showBySantriFormatted($groupKey)
-{
-    // Pecah groupKey menjadi id_santri dan id_group
-    list($idSantri, $idGroup) = explode('-', $groupKey);
+    public function getSetoranBySantriAndGroup($idSantri, $idGroup)
+    {
+        // Cari santri berdasarkan ID
+        $santri = Santri::find($idSantri);
 
-    // Ambil semua setoran dengan relasi lengkap
-    $setorans = Setoran::with(['santri', 'kelas', 'pengajar', 'targets', 'surat'])
-        ->whereHas('santri', function ($query) use ($idSantri) {
-            $query->where('id_santri', $idSantri);
-        })
-        ->whereHas('targets', function ($query) use ($idGroup) {
-            $query->where('id_group', $idGroup);
-        })
-        ->get();
+        if (!$santri) {
+            return response()->json([
+                'message' => 'Santri tidak ditemukan'
+            ], 404);
+        }
 
-    if ($setorans->isEmpty()) {
+        // Ambil data setoran berdasarkan ID Santri dan ID Group (misalnya idGroup disimpan di setoran)
+        $setorans = Setoran::with(['santri', 'kelas', 'pengajar', 'targets', 'surat'])
+            ->whereHas('santri', function ($query) use ($idSantri) {
+                $query->where('id_santri', $idSantri);
+            })
+            ->whereHas('target', function ($query) use ($idGroup) {
+                $query->where('id_group', $idGroup);
+            })
+            ->get();
+
+        if ($setorans->isEmpty()) {
+            return response()->json([
+                'message' => 'Tidak ada data setoran untuk santri ini di group ini.',
+                'setorans' => []
+            ], 404);
+        }
+
+        $santri = optional($setorans->first()->santri);
+
+        // Susun data setorannya
+        $dataSetoran = $setorans->map(function ($setoran) {
+            return [
+                'surat' => optional($setoran->surat)->nama_surat ?? 'Tidak Diketahui',
+                'ayat' => $setoran->jumlah_ayat_start == $setoran->jumlah_ayat_end
+                    ? $setoran->jumlah_ayat_start
+                    : $setoran->jumlah_ayat_start . ' - ' . $setoran->jumlah_ayat_end,
+                'tgl_setoran' => \Carbon\Carbon::parse($setoran->tgl_setoran)->format('d M Y'),
+                'nilai' => number_format($setoran->nilai),
+                'pengajar' => optional($setoran->pengajar)->nama ?? 'Tidak Diketahui',
+                'jenis_kelamin_pengajar' => optional($setoran->pengajar)->jenis_kelamin ?? 1,
+                'keterangan' => $setoran->keterangan
+            ];
+        });
+
         return response()->json([
-            'message' => 'Tidak ada data setoran untuk santri ini.',
-            'data' => []
-        ], 404);
+            'message' => 'Detail setoran santri ditemukan.',
+            'santri' => [
+                'nama' => $santri->nama,
+                'nisn' => $santri->nisn,
+            ],
+            'setorans' => $dataSetoran
+        ]);
     }
 
-    $santri = optional($setorans->first()->santri);
-
-    // Susun data setorannya
-    $dataSetoran = $setorans->map(function ($setoran) {
-        return [
-            'surat' => optional($setoran->surat)->nama_surat ?? 'Tidak Diketahui',
-            'ayat' => $setoran->jumlah_ayat_start == $setoran->jumlah_ayat_end
-                ? $setoran->jumlah_ayat_start
-                : $setoran->jumlah_ayat_start . ' - ' . $setoran->jumlah_ayat_end,
-            'nilai' => number_format($setoran->nilai),
-            'pengajar' => optional($setoran->pengajar)->nama,
-            'keterangan' => $setoran->keterangan
-        ];
-    });
-
-    return response()->json([
-        'message' => 'Detail setoran santri ditemukan.',
-        'santri' => [
-            'nama' => $santri->nama,
-            'nisn' => $santri->nisn,
-        ],
-        'setorans' => $dataSetoran
-    ]);
-}
-public function getTargetsBySantri($santri_id)
+    public function getSetoranSantriByTarget($id_santri, $id_target)
     {
-        $targets = Target::where('id_santri', $santri_id)
+        // 1. Cari santri berdasarkan ID
+        $santri = Santri::find($id_santri);
+
+        if (!$santri) {
+            return response()->json([
+                'message' => 'Santri tidak ditemukan'
+            ], 404);
+        }
+
+        // 2. Cek apakah target tersebut milik santri
+        $target = Target::where('id_target', $id_target)
+            ->where('id_santri', $id_santri)
+            ->first();
+
+        if (!$target) {
+            return response()->json([
+                'message' => 'Santri tidak punya target hafalan tersebut'
+            ], 404);
+        }
+
+        // 3. Ambil data setorannya
+        $setorans = Setoran::with(['surat', 'pengajar:id_pengajar,nama,jenis_kelamin', 'santri'])
+            ->where('id_target', $id_target)
+            ->orderBy('tgl_setoran', 'asc')
+            ->get();
+
+        $result = $setorans->map(function ($setoran) {
+            return [
+                'id_surat' => $setoran->surat?->id_surat,
+                'nama_surat' => $setoran->surat?->nama_surat ?? '-',
+                'ayat' => $setoran->jumlah_ayat_start . ' - ' . $setoran->jumlah_ayat_end,
+                'pengajar' => $setoran->pengajar?->nama ?? '-',
+                'jenis_kelamin_pengajar' => $setoran->pengajar?->jenis_kelamin ?? '-',
+                'tanggal' => $setoran->tgl_setoran,
+                'keterangan' => $setoran->keterangan,
+            ];
+        });
+
+        return response()->json([
+            'message' => sprintf('Daftar setoran untuk santri %s target %s', $id_santri, $id_target),
+            'data' => $result
+        ]);
+    }
+
+
+    public function gettargetBySantri($santri_id)
+    {
+        $target = Target::where('id_santri', operator: $santri_id)
             ->groupBy('id_group')
             ->get(['id_group']);
 
         return response()->json([
-            'targets' => $targets
+            'target' => $target
         ]);
     }
 
     public function getNamaSurat($group_id, $santri_id)
     {
-        $targets = Target::where('id_group', $group_id)
+        $target = Target::where('id_group', $group_id)
             ->where('id_santri', $santri_id)
             ->get();
 
-        $surats = $targets->map(function ($target) use ($santri_id) {
+        $surats = $target->map(function ($target) use ($santri_id) {
             $setoran = Setoran::where('id_target', $target->id_target)
                 ->where('id_santri', $santri_id)
                 ->where('status', 1)
@@ -593,7 +634,7 @@ public function getTargetsBySantri($santri_id)
     {
         $request->validate([
             'group_id' => 'required|exists:groups,id_group',
-            'santri_id' => 'required|exists:santris,id_santri',
+            'id_santri' => 'required|exists:santris,id_santri',
             'surat_id' => 'required|exists:surats,id_surat',
         ]);
 
@@ -637,5 +678,4 @@ public function getTargetsBySantri($santri_id)
             ]);
         }
     }
-
 }

@@ -27,11 +27,11 @@
                     <form action="{{ url('pengajar/store') }}" method="POST" autocomplete="off" enctype="multipart/form-data">
                         @csrf
 
+<<<<<<< HEAD
                         <div class="row">
                             <div class="col-md-6">
                                 <!-- Kolom Kiri -->
                                 <div class="form-group">
-                                    <label>Nama</label>
                                     <input type="text" name="nama" class="form-control @error('nama') is-invalid @enderror"
                                         value="{{ old('nama') }}" required placeholder="Masukkan nama">
                                     @error('nama')
@@ -83,11 +83,11 @@
                                         <span class="text-danger">Nomor telepon wajib diisi.</span>
                                     @enderror
                                 </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <!-- Kolom Kanan -->
-                                <div class="form-group">
+=======
+                        <!-- Input Nama -->
+                        <div class="form-group">
+                            <label>Nama</label>
+                            <input type="text" name="nama" class="form-control @error('nama') is-invalid @enderror"
                                     <label>Alamat</label>
                                     <textarea name="alamat" class="form-control @error('alamat') is-invalid @enderror" required placeholder="Masukkan alamat">{{ old('alamat') }}</textarea>
                                     @error('alamat')
@@ -149,7 +149,11 @@
     <script>
         function previewImage(event) {
             var reader = new FileReader();
+<<<<<<< HEAD
             reader.onload = function(){
+=======
+            reader.onload = function() {
+>>>>>>> 935c067f274c92b63a81fcba184d7d4a9bc72915
                 var output = document.getElementById('preview');
                 output.src = reader.result;
             };

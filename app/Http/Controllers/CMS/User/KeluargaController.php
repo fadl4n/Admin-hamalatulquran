@@ -32,7 +32,7 @@ class KeluargaController extends Controller
 
 public function fnGetData()
 {
-    $data = Keluarga::leftJoin('santris', 'keluargas.id_santri', '=', 'santris.id_santri')
+    $data = Keluarga::leftJoin('santris', 'keluargas.santri_id', '=', 'santris.santri_id')
                     ->select('keluargas.*', 'santris.nama as nama_santri'); // Gunakan nama_santri
 
     return DataTables::of($data)

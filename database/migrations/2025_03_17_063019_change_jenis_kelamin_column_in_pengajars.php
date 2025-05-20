@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('target', function (Blueprint $table) {
-            $table->integer('jumlah_ayat_target');
+        Schema::table('pengajars', function (Blueprint $table) {
+            $table->integer('jenis_kelamin')->change();
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('target', function (Blueprint $table) {
-            $table->dropColumn(['jumlah_ayat_target']);
+        Schema::table('pengajars', function (Blueprint $table) {
+            $table->string('jenis_kelamin')->change();
         });
     }
 };

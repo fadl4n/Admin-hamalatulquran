@@ -5729,22 +5729,22 @@ Buffer.prototype.writeDoubleLE = function writeDoubleLE(value, offset, noAssert)
 
 Buffer.prototype.writeDoubleBE = function writeDoubleBE(value, offset, noAssert) {
   return writeDouble(this, value, offset, false, noAssert);
-}; // copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
+}; // copy(targetBuffer, targettart=0, sourceStart=0, sourceEnd=buffer.length)
 
 
-Buffer.prototype.copy = function copy(target, targetStart, start, end) {
+Buffer.prototype.copy = function copy(target, targettart, start, end) {
   if (!Buffer.isBuffer(target)) throw new TypeError('argument should be a Buffer');
   if (!start) start = 0;
   if (!end && end !== 0) end = this.length;
-  if (targetStart >= target.length) targetStart = target.length;
-  if (!targetStart) targetStart = 0;
+  if (targettart >= target.length) targettart = target.length;
+  if (!targettart) targettart = 0;
   if (end > 0 && end < start) end = start; // Copy 0 bytes; we're done
 
   if (end === start) return 0;
   if (target.length === 0 || this.length === 0) return 0; // Fatal error conditions
 
-  if (targetStart < 0) {
-    throw new RangeError('targetStart out of bounds');
+  if (targettart < 0) {
+    throw new RangeError('targettart out of bounds');
   }
 
   if (start < 0 || start >= this.length) throw new RangeError('Index out of range');
@@ -5752,17 +5752,17 @@ Buffer.prototype.copy = function copy(target, targetStart, start, end) {
 
   if (end > this.length) end = this.length;
 
-  if (target.length - targetStart < end - start) {
-    end = target.length - targetStart + start;
+  if (target.length - targettart < end - start) {
+    end = target.length - targettart + start;
   }
 
   var len = end - start;
 
   if (this === target && typeof Uint8Array.prototype.copyWithin === 'function') {
     // Use built-in when available, missing from IE11
-    this.copyWithin(targetStart, start, end);
+    this.copyWithin(targettart, start, end);
   } else {
-    Uint8Array.prototype.set.call(target, this.subarray(start, end), targetStart);
+    Uint8Array.prototype.set.call(target, this.subarray(start, end), targettart);
   }
 
   return len;
@@ -34498,7 +34498,7 @@ function tr_static_init() {
   // do check in _tr_init()
   //if (static_init_done) return;
 
-  /* For some embedded targets, global variables are not initialized: */
+  /* For some embedded target, global variables are not initialized: */
 /*#ifdef NO_INIT_GLOBAL_POINTERS
   static_l_desc.static_tree = static_ltree;
   static_l_desc.extra_bits = extra_lbits;

@@ -10507,7 +10507,7 @@ function tr_static_init() {
   // do check in _tr_init()
   //if (static_init_done) return;
 
-  /* For some embedded targets, global variables are not initialized: */
+  /* For some embedded target, global variables are not initialized: */
 /*#ifdef NO_INIT_GLOBAL_POINTERS
   static_l_desc.static_tree = static_ltree;
   static_l_desc.extra_bits = extra_lbits;

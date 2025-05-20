@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Santri;
+use App\Models\Target;
 use Exception;
 
 class SantriController extends Controller
@@ -12,21 +13,50 @@ class SantriController extends Controller
     // Helper untuk format URL foto
     private function formatFotoSantri($santri)
     {
-        $santri->map(function ($item) {
-            if ($item->foto_santri) {
-                $item->foto_santri = asset('storage/' . $item->foto_santri);
-                $item->foto_santri = str_replace("127.0.0.1", "10.0.2.2", $item->foto_santri); // Emulator fix
+        if (is_iterable($santri)) {
+            foreach ($santri as $item) {
+                $this->formatFotoSantri($item);
             }
-        });
+        } elseif ($santri) {
+            $foto = (string) $santri->foto_santri;
+
+            if ($foto !== '' && !str_starts_with($foto, 'http://') && !str_starts_with($foto, 'https://')) {
+                $santri->foto_santri = asset('storage/' . $foto);
+            } else {
+                $santri->foto_santri = $foto;
+            }
+
+            if ($santri->foto_santri !== null && is_string($santri->foto_santri)) {
+                $santri->foto_santri = str_replace("127.0.0.1", "10.0.2.2", $santri->foto_santri);
+            }
+        }
+    }
+
+    public function countAktif()
+    {
+        $jumlah = Santri::where('status', 1)->count();
+
+        return response()->json([
+            'status' => 'success',
+            'jumlah' => $jumlah
+        ]);
     }
 
     // Get all santri
     public function getAllSantri()
     {
         try {
-            $santri = Santri::with('kelas')->get();
+            // Ambil data santri dengan relasi ke kelas dan target
+            $santri = Santri::with(['kelas', 'targets'])->get();
 
+            // Format foto santri
             $this->formatFotoSantri($santri);
+
+            // Menambahkan id_group ke setiap santri berdasarkan target yang ada
+            $santri->map(function ($item) {
+                // Ambil id_group dari target pertama yang terhubung dengan santri
+                $item->id_group = $item->targets->first()->id_group ?? null;
+            });
 
             return response()->json([
                 'status' => true,
@@ -53,7 +83,7 @@ class SantriController extends Controller
                 ], 400);
             }
 
-            $santri = Santri::with('kelas')->find($id);
+            $santri = Santri::with('kelas', 'target')->find($id);
 
             if (!$santri) {
                 return response()->json([
@@ -63,10 +93,7 @@ class SantriController extends Controller
             }
 
             // Format URL foto
-            if ($santri->foto_santri) {
-                $santri->foto_santri = asset('storage/' . $santri->foto_santri);
-                $santri->foto_santri = str_replace("127.0.0.1", "10.0.2.2", $santri->foto_santri);
-            }
+            $this->formatFotoSantri($santri);
 
             return response()->json([
                 'status' => true,
@@ -86,7 +113,7 @@ class SantriController extends Controller
     public function getSantriByKelas($id)
     {
         try {
-            $santri = Santri::where('id_kelas', $id)->get();
+            $santri = Santri::with('kelas')->where('id_kelas', $id)->get();
 
             $this->formatFotoSantri($santri);
 
@@ -111,20 +138,22 @@ class SantriController extends Controller
             ], 500);
         }
     }
-    public function DataSantri()
+    public function getGroupFromTarget($id)
     {
-        $santri = Santri::where('status', 1)->count();
+        $target = Target::where('id_santri', $id)->first();
+
+        if (!$target) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ditemukan target untuk santri ini'
+            ], 404);
+        }
 
         return response()->json([
-            'status' => true,
-            'message' => 'Data santri berdasarkan kelas',
-            'data' => $santri
-        ], 200);
-
-
+            'success' => true,
+            'data' => [
+                'id_group' => $target->id_group,
+            ]
+        ]);
+    }
 }
-
-}
-
-
-

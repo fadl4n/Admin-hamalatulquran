@@ -95,7 +95,7 @@
             serverSide: false,
             order: [[0, 'asc']],
             columnDefs: [
-                { className: "text-center", targets: [0, 2, 3, 5, 6] }
+                { className: "text-center", target: [0, 2, 3, 5, 6] }
             ]
         });
 

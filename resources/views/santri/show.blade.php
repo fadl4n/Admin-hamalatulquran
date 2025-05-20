@@ -21,18 +21,19 @@
                                 <a href="{{ url('santri/create') }}" class="btn btn-info">+ Tambah Santri</a>
                             </div>
                             <div class="table-responsive">
-                                <table class="table table-bordered table-hover santri-list w-100">
-                                    <thead class="bg-navy disabled">
-                                        <tr>
-                                            <th>Nama</th>
-                                            <th>NISN</th>
-                                            <th>Nama Kelas</th>
-                                            <th>Angkatan</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
+                            <table class="table table-bordered table-hover santri-list w-100 text-center">
+                                <thead class="bg-navy disabled">
+                                    <tr>
+                                        <th>Nama</th>
+                                        <th>NISN</th>
+                                        <th>Nama Kelas</th>
+                                        <th>Angkatan</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+
                             </div>
                         </div>
                     </div>

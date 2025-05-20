@@ -25,12 +25,12 @@ class TargetController extends Controller
     public function index()
     {
         // Mengambil data dan mengelompokkan berdasarkan kriteria yang sama
-        $targets = Target::with(['santri', 'kelas', 'surat', 'pengajar'])
+        $target = Target::with(['santri', 'kelas', 'surat', 'pengajar'])
             ->get()
             ->groupBy(function ($item) {
                 return $item->id_santri . '-' . $item->id_target;
             });
-        return view('target.show', compact('targets'));
+        return view('target.show', compact('target'));
     }
     public function create()
     {

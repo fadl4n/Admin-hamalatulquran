@@ -13142,7 +13142,7 @@ var widgetsDialog = $.ui.dialog;
 
 //>>label: Droppable
 //>>group: Interactions
-//>>description: Enables drop targets for draggable elements.
+//>>description: Enables drop target for draggable elements.
 //>>docs: http://api.jqueryui.com/droppable/
 //>>demos: http://jqueryui.com/droppable/
 
@@ -18867,7 +18867,7 @@ $.widget( "ui.tooltip", {
 			}
 		};
 
-		// Only bind remove handler for delegated targets. Non-delegated
+		// Only bind remove handler for delegated target. Non-delegated
 		// tooltips will handle this in destroy.
 		if ( target[ 0 ] !== this.element[ 0 ] ) {
 			events.remove = function() {
@@ -18929,7 +18929,7 @@ $.widget( "ui.tooltip", {
 		target.removeData( "ui-tooltip-open" );
 		this._off( target, "mouseleave focusout keyup" );
 
-		// Remove 'remove' binding only on delegated targets
+		// Remove 'remove' binding only on delegated target
 		if ( target[ 0 ] !== this.element[ 0 ] ) {
 			this._off( target, "remove" );
 		}

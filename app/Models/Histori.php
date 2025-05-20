@@ -33,7 +33,7 @@ class Histori extends Model
 
     public function santri()
     {
-        return $this->belongsTo(Santri::class, 'id_santri', 'id_santri');
+        return $this->belongsTo(Santri::class, 'id_santri');
     }
 
     // Relasi ke Kelas
