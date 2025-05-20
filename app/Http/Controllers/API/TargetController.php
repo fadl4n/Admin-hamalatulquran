@@ -90,9 +90,7 @@ class TargetController extends Controller
 
     public function getAllTargetBySantri($id_santri)
     {
-        $target = Target::with('surat', 'santri')
-            ->where('id_santri', $id_santri)
-            ->get();
+        $target = Target::with(['surat', 'santri', 'pengajar', 'histori'])->where('id_santri', $id_santri)->get();
 
         if ($target->isEmpty()) {
             return response()->json([
@@ -102,20 +100,25 @@ class TargetController extends Controller
         }
 
         $result = $target->map(function ($target) {
+            $latestHistori = $target->histori->sortByDesc('id_histori')->first(); // ambil histori terakhir
+
             return [
                 'id_target' => $target->id_target,
                 'id_surat' => optional($target->surat)->id_surat ?? 'Tidak Ditemukan',
+                'id_pengajar' => $target->id_pengajar ?? '0',
+                'nama_pengajar' => optional($target->pengajar)->nama ?? '-',
+                'jenis_kelamin_pengajar' => optional($target->pengajar)->jenis_kelamin ?? '-',
                 'nama_surat' => optional($target->surat)->nama_surat ?? 'Tidak Ditemukan',
                 'ayat_awal' => $target->jumlah_ayat_target_awal ?? '0',
                 'ayat_akhir' => $target->jumlah_ayat_target ?? '0',
                 'jumlah_ayat' => optional($target->surat)->jumlah_ayat ?? '-',
                 'tgl_mulai' => $target->tgl_mulai ?? '0',
                 'tgl_target' => $target->tgl_target ?? '0',
-                'id_pengajar' => $target->id_pengajar ?? '0',
-                'nama_pengajar' => optional($target->pengajar)->nama ?? '-',
-                'jenis_kelamin_pengajar' => optional($target->pengajar)->jenis_kelamin ?? '-',
+                // 'persentase' => $target->histori->avg('persentase'),
+                'persentase' => $latestHistori ? $latestHistori->persentase : null,
             ];
         });
+
 
         return response()->json([
             'success' => true,

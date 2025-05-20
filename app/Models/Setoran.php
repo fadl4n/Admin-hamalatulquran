@@ -66,13 +66,13 @@ class Setoran extends Model
         // Ambil semua target terkait dengan setoran ini
         $target = $this->target;
 
-        if ($target->isEmpty()) {
+        if (!$target) {
             return 0; // Jika tidak ada target, persentase 0%
         }
 
         // Cek semua target dengan id_santri dan id_group yang sama di tabel target
-        $matchingtarget = Target::where('id_santri', $target->first()->id_santri)
-            ->where('id_group', $target->first()->id_group)
+        $matchingtarget = Target::where('id_santri', $target->id_santri)
+            ->where('id_group', $target->id_group)
             ->get();
 
         // Hitung total ayat yang perlu dicapai
