@@ -413,6 +413,6 @@ class TargetController extends Controller
             return $item->id_santri . '-' . $item->id_target;
         });
 
-        return view('target.detail', compact('target'));
+        return view('target.detail', compact('targets'));
     }
 }

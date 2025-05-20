@@ -25,44 +25,45 @@
                             <form action="{{ route('target.update', $target->id_target) }}" method="POST">
                                 @csrf
                                 @method('PUT')
-                                <div class="form-group">
-                                    <label>Nama Santri</label>
-                                    <select name="id_santri" class="form-control" required>
-                                        <option value="">-- Pilih Santri --</option>
-                                        @foreach($santris as $santri)
-                                            <option value="{{ $santri->id_santri }}"
-                                                @if($santri->id_santri == $target->id_santri) selected @endif>
-                                                {{ $santri->nama }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+<div class="form-group">
+    <label>Nama Santri</label>
+    <select name="id_santri" class="form-control" id="id_santri" required>
+        <option value="">-- Pilih Santri --</option>
+        @foreach($santris as $santri)
+            <option value="{{ $santri->id_santri }}"
+                data-id_kelas="{{ $santri->id_kelas }}"
+                @if($santri->id_santri == $target->id_santri) selected @endif>
+                {{ $santri->nama }}
+            </option>
+        @endforeach
+    </select>
+</div>
 
-                                <div class="form-group">
-                                    <label>Nama Pengajar</label>
-                                    <select name="id_pengajar" class="form-control" required>
-                                        <option value="">-- Pilih Pengajar --</option>
-                                        @foreach($pengajars as $pengajar)
-                                            <option value="{{ $pengajar->id_pengajar }}"
-                                                @if($pengajar->id_pengajar == $target->id_pengajar) selected @endif>
-                                                {{ $pengajar->nama }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+<div class="form-group">
+    <label>Nama Pengajar</label>
+    <select name="id_pengajar" class="form-control" required>
+        <option value="">-- Pilih Pengajar --</option>
+        @foreach($pengajars as $pengajar)
+            <option value="{{ $pengajar->id_pengajar }}"
+                @if($pengajar->id_pengajar == $target->id_pengajar) selected @endif>
+                {{ $pengajar->nama }}
+            </option>
+        @endforeach
+    </select>
+</div>
 
-                                <div class="form-group">
-                                    <label>Nama Kelas</label>
-                                    <select name="id_kelas" class="form-control" required>
-                                        <option value="">-- Pilih Kelas --</option>
-                                        @foreach($kelas as $kls)
-                                            <option value="{{ $kls->id_kelas }}"
-                                                @if($kls->id_kelas == $target->id_kelas) selected @endif>
-                                                {{ $kls->nama_kelas }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+<div class="form-group">
+    <label>Nama Kelas</label>
+    <select name="id_kelas" class="form-control" id="id_kelas" required>
+        <option value="">-- Pilih Kelas --</option>
+        @foreach($kelas as $kls)
+            <option value="{{ $kls->id_kelas }}"
+                @if($kls->id_kelas == $target->id_kelas) selected @endif>
+                {{ $kls->nama_kelas }}
+            </option>
+        @endforeach
+    </select>
+</div>
 
                                 <div class="form-group">
                                     <label>Nama Surat</label>
@@ -106,7 +107,7 @@
                                     <input type="date" name="tgl_target" class="form-control" value="{{ old('tgl_target', $target->tgl_target) }}" required>
                                 </div>
 
-                            
+
                                 <button type="submit" class="btn btn-primary">Simpan</button>
                                 <a href="{{ route('target.index') }}" class="btn btn-secondary">Batal</a>
                             </form>
@@ -122,6 +123,23 @@
             const jumlahAyatInput = document.getElementById("jumlah_ayat_target");
             const suratSelect = document.getElementById("id_surat");
             const errorText = document.getElementById("error_jumlah_ayat");
+            const santriSelect = document.querySelector('select[name="id_santri"]');
+            const kelasSelect = document.querySelector('select[name="id_kelas"]');
+
+                    santriSelect.addEventListener('change', function () {
+            const selectedSantri = santriSelect.options[santriSelect.selectedIndex];
+            const kelasId = selectedSantri.getAttribute('data-id_kelas');
+
+            if (kelasId) {
+                for (let i = 0; i < kelasSelect.options.length; i++) {
+                    if (kelasSelect.options[i].value === kelasId) {
+                        kelasSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        });
+
 
             jumlahAyatInput.addEventListener("input", function () {
                 let selectedSurat = suratSelect.options[suratSelect.selectedIndex];

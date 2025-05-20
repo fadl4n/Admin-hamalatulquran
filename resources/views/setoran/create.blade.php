@@ -22,16 +22,14 @@
                             <form action="{{ route('setoran.store') }}" method="POST">
                                 @csrf
                                 <div class="row">
-                                    <!-- Nama Santri -->
-                                    {{-- Nama Santri --}}
+                                   
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="id_santri">Nama Santri</label>
                                             <select name="id_santri" id="id_santri" class="form-control" required>
                                                 <option value="">- Pilih Santri -</option>
                                                 @foreach ($santris as $santri)
-                                                    <option value="{{ $santri->id_santri }}"
-                                                        data-id_kelas="{{ $santri->id_kelas }}">
+                                                    <option value="{{ $santri->id_santri }}">
                                                         {{ $santri->nama }} | {{ $santri->nisn }}
                                                     </option>
                                                 @endforeach
@@ -162,8 +160,7 @@
                                 <!-- Keterangan -->
                                 <div class="form-group">
                                     <label for="keterangan">Keterangan</label>
-                                    <textarea name="keterangan" id="keterangan" rows="3" class="form-control"
-                                        placeholder="Masukkan keterangan..."></textarea>
+                                    <textarea name="keterangan" id="keterangan" rows="3" class="form-control" placeholder="Masukkan keterangan..."></textarea>
                                 </div>
 
                                 <div class="d-flex justify-content-end">

@@ -519,8 +519,8 @@ class SetoranController extends Controller
         $kelas = Kelas::all();
         $surats = Surat::all();
         $pengajars = Pengajar::all();
-        $target = Target::all(); // Ambil data target
-        return view('setoran.edit', compact('setoran', 'santris', 'kelas', 'pengajars', 'target', 'surats'));
+        $targets = Target::all(); // Ambil data target
+        return view('setoran.edit', compact('setoran', 'santris', 'kelas', 'pengajars', 'targets', 'surats'));
     }
 
     public function update(Request $request, Setoran $setoran)

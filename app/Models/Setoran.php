@@ -14,14 +14,14 @@ class Setoran extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'tgl_setoran',
-        'id_target',
         'id_santri',
-        'id_surat',
-        'id_pengajar',
+        'tgl_setoran',
+        'status',
         'id_kelas',
         'keterangan',
-        'status',
+        'id_surat',
+        'id_pengajar',
+        'id_target',
         'persentase',
         'jumlah_ayat_start',
         'jumlah_ayat_end',
@@ -31,7 +31,7 @@ class Setoran extends Model
     // Relasi ke Santri
     public function santri()
     {
-        return $this->belongsTo(Santri::class, 'id_santri');
+        return $this->belongsTo(Santri::class, 'id_santri', 'id_santri');
     }
 
     // Relasi ke Kelas
@@ -52,32 +52,38 @@ class Setoran extends Model
         return $this->belongsTo(Pengajar::class, 'id_pengajar');
     }
 
+    // Relasi ke Targets (menggunakan `hasMany` karena satu setoran bisa memiliki banyak target)
+    public function targets()
+    {
+        return $this->hasMany(Target::class, 'id_target', 'id_target');
+    }
     public function histori()
     {
         return $this->hasOne(Histori::class, 'id_setoran');
     }
     public function target()
     {
-        return $this->belongsTo(Target::class, 'id_target', 'id_target');
+        return $this->hasMany(Target::class, 'id_target', 'id_target');
     }
+
 
     public function getPersentaseAttribute()
     {
         // Ambil semua target terkait dengan setoran ini
-        $target = $this->target;
+        $targets = $this->targets;
 
-        if ($target->isEmpty()) {
+        if ($targets->isEmpty()) {
             return 0; // Jika tidak ada target, persentase 0%
         }
 
-        // Cek semua target dengan id_santri dan id_group yang sama di tabel target
-        $matchingtarget = Target::where('id_santri', $target->first()->id_santri)
-            ->where('id_group', $target->first()->id_group)
+        // Cek semua target dengan id_santri dan id_target yang sama di tabel targets
+        $matchingTargets = Target::where('id_santri', $targets->first()->id_santri)
+            ->where('id_target', $targets->first()->id_target)
             ->get();
 
         // Hitung total ayat yang perlu dicapai
         $total_target = 0;
-        foreach ($matchingtarget as $target) {
+        foreach ($matchingTargets as $target) {
             $jumlah_ayat_target = $target->jumlah_ayat_target;
             $jumlah_ayat_target_awal = $target->jumlah_ayat_target_awal;
 
@@ -91,7 +97,7 @@ class Setoran extends Model
         $ayat_dicapai = 0;
         $totalProgress = 0; // Variabel untuk menghitung total progres
 
-        foreach ($matchingtarget as $target) {
+        foreach ($matchingTargets as $target) {
             $setoranData = Setoran::where('id_target', $target->id_target)
                 ->selectRaw('SUM(jumlah_ayat_end - jumlah_ayat_start + 1) as total_ayat_dicapai')
                 ->first();
@@ -110,11 +116,11 @@ class Setoran extends Model
 
         // Hitung persentase berdasarkan total progres
         $persentase = 0;
-        $totaltarget = $matchingtarget->count();
+        $totalTargets = $matchingTargets->count();
 
-        if ($totaltarget > 0) {
+        if ($totalTargets > 0) {
             // Persentase dihitung berdasarkan total progres
-            $persentase = ($totalProgress / $totaltarget) * 100;
+            $persentase = ($totalProgress / $totalTargets) * 100;
         }
 
         // Pastikan persentase tidak lebih dari 100%

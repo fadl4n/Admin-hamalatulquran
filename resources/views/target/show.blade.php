@@ -46,8 +46,22 @@
                                             <td>{{ $no++ }}</td>
                                             <td>{{ $first->santri->nama }}</td>
                                             <td>{{ $first->kelas->nama_kelas }}</td>
-                                            <td>{{ $first->pengajar->nama }}</td>
-                                            <td>{{'Target '}} {{$first->id_target}}</td>
+                                              <td>{{ $first->pengajar->nama }}</td>
+    <td>
+        @php
+            // Ambil semua target milik santri yang terkait, urutkan berdasarkan id_target dan reset index
+            $targets = $first->santri->targets->sortBy('id_target')->values();
+
+            // Cari index target saat ini
+            $targetIndex = $targets->search(function ($target) use ($first) {
+                return $target->id_target === $first->id_target;
+            });
+
+            // Index mulai dari 0, jadi tambah 1 supaya tampil "Target 1"
+            $targetNumber = $targetIndex !== false ? $targetIndex + 1 : '-';
+        @endphp
+        Target {{ $targetNumber }}
+    </td>
                                             <td>{{ $first->tgl_mulai }}</td>
                                             <td>{{ $first->tgl_target }}</td>
                                             <td class="text-center">
