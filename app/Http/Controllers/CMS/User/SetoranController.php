@@ -315,6 +315,8 @@ class SetoranController extends Controller
     public function store(Request $request)
     {
         // Validasi input
+
+
         $request->validate([
             'id_santri' => 'required|exists:santris,id_santri',
             'tgl_setoran' => 'required|date',
@@ -342,7 +344,6 @@ class SetoranController extends Controller
             ['id_santri', '=', $request->id_santri],
             ['id_kelas', '=', $request->id_kelas],
             ['id_surat', '=', $request->id_surat],
-            ['id_target', '=', $request->id_target]
         ])->first();
 
         // Validasi jika jumlah_ayat_start lebih besar dari jumlah_ayat_end
@@ -446,7 +447,6 @@ class SetoranController extends Controller
         }
         // Periksa apakah histori sudah ada
         $histori = Histori::where('id_santri', $request->id_santri)
-            ->where('id_target', $target->id_target)
             ->where('id_surat', $request->id_surat)
             ->first();
 
@@ -499,6 +499,7 @@ class SetoranController extends Controller
                 'id_santri' => $request->id_santri,
                 'id_target' => $target->id_target,
                 'id_surat' => $request->id_surat,
+                'id_kelas' => $request->id_kelas,
                 'persentase' => $persentaseBaru,
                 'id_setoran' => $setoran->id_setoran,
                 'status' => $statusHistori,
@@ -553,7 +554,6 @@ class SetoranController extends Controller
             ['id_santri', '=', $request->id_santri],
             ['id_kelas', '=', $request->id_kelas],
             ['id_surat', '=', $request->id_surat],
-            ['id_target', '=', $request->id_target ?? $setoran->target->id_target] // Jika id_target tidak ada, gunakan grup yang lama
         ])->first();
 
         // Validasi jika jumlah_ayat_start lebih besar dari jumlah_ayat_end
@@ -650,7 +650,6 @@ class SetoranController extends Controller
 
         // Ambil histori yang terkait dengan setoran yang baru dimasukkan
         $histori = Histori::where('id_santri', $request->id_santri)
-            ->where('id_target', $target->id_target)
             ->where('id_surat', $request->id_surat)
             ->first();
 

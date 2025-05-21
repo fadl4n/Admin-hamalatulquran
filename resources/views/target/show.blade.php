@@ -68,9 +68,13 @@
                                                 <a href="{{ route('target.detail', ['id_target' => $first->id_target]) }}?id_santri={{ $first->id_santri }}" class="btn btn-primary btn-sm">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+                                                <a href="{{ route('target.edit', $first->id_target) }}" class="btn btn-warning btn-sm">
+                                                            <i class="fas fa-edit"></i>
+                                                </a>
                                                <button class="btn btn-danger btn-sm btnDelete" data-id="{{ $first->id_target }}">
                                                             <i class="fas fa-trash-alt"></i>
-                                                        </button>
+                                                </button>
+
                                             </td>
                                         </tr>
                                         @endforeach

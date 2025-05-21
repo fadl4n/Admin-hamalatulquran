@@ -9,7 +9,7 @@ class Target extends Model
 {
     use HasFactory;
 
-    protected $table = 'targets';
+    protected $table = 'target';
     protected $primaryKey = 'id_target';
     public $timestamps = false;
 

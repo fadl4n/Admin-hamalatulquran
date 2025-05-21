@@ -18,7 +18,7 @@
                                         <tr>
                                             <th>Nama Surat</th>
                                             <th>Ayat</th>
-                                            <th>Aksi</th>
+
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -31,14 +31,6 @@
                                                 <tr>
                                                     <td>{{ optional($target->surat)->nama_surat ?? 'Tidak Ditemukan' }}</td>
                                                     <td>{{ $target->jumlah_ayat_target_awal ?? '0' }} - {{ $target->jumlah_ayat_target ?? '0' }}</td>
-                                                    <td class="text-center">
-                                                        <a href="{{ route('target.edit', $target->id_target) }}" class="btn btn-warning btn-sm">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        <button class="btn btn-danger btn-sm btnDelete" data-id="{{ $target->id_target }}">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
-                                                    </td>
                                                 </tr>
                                             @endforeach
                                         @endforeach

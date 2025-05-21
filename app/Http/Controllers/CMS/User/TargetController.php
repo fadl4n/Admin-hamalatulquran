@@ -72,29 +72,29 @@ class TargetController extends Controller
 
         // Cek apakah kombinasi id_santri, id_group, id_surat, dan jumlah ayat sudah ada
         $existingTarget = Target::where('id_santri', $request->id_santri)
-            ->where('id_target', $request->id_target)
             ->where('id_surat', $request->id_surat)
             ->where('jumlah_ayat_target_awal', $request->jumlah_ayat_target_awal)
             ->where('jumlah_ayat_target', $request->jumlah_ayat_target)
             ->exists();
 
         if ($existingTarget) {
-            return back()->withErrors(['jumlah_ayat_target' => 'Target dengan jumlah ayat yang sama sudah ada.'])->withInput();
+            return back()->withErrors(['jumlah_ayat_target' => 'Santri sudah memilih surat dengan jumlah ayat yang sama.'])->withInput();
         }
+$overlapTarget = Target::where('id_santri', $request->id_santri)
+    ->where('id_surat', $request->id_surat)
+    ->where(function ($query) use ($request, $jumlah_ayat_target_end) {
+        $query->whereBetween('jumlah_ayat_target_awal', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end])
+              ->orWhereBetween('jumlah_ayat_target', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end]);
+    })
+    ->orderByDesc('jumlah_ayat_target') // Ambil yang terbesar
+    ->first();
 
-        // Validasi untuk menghindari tumpang tindih rentang ayat
-        $overlapTarget = Target::where('id_santri', $request->id_santri)
-            ->where('id_target', $request->id_target)
-            ->where('id_surat', $request->id_surat)
-            ->where(function ($query) use ($request, $jumlah_ayat_target_end) {
-                $query->whereBetween('jumlah_ayat_target_awal', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end])
-                    ->orWhereBetween('jumlah_ayat_target', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end]);
-            })
-            ->exists();
-
-        if ($overlapTarget) {
-            return back()->withErrors(['jumlah_ayat_target' => 'Rentang jumlah ayat tumpang tindih dengan target yang sudah ada.'])->withInput();
-        }
+if ($overlapTarget) {
+    $ayatTerakhir = $overlapTarget->jumlah_ayat_target;
+    return back()->withErrors([
+        'jumlah_ayat_target' => "Rentang jumlah ayat ini sudah ada, ayat terakhir pada target sebelumnya yaitu ayat ke-{$ayatTerakhir}."
+    ])->withInput();
+}
 
         if (Carbon::parse($request->tgl_mulai)->gt(Carbon::parse($request->tgl_target))) {
     return back()->withErrors([
@@ -211,7 +211,6 @@ class TargetController extends Controller
             'jumlah_ayat_target_awal' => 'required|integer|min:1',
             'jumlah_ayat_target' => 'required|integer|min:1',
             'tgl_target' => 'required|date',
-            'id_group' => 'nullable|integer'
         ]);
 
         // Ambil jumlah ayat dari surat terkait
@@ -229,33 +228,31 @@ class TargetController extends Controller
         // Menghitung jumlah_ayat_target_end
         $jumlah_ayat_target_end = $request->jumlah_ayat_target_awal + $request->jumlah_ayat_target - 1;
 
-        // Cek apakah kombinasi id_santri, id_group, id_surat, dan jumlah ayat sudah ada
-        $existingTarget = Target::where('id_santri', $request->id_santri)
-            ->where('id_target', $request->id_target)
-            ->where('id_surat', $request->id_surat)
-            ->where('jumlah_ayat_target_awal', $request->jumlah_ayat_target_awal)
-            ->where('jumlah_ayat_target', $request->jumlah_ayat_target)
-            ->where('id_target', '!=', $target->id_target)  // Menghindari perbaruan target yang sama
-            ->exists();
+       $existingTarget = Target::where('id_santri', $request->id_santri)
+    ->where('id_surat', $request->id_surat)
+    ->where('jumlah_ayat_target_awal', $request->jumlah_ayat_target_awal)
+    ->where('jumlah_ayat_target', $request->jumlah_ayat_target)
+    ->where('id_target', '!=', $target->id_target) // ← Tambahkan pengecualian ini
+    ->exists();
 
-        if ($existingTarget) {
-            return back()->withErrors(['jumlah_ayat_target' => 'Target dengan jumlah ayat yang sama sudah ada.'])->withInput();
-        }
 
-        // Validasi untuk menghindari tumpang tindih rentang ayat
-        $overlapTarget = Target::where('id_santri', $request->id_santri)
-            ->where('id_target', $request->id_target)
-            ->where('id_surat', $request->id_surat)
-            ->where(function ($query) use ($request, $jumlah_ayat_target_end) {
-                $query->whereBetween('jumlah_ayat_target_awal', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end])
-                    ->orWhereBetween('jumlah_ayat_target', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end]);
-            })
-            ->where('id_target', '!=', $target->id_target)  // Menghindari perbaruan target yang sama
-            ->exists();
+    $overlapTarget = Target::where('id_santri', $request->id_santri)
+    ->where('id_surat', $request->id_surat)
+        ->where('id_target', '!=', $target->id_target) // ← Tambahkan ini juga
+    ->where(function ($query) use ($request, $jumlah_ayat_target_end) {
+        $query->whereBetween('jumlah_ayat_target_awal', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end])
+              ->orWhereBetween('jumlah_ayat_target', [$request->jumlah_ayat_target_awal, $jumlah_ayat_target_end]);
+    })
+    ->orderByDesc('jumlah_ayat_target') // Ambil yang terbesar
+    ->first();
 
-        if ($overlapTarget) {
-            return back()->withErrors(['jumlah_ayat_target' => 'Rentang jumlah ayat tumpang tindih dengan target yang sudah ada.'])->withInput();
-        }
+if ($overlapTarget) {
+    $ayatTerakhir = $overlapTarget->jumlah_ayat_target;
+    return back()->withErrors([
+        'jumlah_ayat_target' => "Rentang jumlah ayat ini sudah ada, ayat terakhir pada target sebelumnya yaitu ayat ke-{$ayatTerakhir}."
+    ])->withInput();
+}
+
 
         if (Carbon::parse($request->tgl_mulai)->gt(Carbon::parse($request->tgl_target))) {
     return back()->withErrors([

@@ -55,22 +55,24 @@
                                         @enderror
                                     </div>
 
-                                    <div class="form-group">
-                                        <label>Tempat Lahir</label>
-                                        <input type="text" name="tempat_lahir" class="form-control @error('tempat_lahir') is-invalid @enderror"
-                                               value="{{ old('tempat_lahir') }}" required>
-                                        @error('tempat_lahir')
-                                            <span class="text-danger">Tempat lahir wajib diisi.</span>
-                                        @enderror
-                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label>Tempat Lahir</label>
+                                            <input type="text" name="tempat_lahir" class="form-control @error('tempat_lahir') is-invalid @enderror"
+                                                value="{{ old('tempat_lahir') }}" required>
+                                            @error('tempat_lahir')
+                                                <span class="text-danger">Tempat lahir wajib diisi.</span>
+                                            @enderror
+                                        </div>
 
-                                    <div class="form-group">
-                                        <label>Tanggal Lahir</label>
-                                        <input type="date" name="tgl_lahir" class="form-control @error('tgl_lahir') is-invalid @enderror"
-                                               value="{{ old('tgl_lahir') }}" required>
-                                        @error('tgl_lahir')
-                                            <span class="text-danger">Tanggal lahir wajib diisi.</span>
-                                        @enderror
+                                        <div class="form-group col-md-6">
+                                            <label>Tanggal Lahir</label>
+                                            <input type="date" name="tgl_lahir" class="form-control @error('tgl_lahir') is-invalid @enderror"
+                                                value="{{ old('tgl_lahir') }}" required>
+                                            @error('tgl_lahir')
+                                                <span class="text-danger">Tanggal lahir wajib diisi.</span>
+                                            @enderror
+                                        </div>
                                     </div>
 
                                     <div class="form-group">
@@ -126,29 +128,30 @@
                                             <span class="text-danger">Silakan pilih kelas.</span>
                                         @enderror
                                     </div>
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label>Jenis Kelamin</label>
+                                            <select name="jenis_kelamin" class="form-control @error('jenis_kelamin') is-invalid @enderror">
+                                                <option value="">Pilih Jenis Kelamin</option>
+                                                <option value="1" {{ old('jenis_kelamin') == '1' ? 'selected' : '' }}>Laki-laki</option>
+                                                <option value="2" {{ old('jenis_kelamin') == '2' ? 'selected' : '' }}>Perempuan</option>
+                                            </select>
+                                            @error('jenis_kelamin')
+                                                <span class="text-danger">Jenis kelamin wajib dipilih.</span>
+                                            @enderror
+                                        </div>
 
-                                    <div class="form-group">
-                                        <label>Jenis Kelamin</label>
-                                        <select name="jenis_kelamin" class="form-control @error('jenis_kelamin') is-invalid @enderror">
-                                            <option value="">Pilih Jenis Kelamin</option>
-                                            <option value="1" {{ old('jenis_kelamin') == '1' ? 'selected' : '' }}>Laki-laki</option>
-                                            <option value="2" {{ old('jenis_kelamin') == '2' ? 'selected' : '' }}>Perempuan</option>
-                                        </select>
-                                        @error('jenis_kelamin')
-                                            <span class="text-danger">Jenis kelamin wajib dipilih.</span>
-                                        @enderror
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label>Status</label>
-                                        <select name="status" class="form-control @error('status') is-invalid @enderror">
-                                            <option value="">Pilih Status</option>
-                                            <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>Aktif</option>
-                                            <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Nonaktif</option>
-                                        </select>
-                                        @error('status')
-                                            <span class="text-danger">Status wajib dipilih.</span>
-                                        @enderror
+                                        <div class="form-group col-md-6">
+                                            <label>Status</label>
+                                            <select name="status" class="form-control @error('status') is-invalid @enderror">
+                                                <option value="">Pilih Status</option>
+                                                <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>Aktif</option>
+                                                <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Nonaktif</option>
+                                            </select>
+                                            @error('status')
+                                                <span class="text-danger">Status wajib dipilih.</span>
+                                            @enderror
+                                        </div>
                                     </div>
 
                                     <div class="form-group">

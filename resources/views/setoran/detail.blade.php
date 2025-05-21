@@ -17,6 +17,13 @@
             background-color: white !important;
             color: black !important; /* Warna teks pada thead hitam */
         }
+        /* Membatasi lebar kolom keterangan dan mengizinkan wrap text */
+        td.keterangan {
+            max-width: 250px; /* Bisa disesuaikan */
+            white-space: normal !important;
+            word-break: break-word;
+            vertical-align: top;
+        }
     </style>
 @endsection
 
@@ -49,6 +56,7 @@
                                         <th>Ayat</th>
                                         <th>Nilai</th>
                                         <th>Pengajar</th>
+                                        <th>Tanggal</th>
                                         <th>Keterangan</th>
                                         <th>Aksi</th>
                                     </tr>
@@ -60,8 +68,11 @@
                                                 {{ $setoran->jumlah_ayat_start == $setoran->jumlah_ayat_end ? $setoran->jumlah_ayat_start : $setoran->jumlah_ayat_start . ' - ' . $setoran->jumlah_ayat_end }}
                                             </td>
                                             <td>{{ number_format($setoran->nilai) }}</td>
-                                            <td>{{$setoran->pengajar->nama}}</td>
-                                            <td>{{ $setoran->keterangan }}</td>
+                                            <td>{{ $setoran->pengajar->nama }}</td>
+                                            <td>{{ $setoran->tgl_setoran }}</td>
+                                            <td class="keterangan" title="{{ $setoran->keterangan }}">
+                                                {{ $setoran->keterangan }}
+                                            </td>
                                             <td class="text-center">
                                                 <a href="{{ url('setoran/edit/' . $setoran->id_setoran) }}" class="btn btn-warning btn-sm">
                                                     <i class="fas fa-edit"></i>
@@ -79,8 +90,7 @@
 
                         <!-- Tombol Kembali -->
                         <div class="mt-4">
-                            <a href="{{ route('setoran.index') }}"  class="btn btn-secondary"> Kembali
-                            </a>
+                            <a href="{{ route('setoran.index') }}" class="btn btn-secondary">Kembali</a>
                         </div>
                     </div>
                 </div>
@@ -88,6 +98,8 @@
         </div>
     </div>
 </section>
+
+
 
 @section('script')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

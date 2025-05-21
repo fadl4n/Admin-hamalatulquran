@@ -56,17 +56,23 @@ class Histori extends Model
 
     public static function determineStatus($totalAyatDisetorkan, $jumlahAyatTarget, $tglTarget, $tglSetoranTerakhir)
     {
-        $hariIni = Carbon::today();
-        $targetDate = Carbon::parse($tglTarget);
+       $hariIni = now(); // bukan today()
+$targetDate = Carbon::parse($tglTarget);
 
-        if ($totalAyatDisetorkan >= $jumlahAyatTarget) {
-            return 2; // Selesai
-        }
+// Jika input tanggal tanpa waktu, tambahkan waktu 23:59:59
+if ($targetDate->hour === 0 && $targetDate->minute === 0 && $targetDate->second === 0) {
+    $targetDate->setTime(23, 59, 59);
+}
 
-        if ($hariIni->gt($targetDate)) {
-            return 3; // Terlambat
-        }
+if ($totalAyatDisetorkan >= $jumlahAyatTarget) {
+    return 2; // Selesai
+}
 
-        return ($totalAyatDisetorkan > 0) ? 1 : 0;
+if ($hariIni->gt($targetDate)) {
+    return 3; // Terlambat
+}
+
+return ($totalAyatDisetorkan > 0) ? 1 : 0;
+
     }
 }

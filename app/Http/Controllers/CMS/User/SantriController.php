@@ -112,12 +112,14 @@ class SantriController extends Controller
     {
         $santri = Santri::with(['keluarga'])->findOrFail($id);
 
+
         // Ambil data keluarga berdasarkan hubungan
         $ayah = $santri->keluarga->firstWhere('hubungan', 1);
         $ibu = $santri->keluarga->firstWhere('hubungan', 2);
         $wali = $santri->keluarga->firstWhere('hubungan', 3);
 
         $kelas = Kelas::all();
+
 
         return view('santri.edit', compact('santri', 'ayah', 'ibu', 'wali', 'kelas'));
     }
@@ -142,6 +144,7 @@ class SantriController extends Controller
             'pendidikan_ayah' => 'nullable|string|max:255',
             'no_telp_ayah' => 'nullable|string|max:20',
             'alamat_ayah' => 'nullable|string',
+            'status_ayah' => 'nullable|integer',
             'email_ayah' => 'nullable|email|max:255',
             'tempat_lahir_ayah' => 'nullable|string|max:255',
             'tgl_lahir_ayah' => 'nullable|date',
@@ -150,6 +153,7 @@ class SantriController extends Controller
             'pendidikan_ibu' => 'nullable|string|max:255',
             'no_telp_ibu' => 'nullable|string|max:20',
             'alamat_ibu' => 'nullable|string',
+            'status_ibu' => 'nullable|integer',
             'email_ibu' => 'nullable|email|max:255',
             'tempat_lahir_ibu' => 'nullable|string|max:255',
             'tgl_lahir_ibu' => 'nullable|date',
@@ -158,6 +162,7 @@ class SantriController extends Controller
             'pendidikan_wali' => 'nullable|string|max:255',
             'no_telp_wali' => 'nullable|string|max:20',
             'alamat_wali' => 'nullable|string',
+            'status_wali' => 'nullable|integer',
             'email_wali' => 'nullable|email|max:255',
             'tempat_lahir_wali' => 'nullable|string|max:255',
             'tgl_lahir_wali' => 'nullable|date',
@@ -178,30 +183,28 @@ class SantriController extends Controller
             $data['password'] = Hash::make($request->password);
         }
 
-        // Handle foto santri baru
-        if ($request->hasFile('foto_santri')) {
-            $image = $request->file('foto_santri');
-            $filename = time() . '.' . $image->getClientOriginalExtension();
+       if ($request->hasFile('foto_santri')) {
+    $image = $request->file('foto_santri');
+    $filename = time() . '.' . $image->getClientOriginalExtension();
 
-            $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
-            $img = $manager->read($image->getPathname());
-            $encodedImage = $img->toJpeg(75);
+    $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+    $img = $manager->read($image->getPathname());
+    $encodedImage = $img->toJpeg(75);
 
-            // Hapus file lama
-            $defaultFoto = Storage::url('uploadedFile/image/default-user.png');
-            if (!empty($santri->foto_santri) && $santri->foto_santri !== $defaultFoto) {
-                Storage::disk('public')->delete($santri->foto_santri);
-            }
+    // Hapus file lama jika bukan default
+    $defaultFoto = 'uploadedFile/image/default-user.png';
+    if (!empty($santri->foto_santri) && basename($santri->foto_santri) !== basename($defaultFoto)) {
+        Storage::disk('public')->delete('uploadedFile/image/santri/' . basename($santri->foto_santri));
+    }
 
-            $path = 'uploadedFile/image/santri/' . $filename;
-            Storage::disk('public')->put($path, (string) $encodedImage);
-            $data['foto_santri'] = asset('storage/' . $path);
-        }
+    // Simpan file baru
+    $relativePath = 'uploadedFile/image/santri/' . $filename;
+    Storage::disk('public')->put($relativePath, (string) $encodedImage);
 
-        // Kalo gak upload gambar, keep yang lama
-        if (empty($data['foto_santri'])) {
-            $data['foto_santri'] = $santri->foto_santri ?? $defaultFoto;
-        }
+    // Simpan path relatif
+    $data['foto_santri'] = 'storage/' . $relativePath;
+}
+
 
         // Update data keluarga
         $this->updateKeluarga($santri->id_santri, 1, $request->all(), 'ayah');
@@ -222,6 +225,7 @@ class SantriController extends Controller
             'pendidikan' => $data['pendidikan_' . $prefix] ?? null,
             'no_telp' => $data['no_telp_' . $prefix] ?? null,
             'alamat' => $data['alamat_' . $prefix] ?? null,
+            'status' => $data['status_' . $prefix] ?? null,
             'email' => $data['email_' . $prefix] ?? null,
             'tempat_lahir' => $data['tempat_lahir_' . $prefix] ?? null,
             'tgl_lahir' => $data['tgl_lahir_' . $prefix] ?? null,

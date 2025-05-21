@@ -38,7 +38,6 @@
                                         <span class="text-danger">Nama wajib diisi.</span>
                                     @enderror
                                 </div>
-
                                 <div class="form-group">
                                     <label>NIP</label>
                                     <input type="text" name="nip" class="form-control @error('nip') is-invalid @enderror"
@@ -47,7 +46,6 @@
                                         <span class="text-danger">NIP sudah digunakan atau tidak valid.</span>
                                     @enderror
                                 </div>
-
                                 <div class="form-group">
                                     <label>Email</label>
                                     <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
@@ -56,7 +54,6 @@
                                         <span class="text-danger">Email sudah digunakan atau tidak valid.</span>
                                     @enderror
                                 </div>
-
                                 <div class="form-group">
                                     <label>Tempat Lahir</label>
                                     <input type="text" name="tempat_lahir" class="form-control @error('tempat_lahir') is-invalid @enderror"
@@ -65,7 +62,6 @@
                                         <span class="text-danger">Tempat lahir wajib diisi.</span>
                                     @enderror
                                 </div>
-
                                 <div class="form-group">
                                     <label>Tanggal Lahir</label>
                                     <input type="date" name="tgl_lahir" class="form-control @error('tgl_lahir') is-invalid @enderror"
@@ -74,7 +70,6 @@
                                         <span class="text-danger">Tanggal lahir wajib diisi.</span>
                                     @enderror
                                 </div>
-
                                 <div class="form-group">
                                     <label>No. Telepon</label>
                                     <input type="text" name="no_telp" class="form-control @error('no_telp') is-invalid @enderror"
@@ -99,8 +94,8 @@
                                     <label>Jenis Kelamin</label>
                                     <select name="jenis_kelamin" class="form-control @error('jenis_kelamin') is-invalid @enderror" required>
                                         <option value="" selected disabled>Pilih Jenis Kelamin</option>
-                                        <option value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-                                        <option value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+                                        <option value="1" {{ old('jenis_kelamin') == '1' ? 'selected' : '' }}>Laki-laki</option>
+                                        <option value="2" {{ old('jenis_kelamin') == '2' ? 'selected' : '' }}>Perempuan</option>
                                     </select>
                                     @error('jenis_kelamin')
                                         <span class="text-danger">Jenis kelamin wajib dipilih.</span>
@@ -124,7 +119,7 @@
                                         onchange="previewImage(event)">
                                     <div class="mt-2">
                                         <img id="preview" src="{{ asset('assets/image/default-user.png') }}"
-                                            alt="Preview Gambar" class="img-thumbnail" width="150">
+                                            alt="Preview Gambar" class="img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
                                     </div>
                                     @error('foto_pengajar')
                                         <span class="text-danger">Format gambar tidak valid atau ukuran terlalu besar.</span>

@@ -13,7 +13,7 @@
     <section class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-12">
+                <div class="col-md-10 offset-md-1">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Form Tambah Setoran</h3>
@@ -22,7 +22,7 @@
                             <form action="{{ route('setoran.store') }}" method="POST">
                                 @csrf
                                 <div class="row">
-                                   
+                                     {{-- Kolom Kiri --}}
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="id_santri">Nama Santri</label>
@@ -38,72 +38,6 @@
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                    </div>
-
-                                    {{-- Nama Kelas --}}
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="id_kelas">Kelas</label>
-                                            <select name="id_kelas" id="id_kelas" class="form-control" required>
-                                                <option value="">- Pilih Kelas -</option>
-                                                @foreach ($kelas as $kelass)
-                                                    <option value="{{ $kelass->id_kelas }}">
-                                                        {{ $kelass->nama_kelas }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            @error('id_kelas')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-
-                                </div>
-
-                                <div class="row">
-                                    <!-- Tanggal Setoran -->
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="tgl_setoran">Tanggal Setoran</label>
-                                            <input type="date" name="tgl_setoran" id="tgl_setoran" class="form-control"
-                                                required>
-                                        </div>
-                                    </div>
-
-                                    <!-- Target -->
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="id_target">Target</label>
-                                            <select name="id_target" id="id_target" class="form-control" required>
-                                                <option value="">- Pilih Target -</option>
-                                            </select>
-                                            @error('id_target')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <!-- Nama Surat -->
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="id_surat">Nama Surat</label>
-                                            <select name="id_surat" id="id_surat" class="form-control" required>
-                                                <option value="">- Pilih Nama Surat -</option>
-                                                @foreach ($surats as $s)
-                                                    <option value="{{ $s->id_surat }}">{{ $s->nama_surat }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('id_surat')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <!-- Pengajar -->
-                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="id_pengajar">Pengajar</label>
                                             <select name="id_pengajar" id="id_pengajar" class="form-control">
@@ -114,38 +48,71 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <!-- Ayat Mulai -->
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="jumlah_ayat_start">Ayat Mulai</label>
-                                            <input type="number" name="jumlah_ayat_start" id="jumlah_ayat_start"
-                                                class="form-control" required value="{{ old('jumlah_ayat_start') }}">
-                                            @if ($errors->has('jumlah_ayat_start'))
-                                                <div class="text-danger">{{ $errors->first('jumlah_ayat_start') }}</div>
-                                            @endif
+                                        <div class="row">
+                                            <div class="form-group col-md-6">
+                                                <label for="tgl_setoran">Tanggal Setoran</label>
+                                                <input type="date" name="tgl_setoran" id="tgl_setoran" class="form-control"
+                                                    required>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="id_kelas">Kelas</label>
+                                                <select name="id_kelas" id="id_kelas" class="form-control" required>
+                                                    <option value="">- Pilih Kelas -</option>
+                                                    @foreach ($kelas as $kelass)
+                                                        <option value="{{ $kelass->id_kelas }}">
+                                                            {{ $kelass->nama_kelas }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('id_kelas')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-md-6">
+                                                <label for="id_target">Target</label>
+                                                <select name="id_target" id="id_target" class="form-control" required>
+                                                    <option value="">- Pilih Target -</option>
+                                                </select>
+                                                @error('id_target')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="id_surat">Nama Surat</label>
+                                                <select name="id_surat" id="id_surat" class="form-control" required>
+                                                    <option value="">- Pilih Nama Surat -</option>
+                                                    @foreach ($surats as $s)
+                                                        <option value="{{ $s->id_surat }}">{{ $s->nama_surat }}</option>
+                                                    @endforeach
+                                                </select>
+                                                @error('id_surat')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
                                         </div>
                                     </div>
-
-                                    <!-- Ayat Akhir -->
+                                    {{-- Kolom Kanan --}}
                                     <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="jumlah_ayat_end">Ayat Akhir</label>
-                                            <input type="number" name="jumlah_ayat_end" id="jumlah_ayat_end"
-                                                class="form-control" required value="{{ old('jumlah_ayat_end') }}">
-                                            @if ($errors->has('jumlah_ayat_end'))
-                                                <div class="text-danger">{{ $errors->first('jumlah_ayat_end') }}</div>
-                                            @endif
+                                        <div class="row">
+                                            <div class="form-group col-md-6">
+                                                <label for="jumlah_ayat_start">Ayat Mulai</label>
+                                                <input type="number" name="jumlah_ayat_start" id="jumlah_ayat_start"
+                                                    class="form-control" required value="{{ old('jumlah_ayat_start') }}">
+                                                @if ($errors->has('jumlah_ayat_start'))
+                                                    <div class="text-danger">{{ $errors->first('jumlah_ayat_start') }}</div>
+                                                @endif
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="jumlah_ayat_end">Ayat Akhir</label>
+                                                <input type="number" name="jumlah_ayat_end" id="jumlah_ayat_end"
+                                                    class="form-control" required value="{{ old('jumlah_ayat_end') }}">
+                                                @if ($errors->has('jumlah_ayat_end'))
+                                                    <div class="text-danger">{{ $errors->first('jumlah_ayat_end') }}</div>
+                                                @endif
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <!-- Nilai -->
-                                <div class="row">
-                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="nilai">Nilai</label>
                                             <input type="number" name="nilai" id="nilai" class="form-control"
@@ -154,19 +121,19 @@
                                                 <div class="text-danger">{{ $errors->first('nilai') }}</div>
                                             @endif
                                         </div>
+                                        <div class="form-group">
+                                            <label for="keterangan">Keterangan</label>
+                                            <textarea name="keterangan" id="keterangan" rows="3" class="form-control" placeholder="Masukkan keterangan..."></textarea>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Keterangan -->
-                                <div class="form-group">
-                                    <label for="keterangan">Keterangan</label>
-                                    <textarea name="keterangan" id="keterangan" rows="3" class="form-control" placeholder="Masukkan keterangan..."></textarea>
-                                </div>
-
+                                {{-- Tombol Aksi --}}
                                 <div class="d-flex justify-content-end">
                                     <button type="submit" class="btn btn-success">Simpan Setoran</button>
                                     <a href="{{ route('setoran.index') }}" class="btn btn-secondary ml-2">Batal</a>
                                 </div>
+
                             </form>
                         </div>
                     </div>
