@@ -59,6 +59,7 @@ class HistoriController extends Controller
                     'jumlah_ayat' => $h->target->jumlah_ayat_target,
                     'persentase' => $h->persentase,
                     'status' => $h->status,
+                    'nilai' => $h->nilai,
                 ];
             });
 

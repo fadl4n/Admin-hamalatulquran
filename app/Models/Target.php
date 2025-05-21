@@ -25,7 +25,6 @@ class Target extends Model
         'id_pengajar',
 
     ];
-
     public function santri()
     {
         return $this->belongsTo(Santri::class, 'id_santri', 'id_santri');
@@ -50,5 +49,10 @@ class Target extends Model
     public function setoran()
     {
         return $this->hasMany(Setoran::class, 'id_target');
+    }
+
+    public function histori()
+    {
+        return $this->hasMany(Histori::class, 'id_target');
     }
 }

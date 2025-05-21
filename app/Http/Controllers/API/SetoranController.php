@@ -26,7 +26,7 @@ class SetoranController extends Controller
     }
     public function index(Request $request)
     {
-        $setorans = Setoran::with(['santri', 'kelas'])
+        $setorans = Setoran::with(['santri', 'kelas', 'target'])
             ->get()
             ->groupBy(function ($item) {
                 return $item->id_santri . '-' . $item->id_target;
@@ -41,19 +41,20 @@ class SetoranController extends Controller
             $averagePersentase = round($groupSetorans->avg('persentase'), 2);
             $status = $averagePersentase >= 100 ? 'Selesai' : 'Proses';
 
-            $result = [
+            $result[] = [
                 'id_santri' => $idSantri,
                 'id_target' => $idTarget,
                 'nama_santri' => $santri->nama,
                 'nisn' => $santri->nisn,
                 'kelas' => $kelasList,
-                'target' => 'Target ' . $groupSetorans->first()->id_group,
+                'target' => 'Target ' . ($groupSetorans->first()->target?->id_group ?? '-'),
                 'status' => $status,
                 'persentase' => $averagePersentase,
             ];
         }
 
         return response()->json([
+            'success' => true,
             'message' => 'Daftar ringkasan setoran berhasil diambil',
             'data' => $result
         ]);
