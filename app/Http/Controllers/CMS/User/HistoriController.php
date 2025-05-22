@@ -70,6 +70,11 @@ class HistoriController extends Controller
                 $ayatEnd = $histori->target->setoran()->max('jumlah_ayat_end');
                 return round(($ayatEnd / $totalAyat) * 100) . '%';
             })
+            ->filterColumn('nama_kelas', function ($query, $keyword) {
+            $query->whereHas('kelas', function ($q) use ($keyword) {
+                $q->where('nama_kelas', 'like', "%$keyword%");
+            });
+        })
             ->addColumn('nilai', fn($histori) => $histori->nilai)
             ->addColumn('aksi', function($histori) {
                 return '<button class="btn btn-primary btn-sm edit-nilai" data-id="' . $histori->id_target . '" data-nilai="' . $histori->nilai . '"><i class="fas fa-edit"></i></button>';

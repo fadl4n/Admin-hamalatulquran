@@ -185,19 +185,7 @@
             }
         });
     });
-        document.addEventListener("DOMContentLoaded", function() {
-            const btnContinue = document.getElementById("btnContinue");
-            const form = document.querySelector("form");
-
-            // Handle tombol "Continue"
-            if (btnContinue) {
-                btnContinue.addEventListener("click", function() {
-                    const url = "{{ route('target.create') }}";
-                    form.action = url;
-                    form.submit();
-                });
-            }
-        });
+       
     </script>
 
 @endsection

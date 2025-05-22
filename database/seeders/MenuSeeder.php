@@ -88,7 +88,7 @@ class MenuSeeder extends Seeder
             ],
             [
                 'group_menu_id' => 3,
-                'name' => 'Hisotri',
+                'name' => "Muroja'ah",
                 'url' => '/histori',
                 'sequence' =>  8
             ],

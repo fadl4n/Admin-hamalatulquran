@@ -7,11 +7,15 @@ use Illuminate\Http\Request;
 use App\Models\Santri;
 use App\Models\Kelas;
 use App\Models\Keluarga;
+use App\Models\Histori;
+use App\Models\Target;
+use App\Models\Setoran;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SantriController extends Controller
 {
@@ -37,12 +41,45 @@ class SantriController extends Controller
         }
         return view('santri.show');
     }
+public function show($id)
+{
+    $santri = Santri::with(['kelas', 'keluarga'])->findOrFail($id);
 
-    public function show($id)
-    {
-        $santri = Santri::with(['kelas', 'keluarga'])->findOrFail($id);
-        return view('santri.detail', compact('santri'));
+    // Ambil semua target milik santri
+    $targets = Target::where('id_santri', $id)->with('surat')->get();
+
+    $hafalan = [];
+    $murojaah = [];
+
+    foreach ($targets as $target) {
+        $namaSurat = $target->surat->nama_surat ?? '-';
+
+        $nilaiHafalan = Setoran::where('id_target', $target->id_target)->avg('nilai');
+        $ayatHafalanStart = Setoran::where('id_target', $target->id_target)->min('jumlah_ayat_start');
+        $ayatHafalanEnd = Setoran::where('id_target', $target->id_target)->max('jumlah_ayat_end');
+        $ayatHafalan = ($ayatHafalanStart && $ayatHafalanEnd) ? "$ayatHafalanStart - $ayatHafalanEnd" : '-';
+
+        $nilaiMurojaah = Histori::where('id_target', $target->id_target)->avg('nilai');
+        $ayatMurojaahStart = $target->jumlah_ayat_target_awal;
+        $ayatMurojaahEnd = $target->jumlah_ayat_target;
+        $ayatMurojaah = ($ayatMurojaahStart && $ayatMurojaahEnd) ? "$ayatMurojaahStart - $ayatMurojaahEnd" : '-';
+
+        $hafalan[] = [
+            'surat' => $namaSurat,
+            'nilai' => number_format($nilaiHafalan ?? 0, 2),
+            'ayat'  => $ayatHafalan,
+        ];
+
+        $murojaah[] = [
+            'surat' => $namaSurat,
+            'nilai' => number_format($nilaiMurojaah ?? 0, 2),
+            'ayat'  => $ayatMurojaah,
+        ];
     }
+
+    return view('santri.detail', compact('santri', 'hafalan', 'murojaah'));
+}
+
     public function create()
     {
         $kelas = Kelas::all();
@@ -81,7 +118,7 @@ class SantriController extends Controller
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
 
-        $data['foto_santri'] = Storage::url('uploadedFile/image/default-user.png');
+        // $data['foto_santri'] = Storage::url('uploadedFile/image/default-user.png');
 
         if ($request->hasFile('foto_santri')) {
             $image = $request->file('foto_santri');
@@ -249,49 +286,92 @@ class SantriController extends Controller
     }
 
     public function fnGetData(Request $request)
-    {
-        $santris = Santri::with('kelas')->select(['id_santri', 'nama', 'nisn', 'angkatan', 'id_kelas']);
+{
+    $santris = Santri::with('kelas')->select(['id_santri', 'nama', 'nisn', 'angkatan', 'id_kelas']);
 
-        // Menangani pengurutan berdasarkan kolom yang dikirim dari DataTables
-        if ($request->has('order')) {
-            $orderColumnIndex = $request->input('order.0.column');
-            $orderDirection = $request->input('order.0.dir');
+    // Pengurutan dari DataTables
+    if ($request->has('order')) {
+        $orderColumnIndex = $request->input('order.0.column');
+        $orderDirection = $request->input('order.0.dir');
 
-            // Menentukan kolom yang akan diurutkan
-            $columns = ['id_kelas', 'nama', 'nisn', 'angkatan'];
+        $columns = ['id_kelas', 'nama', 'nisn', 'angkatan'];
 
-            // Menambahkan pengurutan berdasarkan kolom dan arah
-            if ($orderColumnIndex == 0) {
-                // Jika yang diurutkan adalah kolom nama (indeks 0), maka urutkan berdasarkan id_kelas dulu
-                $santris->orderBy('id_kelas', 'asc')->orderBy('nama', $orderDirection);
-            } elseif ($orderColumnIndex == 1) {
-                // Jika yang diurutkan adalah kolom lainnya, lakukan pengurutan yang sesuai
-                $santris->orderBy('id_kelas', 'asc')->orderBy('nama', 'asc');
-            } else {
-                // Pengurutan default jika bukan kolom pertama atau lainnya
-                $santris->orderBy('id_kelas', 'asc')->orderBy('nama', 'asc');
-            }
+        if ($orderColumnIndex == 0) {
+            $santris->orderBy('id_kelas', 'asc')->orderBy('nama', $orderDirection);
+        } elseif ($orderColumnIndex == 1) {
+            $santris->orderBy('id_kelas', 'asc')->orderBy('nama', 'asc');
         } else {
-            // Default urutan berdasarkan id_kelas terlebih dahulu, baru nama
             $santris->orderBy('id_kelas', 'asc')->orderBy('nama', 'asc');
         }
-
-        return DataTables::of($santris)
-            ->addColumn('nama_kelas', function ($santri) {
-                return $santri->kelas ? $santri->kelas->nama_kelas : 'Tidak Ada Kelas';
-            })
-            ->addColumn('action', function ($santri) {
-                return '<a href="' . url('santri/show/' . $santri->id_santri) . '" class="btn btn-primary btn-sm" title="Preview">
-                            <i class="fa fa-eye"></i>
-                        </a>
-                        <a href="' . url('santri/edit/' . $santri->id_santri) . '" class="btn btn-warning btn-sm" title="Edit">
-                            <i class="fa fa-edit"></i>
-                        </a>
-                        <button class="btn btn-danger btn-sm btnDelete" data-id="' . $santri->id_santri . '" title="Hapus">
-                            <i class="fas fa-trash"></i>
-                        </button>';
-            })
-            ->rawColumns(['action'])
-            ->make(true);
+    } else {
+        $santris->orderBy('id_kelas', 'asc')->orderBy('nama', 'asc');
     }
+
+    return DataTables::of($santris)
+        ->addColumn('nama_kelas', function ($santri) {
+            return $santri->kelas ? $santri->kelas->nama_kelas : 'Tidak Ada Kelas';
+        })
+        ->filterColumn('nama_kelas', function ($query, $keyword) {
+            $query->whereHas('kelas', function ($q) use ($keyword) {
+                $q->where('nama_kelas', 'like', "%$keyword%");
+            });
+        })
+        ->addColumn('action', function ($santri) {
+            return '<a href="' . url('santri/show/' . $santri->id_santri) . '" class="btn btn-primary btn-sm" title="Preview">
+                        <i class="fa fa-eye"></i>
+                    </a>
+                    <a href="' . url('santri/edit/' . $santri->id_santri) . '" class="btn btn-warning btn-sm" title="Edit">
+                        <i class="fa fa-edit"></i>
+                    </a>
+                    <button class="btn btn-danger btn-sm btnDelete" data-id="' . $santri->id_santri . '" title="Hapus">
+                        <i class="fas fa-trash"></i>
+                    </button>';
+        })
+        ->rawColumns(['action'])
+        ->make(true);
+}
+public function downloadPdf($id)
+{
+    $santri = Santri::with(['kelas', 'keluarga'])->findOrFail($id);
+    $targets = Target::where('id_santri', $id)->with('surat')->get();
+
+    $ayah = $santri->keluarga->firstWhere('hubungan', 1);
+    $ibu = $santri->keluarga->firstWhere('hubungan', 2);
+    $wali = $santri->keluarga->firstWhere('hubungan', 3);
+
+    $hafalan = [];
+    $murojaah = [];
+
+    foreach ($targets as $target) {
+        $namaSurat = $target->surat->nama_surat ?? '-';
+
+        $nilaiHafalan = Setoran::where('id_target', $target->id_target)->avg('nilai');
+        $ayatHafalanStart = Setoran::where('id_target', $target->id_target)->min('jumlah_ayat_start');
+        $ayatHafalanEnd = Setoran::where('id_target', $target->id_target)->max('jumlah_ayat_end');
+        $ayatHafalan = ($ayatHafalanStart && $ayatHafalanEnd) ? "$ayatHafalanStart - $ayatHafalanEnd" : '-';
+
+        $nilaiMurojaah = Histori::where('id_target', $target->id_target)->avg('nilai');
+        $ayatMurojaahStart = $target->jumlah_ayat_target_awal;
+        $ayatMurojaahEnd = $target->jumlah_ayat_target;
+        $ayatMurojaah = ($ayatMurojaahStart && $ayatMurojaahEnd) ? "$ayatMurojaahStart - $ayatMurojaahEnd" : '-';
+
+        $hafalan[] = [
+            'surat' => $namaSurat,
+            'nilai' => number_format($nilaiHafalan ?? 0, 2),
+            'ayat'  => $ayatHafalan,
+        ];
+
+        $murojaah[] = [
+            'surat' => $namaSurat,
+            'nilai' => number_format($nilaiMurojaah ?? 0, 2),
+            'ayat'  => $ayatMurojaah,
+        ];
+    }
+
+    $pdf = Pdf::loadView('santri.pdf', compact('santri', 'ayah', 'ibu', 'wali', 'hafalan', 'murojaah'))
+                ->setPaper('A4', 'portrait');
+
+    return $pdf->download('detail-santri.pdf');
+}
+
 }

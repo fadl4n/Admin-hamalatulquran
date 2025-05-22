@@ -1,165 +1,162 @@
-    @extends('admin_template')
+@extends('admin_template')
 
-    @section('content')
-    <section class="content">
-        <div class="container-fluid">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Edit Setoran</h3>
-                </div>
-                <div class="card-body">
-                    @if(session('error'))
-                        <div class="alert alert-danger">{{ session('error') }}</div>
-                    @endif
+@section('content')
+<section class="content">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Edit Setoran</h3>
+                    </div>
+                    <div class="card-body">
+                        @if(session('error'))
+                            <div class="alert alert-danger">{{ session('error') }}</div>
+                        @endif
 
-                    <form action="{{ route('setoran.update', $setoran->id_setoran) }}" method="POST">
-                        @csrf
-                        @method('PUT')
+                        <form action="{{ route('setoran.update', $setoran->id_setoran) }}" method="POST">
+                            @csrf
+                            @method('PUT')
 
-                        <div class="row">
-                            {{-- Nama Santri --}}
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="id_santri">Nama Santri</label>
-                                    <select name="id_santri" id="id_santri" class="form-control select2 @error('id_santri') is-invalid @enderror" required>
-                                        <option value="">- Pilih Santri -</option>
-                                        @foreach ($santris as $santri)
-                                            <option
-                                                value="{{ $santri->id_santri }}"
-                                                data-id_kelas="{{ $santri->id_kelas }}"
-                                                {{ old('id_santri', $setoran->id_santri) == $santri->id_santri ? 'selected' : '' }}>
-                                                {{ $santri->nama }} | {{ $santri->nisn }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('id_santri')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
+                            <div class="row">
+                                {{-- Kolom Kiri --}}
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_santri">Nama Santri</label>
+                                        <select name="id_santri" id="id_santri" class="form-control @error('id_santri') is-invalid @enderror" required>
+                                            <option value="">- Pilih Santri -</option>
+                                            @foreach ($santris as $santri)
+                                                <option
+                                                    value="{{ $santri->id_santri }}"
+                                                    data-id_kelas="{{ $santri->id_kelas }}"
+                                                    {{ old('id_santri', $setoran->id_santri) == $santri->id_santri ? 'selected' : '' }}>
+                                                    {{ $santri->nama }} | {{ $santri->nisn }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('id_santri')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="id_pengajar">Pengajar</label>
+                                        <select name="id_pengajar" id="id_pengajar" class="form-control @error('id_pengajar') is-invalid @enderror">
+                                            <option value="">Pilih Pengajar</option>
+                                            @foreach ($pengajars as $pengajar)
+                                                <option value="{{ $pengajar->id_pengajar }}" {{ old('id_pengajar', $setoran->id_pengajar) == $pengajar->id_pengajar ? 'selected' : '' }}>
+                                                    {{ $pengajar->nama }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('id_pengajar')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="tgl_setoran">Tanggal Setoran</label>
+                                        <input type="date" name="tgl_setoran" id="tgl_setoran" class="form-control @error('tgl_setoran') is-invalid @enderror" value="{{ old('tgl_setoran', $setoran->tgl_setoran) }}" required>
+                                        @error('tgl_setoran')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="id_kelas">Kelas</label>
+                                        <select name="id_kelas" id="id_kelas" class="form-control @error('id_kelas') is-invalid @enderror" required>
+                                            <option value="">- Pilih Kelas -</option>
+                                            @foreach ($kelas as $kelass)
+                                                <option value="{{ $kelass->id_kelas }}" {{ old('id_kelas', $setoran->id_kelas) == $kelass->id_kelas ? 'selected' : '' }}>
+                                                    {{ $kelass->nama_kelas }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('id_kelas')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                {{-- Kolom Kanan --}}
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_target">Target</label>
+                                        <select name="id_target" id="id_target" class="form-control @error('id_target') is-invalid @enderror" required>
+                                            <option value="">- Pilih Target -</option>
+                                            @foreach ($targets as $target)
+                                                <option value="{{ $target->id_target }}" {{ old('id_target', $setoran->id_target) == $target->id_target ? 'selected' : '' }}>
+                                                    Target {{ $loop->iteration }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('id_target')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="id_surat">Nama Surat</label>
+                                        <select name="id_surat" id="id_surat" class="form-control  @error('id_surat') is-invalid @enderror" required>
+                                            <option value="">- Pilih Nama Surat -</option>
+                                            @foreach ($surats as $surat)
+                                                <option value="{{ $surat->id_surat }}" {{ old('id_surat', $setoran->id_surat) == $surat->id_surat ? 'selected' : '' }}>
+                                                    {{ $surat->nama_surat }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('id_surat')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label for="jumlah_ayat_start">Ayat Mulai</label>
+                                            <input type="number" name="jumlah_ayat_start" id="jumlah_ayat_start" class="form-control @error('jumlah_ayat_start') is-invalid @enderror" value="{{ old('jumlah_ayat_start', $setoran->jumlah_ayat_start) }}" required>
+                                            @error('jumlah_ayat_start')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label for="jumlah_ayat_end">Ayat Akhir</label>
+                                            <input type="number" name="jumlah_ayat_end" id="jumlah_ayat_end" class="form-control @error('jumlah_ayat_end') is-invalid @enderror" value="{{ old('jumlah_ayat_end', $setoran->jumlah_ayat_end) }}" required>
+                                            @error('jumlah_ayat_end')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="nilai">Nilai</label>
+                                        <input type="number" name="nilai" id="nilai" class="form-control @error('nilai') is-invalid @enderror" value="{{ old('nilai', $setoran->nilai) }}" required>
+                                        @error('nilai')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="keterangan">Keterangan</label>
+                                        <textarea name="keterangan" id="keterangan" rows="3" class="form-control @error('keterangan') is-invalid @enderror">{{ old('keterangan', $setoran->keterangan) }}</textarea>
+                                        @error('keterangan')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
 
-                            {{-- Kelas --}}
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="id_kelas">Kelas</label>
-                                    <select name="id_kelas" id="id_kelas" class="form-control select2 @error('id_kelas') is-invalid @enderror" required>
-                                        <option value="">- Pilih Kelas -</option>
-                                        @foreach ($kelas as $kelass)
-                                            <option value="{{ $kelass->id_kelas }}"
-                                                {{ old('id_kelas', $setoran->id_kelas) == $kelass->id_kelas ? 'selected' : '' }}>
-                                                {{ $kelass->nama_kelas }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('id_kelas')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">Simpan</button>
+                                <a href="{{ route('setoran.index') }}" class="btn btn-secondary ml-2">Batal</a>
                             </div>
-                        </div>
-
-                        {{-- Tanggal & Pengajar --}}
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Tanggal Setoran</label>
-                                    <input type="date" name="tgl_setoran" class="form-control @error('tgl_setoran') is-invalid @enderror" value="{{ old('tgl_setoran', $setoran->tgl_setoran) }}" required>
-                                    @error('tgl_setoran')<span class="text-danger">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Pengajar</label>
-                                    <select name="id_pengajar" class="form-control @error('id_pengajar') is-invalid @enderror">
-                                        <option value="">Pilih Pengajar</option>
-                                        @foreach($pengajars as $pengajar)
-                                            <option value="{{ $pengajar->id_pengajar }}" {{ old('id_pengajar', $setoran->id_pengajar) == $pengajar->id_pengajar ? 'selected' : '' }}>
-                                                {{ $pengajar->nama }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('id_pengajar')<span class="text-danger">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Target & Surat --}}
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Target</label>
-                                   <select name="id_target" id="id_target" class="form-control select2 @error('id_target') is-invalid @enderror" required>
-    <option value="">- Pilih Target -</option>
-    @foreach($targets as $target)
-        <option value="{{ $target->id_target }}"
-            {{ old('id_target', $setoran->id_target) == $target->id_target ? 'selected' : '' }}>
-            Target {{ $loop->iteration }}
-        </option>
-    @endforeach
-</select>
-
-                                    @error('id_target')<span class="text-danger">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Surat</label>
-                                    <select name="id_surat" id="id_surat" class="form-control select2 @error('id_surat') is-invalid @enderror" required>
-                                        <option value="">- Pilih Nama Surat -</option>
-                                        @foreach($surats as $surat)
-                                            <option value="{{ $surat->id_surat }}" {{ old('id_surat', $setoran->id_surat) == $surat->id_surat ? 'selected' : '' }}>
-                                                {{ $surat->nama_surat }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('id_surat')<span class="text-danger">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Ayat --}}
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Ayat Mulai</label>
-                                    <input type="number" id="jumlah_ayat_start" name="jumlah_ayat_start" class="form-control @error('jumlah_ayat_start') is-invalid @enderror" value="{{ old('jumlah_ayat_start', $setoran->jumlah_ayat_start) }}" required>
-                                    @error('jumlah_ayat_start')<span class="text-danger">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Ayat Akhir</label>
-                                    <input type="number" id="jumlah_ayat_end" name="jumlah_ayat_end" class="form-control @error('jumlah_ayat_end') is-invalid @enderror" value="{{ old('jumlah_ayat_end', $setoran->jumlah_ayat_end) }}" required>
-                                    @error('jumlah_ayat_end')<span class="text-danger">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Nilai --}}
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Nilai</label>
-                                <input type="number" name="nilai" class="form-control @error('nilai') is-invalid @enderror" value="{{ old('nilai', $setoran->nilai) }}" required>
-                                @error('nilai')<span class="text-danger">{{ $message }}</span>@enderror
-                            </div>
-                        </div>
-
-                        {{-- Keterangan --}}
-                        <div class="form-group">
-                            <label>Keterangan</label>
-                            <textarea name="keterangan" class="form-control @error('keterangan') is-invalid @enderror" rows="3">{{ old('keterangan', $setoran->keterangan) }}</textarea>
-                            @error('keterangan')<span class="text-danger">{{ $message }}</span>@enderror
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                        <a href="{{ route('setoran.index') }}" class="btn btn-secondary">Batal</a>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
-    @endsection
+@endsection
 
 
     @section('script')

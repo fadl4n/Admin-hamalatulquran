@@ -51,7 +51,10 @@ class Santri extends Model
     {
         return $this->hasMany(Target::class, 'id_santri'); // Relasi ke target berdasarkan id_santri
     }
-
+ public function histori()
+    {
+        return $this->hasMany(Target::class, 'id_santri'); // Relasi ke target berdasarkan id_santri
+    }
 
     public function setoran()
     {

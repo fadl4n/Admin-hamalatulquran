@@ -194,14 +194,12 @@
 <div class="form-group">
     <label>Status</label>
     <select name="status_ayah" class="form-control">
-        <option value="1"
-            {{ old('status_ayah', optional($ayah)->status) == 1 ? 'selected' : '' }}>Hidup
-        </option>
-        <option value="2"
-            {{ old('status_ayah', optional($ayah)->status) == 2 ? 'selected' : '' }}>
-            Meninggal</option>
+        <option value="" disabled selected>- Pilih status -</option>
+        <option value="1" {{ old('status_ayah', optional($ayah)->status) == 1 ? 'selected' : '' }}>Hidup</option>
+        <option value="2" {{ old('status_ayah', optional($ayah)->status) == 2 ? 'selected' : '' }}>Meninggal</option>
     </select>
 </div>
+
 <div class="form-group">
     <label>Pekerjaan</label>
     <input type="text" name="pekerjaan_ayah" class="form-control ayah-input"
@@ -263,14 +261,12 @@
 <div class="form-group">
     <label>Status</label>
     <select name="status_ibu" class="form-control">
-        <option value="1"
-            {{ old('status_ibu', optional($ibu)->status) == 1 ? 'selected' : '' }}>Hidup
-        </option>
-        <option value="2"
-            {{ old('status_ibu', optional($ibu)->status) == 2 ? 'selected' : '' }}>
-            Meninggal</option>
+        <option value="" disabled selected>- Pilih status -</option>
+        <option value="1" {{ old('status_ibu', optional($ibu)->status) == 1 ? 'selected' : '' }}>Hidup</option>
+        <option value="2" {{ old('status_ibu', optional($ibu)->status) == 2 ? 'selected' : '' }}>Meninggal</option>
     </select>
 </div>
+
 <div class="form-group">
     <label>Pekerjaan</label>
     <input type="text" name="pekerjaan_ibu" class="form-control ibu-input"
@@ -334,14 +330,12 @@
 <div class="form-group">
     <label>Status</label>
     <select name="status_wali" class="form-control">
-        <option value="1"
-            {{ old('status_wali', optional($wali)->status) == 1 ? 'selected' : '' }}>Hidup
-        </option>
-        <option value="2"
-            {{ old('status_wali', optional($wali)->status) == 2 ? 'selected' : '' }}>
-            Meninggal</option>
+        <option value="" disabled selected>- Pilih status -</option>
+        <option value="1" {{ old('status_wali', optional($wali)->status) == 1 ? 'selected' : '' }}>Hidup</option>
+        <option value="2" {{ old('status_wali', optional($wali)->status) == 2 ? 'selected' : '' }}>Meninggal</option>
     </select>
 </div>
+
 <div class="form-group">
     <label>Pekerjaan</label>
     <input type="text" name="pekerjaan_wali"

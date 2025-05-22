@@ -14,15 +14,16 @@
                         <div class="card-body">
                             <div class="mt-4 d-flex align-items-center justify-content-between">
                                 <div></div> <!-- kosong di kiri supaya judul bisa tepat di tengah -->
+
                                 <h4 class="mb-0">Data Santri</h4>
+
                                 <div>
                                     <a href="{{ route('santri.downloadPdf', $santri->id_santri) }}"
                                         class="btn btn-danger me-2">
                                         <i class="fas fa-print"></i> Cetak PDF
                                     </a>
-                                    <a href="{{ route('santri.index') }}" class="btn btn-outline-secondary">
-                                        Kembali
-                                    </a>
+                                    <a href="{{ url('kelas/' . $kelas->id_kelas . '/santri') }}"
+                                        class="btn btn-outline-secondary"> Kembali </a>
                                 </div>
                             </div>
                             <div class="row mt-4">
@@ -104,15 +105,8 @@
                                 </tr>
                                 <tr>
                                     <th width="40%">Status</th>
-                                    <td>
-                                        {{ match ($ayah->status) {
-                                            1 => 'Hidup',
-                                            2 => 'Meninggal',
-                                            default => '-',
-                                        } }}
-                                    </td>
+                                    <td>{{ $ayah->status ?? '' }}</td>
                                 </tr>
-
                                 <tr>
                                     <th>Pekerjaan </th>
                                     <td>{{ $ayah->pekerjaan ?? '' }}</td>
@@ -150,15 +144,8 @@
                                 </tr>
                                 <tr>
                                     <th width="40%">Status</th>
-                                    <td>
-                                        {{ match ($ibu->status) {
-                                            1 => 'Hidup',
-                                            2 => 'Meninggal',
-                                            default => '-',
-                                        } }}
-                                    </td>
+                                    <td>{{ $ibu->status ?? '' }}</td>
                                 </tr>
-
                                 <tr>
                                     <th>Pekerjaan </th>
                                     <td>{{ $ibu->pekerjaan ?? '' }}</td>
@@ -197,15 +184,8 @@
                                 </tr>
                                 <tr>
                                     <th width="40%">Status</th>
-                                    <td>
-                                        {{ match ($wali->status) {
-                                            1 => 'Hidup',
-                                            2 => 'Meninggal',
-                                            default => '-',
-                                        } }}
-                                    </td>
+                                    <td>{{ $wali->status ?? '' }}</td>
                                 </tr>
-
                                 <tr>
                                     <th>Pekerjaan Wali</th>
                                     <td>{{ $wali->pekerjaan ?? '' }}</td>
@@ -233,120 +213,73 @@
                             </table>
 
                             <!-- Tombol Kembali di Bawah
-                                    <div class="mt-4">
-                                        <a href="{{ route('santri.index') }}" class="btn btn-outline-secondary"> Kembali
-                                        </a>
-                                    </div> -->
+                                <div class="mt-4">
+                                    <a href="{{ route('santri.index') }}" class="btn btn-outline-secondary"> Kembali
+                                    </a>
+                                </div> -->
                         </div>
                     </div>
                 </div>
             </div>
-
             <!-- Tabel Detail Nilai Santri -->
-            <div class="row mt-5">
-                <div class="col-md-10 offset-md-1">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="text-center mb-4">Rapor Nilai Santri</h4>
-
-                            <!-- Tabel Hafalan -->
-                            <h5 class="mb-3">Nilai Hafalan</h5>
-                            <table class="table table-striped">
-                                <thead>
+            <div class="mt-5">
+                <h4>Detail Nilai Santri</h4>
+                <div class="row">
+                    <!-- Tabel Hafalan -->
+                    <div class="col-md-6">
+                        <h5>Hafalan</h5>
+                        <table class="table table-bordered">
+                            <thead class="bg-navy disabled">
+                                <tr>
+                                    <th>Surat</th>
+                                    <th>Ayat</th>
+                                    <th>Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($hafalan as $item)
                                     <tr>
-                                        <th width="5%">No</th>
-                                        <th>Surat</th>
-                                        <th>Ayat</th>
-                                        <th>Nilai</th>
+                                        <td>{{ $item['surat'] }}</td>
+                                        <td>{{ $item['ayat'] }}</td>
+                                        <td>{{ $item['nilai'] ?? '-' }}</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @php
-                                        $totalHafalan = 0;
-                                        $countHafalan = 0;
-                                    @endphp
-                                    @forelse ($hafalan as $index => $item)
-                                        <tr>
-                                            <td class="text-center">{{ $index + 1 }}</td>
-                                            <td>{{ $item['surat'] }}</td>
-                                            <td>{{ $item['ayat'] }}</td>
-                                            <td class="text-center">{{ $item['nilai'] ?? '-' }}</td>
-                                        </tr>
-                                        @if (is_numeric($item['nilai']))
-                                            @php
-                                                $totalHafalan += $item['nilai'];
-                                                $countHafalan++;
-                                            @endphp
-                                        @endif
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted">Tidak ada data hafalan.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                                @if ($countHafalan > 0)
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="3" class="text-end fw-bold">Rata-rata</td>
-                                            <td class="text-center fw-bold">
-                                                {{ number_format($totalHafalan / $countHafalan, 2) }}</td>
-                                        </tr>
-                                    </tfoot>
-                                @endif
-                            </table>
-
-                            <!-- Tabel Muroja'ah -->
-                            <h5 class="mt-5 mb-3">Nilai Muroja'ah</h5>
-                            <table class="table table-striped">
-                                <thead>
+                                @empty
                                     <tr>
-                                        <th width="5%">No</th>
-                                        <th>Surat</th>
-                                        <th>Ayat</th>
-                                        <th>Nilai</th>
+                                        <td colspan="3" class="text-center">Tidak ada data hafalan.</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @php
-                                        $totalMurojaah = 0;
-                                        $countMurojaah = 0;
-                                    @endphp
-                                    @forelse ($murojaah as $index => $item)
-                                        <tr>
-                                            <td class="text-center">{{ $index + 1 }}</td>
-                                            <td>{{ $item['surat'] }}</td>
-                                            <td>{{ $item['ayat'] ?? '-' }}</td>
-                                            <td class="text-center">{{ $item['nilai'] ?? '-' }}</td>
-                                        </tr>
-                                        @if (is_numeric($item['nilai']))
-                                            @php
-                                                $totalMurojaah += $item['nilai'];
-                                                $countMurojaah++;
-                                            @endphp
-                                        @endif
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted">Tidak ada data muroja'ah.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                                @if ($countMurojaah > 0)
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="3" class="text-end fw-bold">Rata-rata</td>
-                                            <td class="text-center fw-bold">
-                                                {{ number_format($totalMurojaah / $countMurojaah, 2) }}</td>
-                                        </tr>
-                                    </tfoot>
-                                @endif
-                            </table>
-                        </div>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tabel Muroja'ah -->
+                    <div class="col-md-6">
+                        <h5>Muroja'ah</h5>
+                        <table class="table table-bordered">
+                            <thead class="bg-navy disabled">
+                                <tr>
+                                    <th>Surat</th>
+                                    <th>Ayat</th>
+                                    <th>Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($murojaah as $item)
+                                    <tr>
+                                        <td>{{ $item['surat'] }}</td>
+                                        <td>{{ $item['ayat'] ?? '-' }}</td>
+                                        <td>{{ $item['nilai'] }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center">Tidak ada data muroja'ah.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
-
-
 
         </div>
     </section>

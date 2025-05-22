@@ -5,6 +5,10 @@ namespace App\Http\Controllers\CMS\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Kelas;
+use App\Models\Santri;
+use App\Models\Target;
+use App\Models\Setoran;
+use App\Models\Histori;
 use Yajra\DataTables\Facades\DataTables;
 
 class KelasController extends Controller
@@ -102,16 +106,81 @@ class KelasController extends Controller
         ->addIndexColumn()
         ->addColumn('action', function ($kelas) {
             return '
-                <button class="btn btn-warning btn-sm btnEdit" data-id="'.$kelas->id_kelas.'" title="Edit">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-danger btn-sm btnDelete" data-id="'.$kelas->id_kelas.'" title="Hapus">
-                    <i class="fas fa-trash"></i>
-                </button>
+   <a href="'.url('kelas/'.$kelas->id_kelas.'/santri').'" class="btn btn-info btn-sm" title="Detail">
+        <i class="fas fa-eye"></i>
+    </a>
+    <button class="btn btn-warning btn-sm btnEdit" data-id="'.$kelas->id_kelas.'" title="Edit">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-danger btn-sm btnDelete" data-id="'.$kelas->id_kelas.'" title="Hapus">
+        <i class="fas fa-trash"></i>
+    </button>
             ';
         })
         ->rawColumns(['action'])
         ->make(true);
 }
+public function showSantri($id_kelas)
+{
+    $kelas = Kelas::findOrFail($id_kelas);
+    return view('kelas.detail', compact('kelas'));
+}
+public function showDetailSantri($id_kelas, $id_santri)
+{
+    $santri = Santri::with(['kelas', 'keluarga'])->findOrFail($id_santri);
+    $kelas = Kelas::findOrFail($id_kelas);
+
+    // Ambil semua target milik santri
+    $targets = Target::where('id_santri', $id_santri)->with('surat')->get();
+
+    $hafalan = [];
+    $murojaah = [];
+
+    foreach ($targets as $target) {
+        $namaSurat = $target->surat->nama_surat ?? '-';
+
+        $nilaiHafalan = Setoran::where('id_target', $target->id_target)->avg('nilai');
+        $ayatHafalanStart = Setoran::where('id_target', $target->id_target)->min('jumlah_ayat_start');
+        $ayatHafalanEnd = Setoran::where('id_target', $target->id_target)->max('jumlah_ayat_end');
+        $ayatHafalan = ($ayatHafalanStart && $ayatHafalanEnd) ? "$ayatHafalanStart - $ayatHafalanEnd" : '-';
+
+        $nilaiMurojaah = Histori::where('id_target', $target->id_target)->avg('nilai');
+        $ayatMurojaahStart = $target->jumlah_ayat_target_awal;
+        $ayatMurojaahEnd = $target->jumlah_ayat_target;
+        $ayatMurojaah = ($ayatMurojaahStart && $ayatMurojaahEnd) ? "$ayatMurojaahStart - $ayatMurojaahEnd" : '-';
+
+        $hafalan[] = [
+            'surat' => $namaSurat,
+            'nilai' => number_format($nilaiHafalan ?? 0, 2),
+            'ayat'  => $ayatHafalan,
+        ];
+
+        $murojaah[] = [
+            'surat' => $namaSurat,
+            'nilai' => number_format($nilaiMurojaah ?? 0, 2),
+            'ayat'  => $ayatMurojaah,
+        ];
+    }
+
+    return view('kelas.detail_santri', compact('santri', 'kelas', 'hafalan', 'murojaah'));
+}
+
+
+public function fnGetSantri(Request $request)
+{
+    $kelas_id = $request->input('kelas_id');
+
+    $santriQuery = Santri::where('id_kelas', $kelas_id)->select('id_santri as id', 'nama', 'nisn');
+
+    return DataTables::of($santriQuery)
+        ->addColumn('action', function ($santri) use ($kelas_id) {
+            return '<a href="'.url('kelas/'.$kelas_id.'/santri/'.$santri->id).'" class="btn btn-info btn-sm" title="Detail">
+                        <i class="fas fa-eye"></i>
+                    </a>';
+        })
+        ->rawColumns(['action'])
+        ->make(true);
+}
+
 
 }

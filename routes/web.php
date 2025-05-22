@@ -144,6 +144,9 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::put('update-orangtua/{id}', 'updateOrangTua')->name('update.orangtua'); // Pastikan ini ada
             Route::get('edit-wali/{id}', 'editWali')->name('edit.wali');
             Route::put('update-wali/{id}', 'updateWali')->name('update.wali');
+            Route::get('pdf/{id}', 'downloadPdf')->name('downloadPdf');
+
+
         });
     });
 
@@ -158,6 +161,11 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::put('update/{id}', 'update')->name('update'); // Perbaiki route update
             Route::delete('delete/{id}', 'destroy')->name('destroy');
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
+            Route::get('{id_kelas}/santri', 'showSantri')->name('showSantri');
+            Route::get('fn-get-santri', 'fnGetSantri')->name('fnGetSantri');
+            Route::get('{id_kelas}/santri/{id_santri}','showDetailSantri')->name('kelas.santri.detail');
+
+
         });
     });
     Route::prefix('pengajar')->name('pengajar.')->group(function () {

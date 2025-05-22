@@ -752,6 +752,11 @@ class SetoranController extends Controller
             ->addColumn('status', function ($row) {
                 return $row->status == 1 ? 'Selesai' : 'Proses';  // Ganti dengan status sesuai kebutuhan
             })
+            ->filterColumn('nama_kelas', function ($query, $keyword) {
+            $query->whereHas('kelas', function ($q) use ($keyword) {
+                $q->where('nama_kelas', 'like', "%$keyword%");
+            });
+        })
             ->addColumn('action', function ($row) {
                 return '<a href="' . route('setoran.edit', $row->id_setoran) . '" class="btn btn-sm btn-warning">Edit</a>
                         <button class="btn btn-sm btn-danger btnDelete" data-id="' . $row->id_setoran . '">Hapus</button>';

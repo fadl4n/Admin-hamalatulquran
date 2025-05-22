@@ -132,7 +132,6 @@ if ($overlapTarget) {
             'jumlah_ayat_target_awal' => $request->jumlah_ayat_target_awal,
             'jumlah_ayat_target' => $request->jumlah_ayat_target,
             'tgl_target' => $request->tgl_target,
-            'id_group' => $request->id_group,
         ]);
 
         $today = now(); // Mendapatkan tanggal sekarang
@@ -379,6 +378,11 @@ if ($overlapTarget) {
             ->addColumn('tgl_target', function ($row) {
                 return $row->tgl_target;
             })
+            ->filterColumn('nama_kelas', function ($query, $keyword) {
+            $query->whereHas('kelas', function ($q) use ($keyword) {
+                $q->where('nama_kelas', 'like', "%$keyword%");
+            });
+        })
 
             ->addColumn('action', function ($row) {
                 return '
