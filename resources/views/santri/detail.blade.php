@@ -104,12 +104,9 @@
                                 </tr>
                                 <tr>
                                     <th width="40%">Status</th>
+
                                     <td>
-                                        {{ match ($ayah->status) {
-                                            1 => 'Hidup',
-                                            2 => 'Meninggal',
-                                            default => '-',
-                                        } }}
+                                        {{ [1 => 'Hidup', 2 => 'Meninggal'][$ayah?->status] ?? '-' }}
                                     </td>
                                 </tr>
 
@@ -151,12 +148,9 @@
                                 <tr>
                                     <th width="40%">Status</th>
                                     <td>
-                                        {{ match ($ibu->status) {
-                                            1 => 'Hidup',
-                                            2 => 'Meninggal',
-                                            default => '-',
-                                        } }}
+                                        {{ [1 => 'Hidup', 2 => 'Meninggal'][$ibu?->status] ?? '-' }}
                                     </td>
+
                                 </tr>
 
                                 <tr>
@@ -184,12 +178,10 @@
                                     <td>{{ $ibu->tempat_lahir ?? '' }}, {{ $ibu->tgl_lahir ?? '' }}</td>
                                 </tr>
                             </table>
-
                             <!-- Bagian Data Wali -->
                             <div class="mt-4 d-flex justify-content-between align-items-center">
                                 <h4>Data Wali:</h4>
                             </div>
-
                             <table class="table table-striped">
                                 <tr>
                                     <th width="40%">Nama Wali</th>
@@ -198,12 +190,9 @@
                                 <tr>
                                     <th width="40%">Status</th>
                                     <td>
-                                        {{ match ($wali->status) {
-                                            1 => 'Hidup',
-                                            2 => 'Meninggal',
-                                            default => '-',
-                                        } }}
+                                        {{ [1 => 'Hidup', 2 => 'Meninggal'][$wali?->status] ?? '-' }}
                                     </td>
+
                                 </tr>
 
                                 <tr>
@@ -233,10 +222,10 @@
                             </table>
 
                             <!-- Tombol Kembali di Bawah
-                                    <div class="mt-4">
-                                        <a href="{{ route('santri.index') }}" class="btn btn-outline-secondary"> Kembali
-                                        </a>
-                                    </div> -->
+                                        <div class="mt-4">
+                                            <a href="{{ route('santri.index') }}" class="btn btn-outline-secondary"> Kembali
+                                            </a>
+                                        </div> -->
                         </div>
                     </div>
                 </div>

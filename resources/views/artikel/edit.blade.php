@@ -8,7 +8,7 @@
     <section class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-10 offset-md-1">
                     <div class="card">
                         <div class="card-body">
                             <form action="{{ route('artikel.update', $artikels->id) }}" method="POST" enctype="multipart/form-data">
@@ -43,12 +43,15 @@
                                              src="{{ $artikels->gambar ? $artikels->gambar : asset('assets/image/default-user.png') }}"
                                              alt="Gambar"
                                              class="img-thumbnail"
-                                             width="150">
+                                             style="width: 150px; height: 150px; object-fit: cover;">
                                     </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary">Update</button>
-                                <a href="{{ route('artikel.index') }}" class="btn btn-secondary">Batal</a>
+                                {{-- Tombol Aksi --}}
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                    <a href="{{ route('artikel.index') }}" class="btn btn-secondary ml-2">Batal</a>
+                                </div>
                             </form>
                         </div>
                     </div>

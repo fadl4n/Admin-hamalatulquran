@@ -8,7 +8,7 @@
     <section class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-12">
+                <div class="col-md-10 offset-md-1">
                     <div class="card">
                         <div class="card-body">
                             <form action="{{ route('santri.update', $santri->id_santri) }}" method="POST"
@@ -184,214 +184,210 @@
                                     </div>
                                 </div>
 
+                                <h4>Ayah</h4>
+                                <div class="form-group">
+                                    <label>Nama Ayah</label>
+                                    <input type="text" name="nama_ayah" class="form-control"
+                                        value="{{ old('nama_ayah', $ayah->nama ?? '') }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select name="status_ayah" class="form-control">
+                                        <option value="" disabled selected>- Pilih status -</option>
+                                        <option value="1" {{ old('status_ayah', optional($ayah)->status) == 1 ? 'selected' : '' }}>Hidup</option>
+                                        <option value="2" {{ old('status_ayah', optional($ayah)->status) == 2 ? 'selected' : '' }}>Meninggal</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Pekerjaan</label>
+                                    <input type="text" name="pekerjaan_ayah" class="form-control ayah-input"
+                                        value="{{ old('pekerjaan_ayah', $ayah->pekerjaan ?? '') }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Pendidikan</label>
+                                    <input type="text" name="pendidikan_ayah" class="form-control ayah-input"
+                                        value="{{ old('pendidikan_ayah', $ayah->pendidikan ?? '') }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Alamat</label>
+                                    <textarea name="alamat_ayah" class="form-control ayah-input">{{ old('alamat_ayah', $ayah->alamat ?? '') }}</textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Email Ayah</label>
+                                            <input type="email" name="email_ayah"
+                                                class="form-control ayah-input @error('email_ayah') is-invalid @enderror"
+                                                value="{{ old('email_ayah', $ayah->email ?? '') }}">
+                                            @error('email_ayah')
+                                                <span class="text-danger">Format email tidak valid.</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>No. Telepon</label>
+                                            <input type="text" name="no_telp_ayah" class="form-control ayah-input"
+                                                value="{{ old('no_telp_ayah', $ayah->no_telp ?? '') }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Tempat Lahir</label>
+                                            <input type="text" name="tempat_lahir_ayah" class="form-control"
+                                                value="{{ old('tempat_lahir_ayah', $ayah->tempat_lahir ?? '') }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Tanggal Lahir</label>
+                                            <input type="date" name="tgl_lahir_ayah" class="form-control"
+                                                value="{{ old('tgl_lahir_ayah', $ayah->tgl_lahir ?? '') }}">
+                                        </div>
+                                    </div>
+                                </div>
 
-                              <h4>Ayah</h4>
-<div class="form-group">
-    <label>Nama Ayah</label>
-    <input type="text" name="nama_ayah" class="form-control"
-        value="{{ old('nama_ayah', $ayah->nama ?? '') }}">
-</div>
-<div class="form-group">
-    <label>Status</label>
-    <select name="status_ayah" class="form-control">
-        <option value="" disabled selected>- Pilih status -</option>
-        <option value="1" {{ old('status_ayah', optional($ayah)->status) == 1 ? 'selected' : '' }}>Hidup</option>
-        <option value="2" {{ old('status_ayah', optional($ayah)->status) == 2 ? 'selected' : '' }}>Meninggal</option>
-    </select>
-</div>
-
-<div class="form-group">
-    <label>Pekerjaan</label>
-    <input type="text" name="pekerjaan_ayah" class="form-control ayah-input"
-        value="{{ old('pekerjaan_ayah', $ayah->pekerjaan ?? '') }}">
-</div>
-<div class="form-group">
-    <label>Pendidikan</label>
-    <input type="text" name="pendidikan_ayah" class="form-control ayah-input"
-        value="{{ old('pendidikan_ayah', $ayah->pendidikan ?? '') }}">
-</div>
-<div class="form-group">
-    <label>Alamat</label>
-    <textarea name="alamat_ayah" class="form-control ayah-input">{{ old('alamat_ayah', $ayah->alamat ?? '') }}</textarea>
-</div>
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Email Ayah</label>
-            <input type="email" name="email_ayah"
-                class="form-control ayah-input @error('email_ayah') is-invalid @enderror"
-                value="{{ old('email_ayah', $ayah->email ?? '') }}">
-            @error('email_ayah')
-                <span class="text-danger">Format email tidak valid.</span>
-            @enderror
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>No. Telepon</label>
-            <input type="text" name="no_telp_ayah" class="form-control ayah-input"
-                value="{{ old('no_telp_ayah', $ayah->no_telp ?? '') }}">
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Tempat Lahir</label>
-            <input type="text" name="tempat_lahir_ayah" class="form-control"
-                value="{{ old('tempat_lahir_ayah', $ayah->tempat_lahir ?? '') }}">
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Tanggal Lahir</label>
-            <input type="date" name="tgl_lahir_ayah" class="form-control"
-                value="{{ old('tgl_lahir_ayah', $ayah->tgl_lahir ?? '') }}">
-        </div>
-    </div>
-</div>
-
-
-                               <h4>Ibu</h4>
-<div class="form-group">
-    <label>Nama Ibu</label>
-    <input type="text" name="nama_ibu" class="form-control"
-        value="{{ old('nama_ibu', $ibu->nama ?? '') }}">
-</div>
-<div class="form-group">
-    <label>Status</label>
-    <select name="status_ibu" class="form-control">
-        <option value="" disabled selected>- Pilih status -</option>
-        <option value="1" {{ old('status_ibu', optional($ibu)->status) == 1 ? 'selected' : '' }}>Hidup</option>
-        <option value="2" {{ old('status_ibu', optional($ibu)->status) == 2 ? 'selected' : '' }}>Meninggal</option>
-    </select>
-</div>
-
-<div class="form-group">
-    <label>Pekerjaan</label>
-    <input type="text" name="pekerjaan_ibu" class="form-control ibu-input"
-        value="{{ old('pekerjaan_ibu', $ibu->pekerjaan ?? '') }}">
-</div>
-<div class="form-group">
-    <label>Pendidikan</label>
-    <input type="text" name="pendidikan_ibu" class="form-control ibu-input"
-        value="{{ old('pendidikan_ibu', $ibu->pendidikan ?? '') }}">
-</div>
-<div class="form-group">
-    <label>Alamat</label>
-    <textarea name="alamat_ibu" class="form-control ibu-input">{{ old('alamat_ibu', $ibu->alamat ?? '') }}</textarea>
-</div>
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Email Ibu</label>
-            <input type="email" name="email_ibu"
-                class="form-control ibu-input @error('email_ibu') is-invalid @enderror"
-                value="{{ old('email_ibu', $ibu->email ?? '') }}">
-            @error('email_ibu')
-                <span class="text-danger">Format email tidak valid.</span>
-            @enderror
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>No. Telepon</label>
-            <input type="text" name="no_telp_ibu" class="form-control ibu-input"
-                value="{{ old('no_telp_ibu', $ibu->no_telp ?? '') }}">
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Tempat Lahir</label>
-            <input type="text" name="tempat_lahir_ibu" class="form-control"
-                value="{{ old('tempat_lahir_ibu', $ibu->tempat_lahir ?? '') }}">
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Tanggal Lahir</label>
-            <input type="date" name="tgl_lahir_ibu" class="form-control"
-                value="{{ old('tgl_lahir_ibu', $ibu->tgl_lahir ?? '') }}">
-        </div>
-    </div>
-</div>
-
-
+                                <h4>Ibu</h4>
+                                <div class="form-group">
+                                    <label>Nama Ibu</label>
+                                    <input type="text" name="nama_ibu" class="form-control"
+                                        value="{{ old('nama_ibu', $ibu->nama ?? '') }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select name="status_ibu" class="form-control">
+                                        <option value="" disabled selected>- Pilih status -</option>
+                                        <option value="1" {{ old('status_ibu', optional($ibu)->status) == 1 ? 'selected' : '' }}>Hidup</option>
+                                        <option value="2" {{ old('status_ibu', optional($ibu)->status) == 2 ? 'selected' : '' }}>Meninggal</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Pekerjaan</label>
+                                    <input type="text" name="pekerjaan_ibu" class="form-control ibu-input"
+                                        value="{{ old('pekerjaan_ibu', $ibu->pekerjaan ?? '') }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Pendidikan</label>
+                                    <input type="text" name="pendidikan_ibu" class="form-control ibu-input"
+                                        value="{{ old('pendidikan_ibu', $ibu->pendidikan ?? '') }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Alamat</label>
+                                    <textarea name="alamat_ibu" class="form-control ibu-input">{{ old('alamat_ibu', $ibu->alamat ?? '') }}</textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Email Ibu</label>
+                                            <input type="email" name="email_ibu"
+                                                class="form-control ibu-input @error('email_ibu') is-invalid @enderror"
+                                                value="{{ old('email_ibu', $ibu->email ?? '') }}">
+                                            @error('email_ibu')
+                                                <span class="text-danger">Format email tidak valid.</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>No. Telepon</label>
+                                            <input type="text" name="no_telp_ibu" class="form-control ibu-input"
+                                                value="{{ old('no_telp_ibu', $ibu->no_telp ?? '') }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Tempat Lahir</label>
+                                            <input type="text" name="tempat_lahir_ibu" class="form-control"
+                                                value="{{ old('tempat_lahir_ibu', $ibu->tempat_lahir ?? '') }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Tanggal Lahir</label>
+                                            <input type="date" name="tgl_lahir_ibu" class="form-control"
+                                                value="{{ old('tgl_lahir_ibu', $ibu->tgl_lahir ?? '') }}">
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <h4>Wali</h4>
-<div class="form-group">
-    <label>Nama Wali</label>
-    <input type="text" name="nama_wali"
-        class="form-control @error('nama_wali') is-invalid @enderror"
-        value="{{ old('nama_wali', $wali->nama ?? '') }}">
-</div>
-<div class="form-group">
-    <label>Status</label>
-    <select name="status_wali" class="form-control">
-        <option value="" disabled selected>- Pilih status -</option>
-        <option value="1" {{ old('status_wali', optional($wali)->status) == 1 ? 'selected' : '' }}>Hidup</option>
-        <option value="2" {{ old('status_wali', optional($wali)->status) == 2 ? 'selected' : '' }}>Meninggal</option>
-    </select>
-</div>
+                                <div class="form-group">
+                                    <label>Nama Wali</label>
+                                    <input type="text" name="nama_wali"
+                                        class="form-control @error('nama_wali') is-invalid @enderror"
+                                        value="{{ old('nama_wali', $wali->nama ?? '') }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select name="status_wali" class="form-control">
+                                        <option value="" disabled selected>- Pilih status -</option>
+                                        <option value="1" {{ old('status_wali', optional($wali)->status) == 1 ? 'selected' : '' }}>Hidup</option>
+                                        <option value="2" {{ old('status_wali', optional($wali)->status) == 2 ? 'selected' : '' }}>Meninggal</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Pekerjaan</label>
+                                    <input type="text" name="pekerjaan_wali"
+                                        class="form-control wali-input @error('pekerjaan_wali') is-invalid @enderror"
+                                        value="{{ old('pekerjaan_wali', $wali->pekerjaan ?? '') }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Pendidikan</label>
+                                    <input type="text" name="pendidikan_wali"
+                                        class="form-control wali-input @error('pendidikan_wali') is-invalid @enderror"
+                                        value="{{ old('pendidikan_wali', $wali->pendidikan ?? '') }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Alamat</label>
+                                    <textarea name="alamat_wali" class="form-control wali-input @error('alamat_wali') is-invalid @enderror">{{ old('alamat_wali', $wali->alamat ?? '') }}</textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <input type="email" name="email_wali"
+                                                class="form-control wali-input @error('email_wali') is-invalid @enderror"
+                                                value="{{ old('email_wali', $wali->email ?? '') }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>No. Telepon</label>
+                                            <input type="text" name="no_telp_wali"
+                                                class="form-control wali-input @error('no_telp_wali') is-invalid @enderror"
+                                                value="{{ old('no_telp_wali', $wali->no_telp ?? '') }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Tempat Lahir</label>
+                                            <input type="text" name="tempat_lahir_wali"
+                                                class="form-control @error('tempat_lahir_wali') is-invalid @enderror"
+                                                value="{{ old('tempat_lahir_wali', $wali->tempat_lahir ?? '') }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Tanggal Lahir</label>
+                                            <input type="date" name="tgl_lahir_wali"
+                                                class="form-control @error('tgl_lahir_wali') is-invalid @enderror"
+                                                value="{{ old('tgl_lahir_wali', $wali->tgl_lahir ?? '') }}">
+                                        </div>
+                                    </div>
+                                </div>
 
-<div class="form-group">
-    <label>Pekerjaan</label>
-    <input type="text" name="pekerjaan_wali"
-        class="form-control wali-input @error('pekerjaan_wali') is-invalid @enderror"
-        value="{{ old('pekerjaan_wali', $wali->pekerjaan ?? '') }}">
-</div>
-<div class="form-group">
-    <label>Pendidikan</label>
-    <input type="text" name="pendidikan_wali"
-        class="form-control wali-input @error('pendidikan_wali') is-invalid @enderror"
-        value="{{ old('pendidikan_wali', $wali->pendidikan ?? '') }}">
-</div>
-<div class="form-group">
-    <label>Alamat</label>
-    <textarea name="alamat_wali" class="form-control wali-input @error('alamat_wali') is-invalid @enderror">{{ old('alamat_wali', $wali->alamat ?? '') }}</textarea>
-</div>
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" name="email_wali"
-                class="form-control wali-input @error('email_wali') is-invalid @enderror"
-                value="{{ old('email_wali', $wali->email ?? '') }}">
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>No. Telepon</label>
-            <input type="text" name="no_telp_wali"
-                class="form-control wali-input @error('no_telp_wali') is-invalid @enderror"
-                value="{{ old('no_telp_wali', $wali->no_telp ?? '') }}">
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Tempat Lahir</label>
-            <input type="text" name="tempat_lahir_wali"
-                class="form-control @error('tempat_lahir_wali') is-invalid @enderror"
-                value="{{ old('tempat_lahir_wali', $wali->tempat_lahir ?? '') }}">
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Tanggal Lahir</label>
-            <input type="date" name="tgl_lahir_wali"
-                class="form-control @error('tgl_lahir_wali') is-invalid @enderror"
-                value="{{ old('tgl_lahir_wali', $wali->tgl_lahir ?? '') }}">
-        </div>
-    </div>
-</div>
+                                {{-- Tombol Aksi --}}
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">Simpan</button>
+                                    <a href="{{ route('santri.index') }}" class="btn btn-secondary ml-2">Batal</a>
+                                </div>
 
-
-                                <button type="submit" class="btn btn-primary">Simpan</button>
-                                <a href="{{ route('santri.index') }}" class="btn btn-secondary">Batal</a>
                             </form>
                         </div>
                     </div>

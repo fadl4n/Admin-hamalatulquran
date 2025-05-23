@@ -5,7 +5,7 @@
 @section('content')
 <section class="content">
     <div class="container-fluid">
-        <div class="card">
+        <div class="card col-md-10 offset-md-1">
             <div class="card-header">
                 <h3 class="card-title" style="font-size: 1.8rem;">{{ $santri->nama }}</h3>
             </div>

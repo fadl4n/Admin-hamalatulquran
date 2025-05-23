@@ -18,7 +18,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h5>Daftar Santri</h5>
+                        <h5 class="text-center">Daftar Santri {{ $kelas->nama_kelas }}</h5>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover santri-detail-list w-100 text-center">
                                 <thead class="bg-navy disabled">

@@ -85,8 +85,6 @@
                                     </table>
                                 </div>
                             </div>
-
-
                             @php
                                 $ayah = $santri->keluarga->firstWhere('hubungan', 1);
                                 $ibu = $santri->keluarga->firstWhere('hubungan', 2);
@@ -105,7 +103,10 @@
                                 </tr>
                                 <tr>
                                     <th width="40%">Status</th>
-                                    <td>{{ $ayah->status ?? '' }}</td>
+
+                                    <td>
+                                        {{ [1 => 'Hidup', 2 => 'Meninggal'][$ayah?->status] ?? '-' }}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th>Pekerjaan </th>
@@ -137,14 +138,15 @@
                                 <div class="mt-4 d-flex justify-content-between align-items-center">
                                     <h4>Data Ibu:</h4>
                                 </div>
-
                                 <tr>
                                     <th width="40%">Nama Ibu</th>
                                     <td>{{ $ibu->nama ?? '' }}</td>
                                 </tr>
                                 <tr>
                                     <th width="40%">Status</th>
-                                    <td>{{ $ibu->status ?? '' }}</td>
+                                    <td>
+                                        {{ [1 => 'Hidup', 2 => 'Meninggal'][$ibu?->status] ?? '-' }}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th>Pekerjaan </th>
@@ -171,12 +173,10 @@
                                     <td>{{ $ibu->tempat_lahir ?? '' }}, {{ $ibu->tgl_lahir ?? '' }}</td>
                                 </tr>
                             </table>
-
                             <!-- Bagian Data Wali -->
                             <div class="mt-4 d-flex justify-content-between align-items-center">
                                 <h4>Data Wali:</h4>
                             </div>
-
                             <table class="table table-striped">
                                 <tr>
                                     <th width="40%">Nama Wali</th>
@@ -184,8 +184,12 @@
                                 </tr>
                                 <tr>
                                     <th width="40%">Status</th>
-                                    <td>{{ $wali->status ?? '' }}</td>
+                                    <td>
+                                        {{ [1 => 'Hidup', 2 => 'Meninggal'][$wali?->status] ?? '-' }}
+                                    </td>
+
                                 </tr>
+
                                 <tr>
                                     <th>Pekerjaan Wali</th>
                                     <td>{{ $wali->pekerjaan ?? '' }}</td>
@@ -222,64 +226,108 @@
                 </div>
             </div>
             <!-- Tabel Detail Nilai Santri -->
-            <div class="mt-5">
-                <h4>Detail Nilai Santri</h4>
-                <div class="row">
-                    <!-- Tabel Hafalan -->
-                    <div class="col-md-6">
-                        <h5>Hafalan</h5>
-                        <table class="table table-bordered">
-                            <thead class="bg-navy disabled">
-                                <tr>
-                                    <th>Surat</th>
-                                    <th>Ayat</th>
-                                    <th>Nilai</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($hafalan as $item)
-                                    <tr>
-                                        <td>{{ $item['surat'] }}</td>
-                                        <td>{{ $item['ayat'] }}</td>
-                                        <td>{{ $item['nilai'] ?? '-' }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="text-center">Tidak ada data hafalan.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="row mt-5">
+                <div class="col-md-10 offset-md-1">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="text-center mb-4">Rapor Nilai Santri</h4>
 
-                    <!-- Tabel Muroja'ah -->
-                    <div class="col-md-6">
-                        <h5>Muroja'ah</h5>
-                        <table class="table table-bordered">
-                            <thead class="bg-navy disabled">
-                                <tr>
-                                    <th>Surat</th>
-                                    <th>Ayat</th>
-                                    <th>Nilai</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($murojaah as $item)
+                            <!-- Tabel Hafalan -->
+                            <h5 class="mb-3">Nilai Hafalan</h5>
+                            <table class="table table-striped">
+                                <thead>
                                     <tr>
-                                        <td>{{ $item['surat'] }}</td>
-                                        <td>{{ $item['ayat'] ?? '-' }}</td>
-                                        <td>{{ $item['nilai'] }}</td>
+                                        <th width="5%">No</th>
+                                        <th>Surat</th>
+                                        <th>Ayat</th>
+                                        <th>Nilai</th>
                                     </tr>
-                                @empty
+                                </thead>
+                                <tbody>
+                                    @php
+                                        $totalHafalan = 0;
+                                        $countHafalan = 0;
+                                    @endphp
+                                    @forelse ($hafalan as $index => $item)
+                                        <tr>
+                                            <td class="text-center">{{ $index + 1 }}</td>
+                                            <td>{{ $item['surat'] }}</td>
+                                            <td>{{ $item['ayat'] }}</td>
+                                            <td class="text-center">{{ $item['nilai'] ?? '-' }}</td>
+                                        </tr>
+                                        @if (is_numeric($item['nilai']))
+                                            @php
+                                                $totalHafalan += $item['nilai'];
+                                                $countHafalan++;
+                                            @endphp
+                                        @endif
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">Tidak ada data hafalan.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                                @if ($countHafalan > 0)
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3" class="text-end fw-bold">Rata-rata</td>
+                                            <td class="text-center fw-bold">
+                                                {{ number_format($totalHafalan / $countHafalan, 2) }}</td>
+                                        </tr>
+                                    </tfoot>
+                                @endif
+                            </table>
+
+                            <!-- Tabel Muroja'ah -->
+                            <h5 class="mt-5 mb-3">Nilai Muroja'ah</h5>
+                            <table class="table table-striped">
+                                <thead>
                                     <tr>
-                                        <td colspan="3" class="text-center">Tidak ada data muroja'ah.</td>
+                                        <th width="5%">No</th>
+                                        <th>Surat</th>
+                                        <th>Ayat</th>
+                                        <th>Nilai</th>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @php
+                                        $totalMurojaah = 0;
+                                        $countMurojaah = 0;
+                                    @endphp
+                                    @forelse ($murojaah as $index => $item)
+                                        <tr>
+                                            <td class="text-center">{{ $index + 1 }}</td>
+                                            <td>{{ $item['surat'] }}</td>
+                                            <td>{{ $item['ayat'] ?? '-' }}</td>
+                                            <td class="text-center">{{ $item['nilai'] ?? '-' }}</td>
+                                        </tr>
+                                        @if (is_numeric($item['nilai']))
+                                            @php
+                                                $totalMurojaah += $item['nilai'];
+                                                $countMurojaah++;
+                                            @endphp
+                                        @endif
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">Tidak ada data muroja'ah.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                                @if ($countMurojaah > 0)
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3" class="text-end fw-bold">Rata-rata</td>
+                                            <td class="text-center fw-bold">
+                                                {{ number_format($totalMurojaah / $countMurojaah, 2) }}</td>
+                                        </tr>
+                                    </tfoot>
+                                @endif
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
+
 
         </div>
     </section>

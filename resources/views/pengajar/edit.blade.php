@@ -8,7 +8,7 @@
     <section class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-12">
+                <div class="col-md-10 offset-md-1">
                     <div class="card">
                         <div class="card-body">
                             @if (session('error'))

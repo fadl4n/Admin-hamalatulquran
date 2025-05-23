@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-    <div class="card">
+    <div class="card col-md-10 offset-md-1">
         <div class="card-body">
             <form action="{{ route('surat.update', $surat->id_surat) }}" method="POST">
                 @csrf

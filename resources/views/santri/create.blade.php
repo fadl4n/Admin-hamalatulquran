@@ -20,7 +20,6 @@
                                 {{ session('error') }}
                             </div>
                         @endif
-
                         <!-- Notifikasi validasi error -->
                         @if ($errors->any())
                             <div class="alert alert-danger">
@@ -45,7 +44,6 @@
                                             <span class="text-danger">Nama wajib diisi.</span>
                                         @enderror
                                     </div>
-
                                     <div class="form-group">
                                         <label>NISN</label>
                                         <input type="number" name="nisn" class="form-control @error('nisn') is-invalid @enderror"
@@ -54,7 +52,6 @@
                                             <span class="text-danger">NISN wajib diisi dan harus unik.</span>
                                         @enderror
                                     </div>
-
                                     <div class="row">
                                         <div class="form-group col-md-6">
                                             <label>Tempat Lahir</label>
@@ -74,7 +71,6 @@
                                             @enderror
                                         </div>
                                     </div>
-
                                     <div class="form-group">
                                         <label>Email</label>
                                         <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
@@ -83,7 +79,6 @@
                                             <span class="text-danger">Email wajib diisi dan harus unik.</span>
                                         @enderror
                                     </div>
-
                                     <div class="form-group">
                                         <label>Password</label>
                                         <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
@@ -104,7 +99,6 @@
                                             <span class="text-danger">Alamat tidak boleh kosong.</span>
                                         @enderror
                                     </div>
-
                                     <div class="form-group">
                                         <label>Angkatan</label>
                                         <input type="number" name="angkatan" class="form-control @error('angkatan') is-invalid @enderror"
@@ -113,7 +107,6 @@
                                             <span class="text-danger">Angkatan tidak boleh kosong.</span>
                                         @enderror
                                     </div>
-
                                     <div class="form-group">
                                         <label>Kelas</label>
                                         <select name="id_kelas" class="form-control @error('id_kelas') is-invalid @enderror">
@@ -153,7 +146,6 @@
                                             @enderror
                                         </div>
                                     </div>
-
                                     <div class="form-group">
                                         <label for="foto_santri">Foto Santri</label>
                                         <input type="file" name="foto_santri" id="foto_santri"
@@ -176,10 +168,12 @@
                                 </div>
                             </div>
 
+                            <!-- Tombol Simpan dan Batal (Rata Kanan dengan jarak) -->
                             <div class="mt-4 d-flex justify-content-end">
                                 <button type="submit" class="btn btn-success mr-2">Simpan</button>
                                 <a href="{{ url('santri') }}" class="btn btn-secondary">Batal</a>
                             </div>
+                            
                         </form>
                     </div>
                 </div>

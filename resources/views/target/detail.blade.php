@@ -6,7 +6,7 @@
     <section class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-10 offset-md-1">
                     <h5> @isset($targest){{ $targets->first()->first()->santri->nama }}@endisset</h5>
                     <div class="card">
                         <div class="card-body">

@@ -1,19 +1,25 @@
 @extends('admin_template')
 
+@section('title page')
+    Tambah Pengajar
+@endsection
+
 @section('content')
     <section class="content">
-        <div class="container-fluid">
-            <div class="card">
+        <div class="container-fluid mt-4 mb-5">
+            <div class="card col-md-10 offset-md-1">
                 <div class="card-header">
                     <h3 class="card-title">Tambah Pengajar</h3>
                 </div>
                 <div class="card-body">
+
+                    <!-- Notifikasi session error manual -->
                     @if(session('error'))
                         <div class="alert alert-danger">
                             {{ session('error') }}
                         </div>
                     @endif
-
+                    <!-- Notifikasi validasi error -->
                     @if ($errors->any())
                         <div class="alert alert-danger">
                             <ul class="mb-0">
@@ -89,7 +95,6 @@
                                         <span class="text-danger">Alamat wajib diisi.</span>
                                     @enderror
                                 </div>
-
                                 <div class="form-group">
                                     <label>Jenis Kelamin</label>
                                     <select name="jenis_kelamin" class="form-control @error('jenis_kelamin') is-invalid @enderror" required>
@@ -101,7 +106,6 @@
                                         <span class="text-danger">Jenis kelamin wajib dipilih.</span>
                                     @enderror
                                 </div>
-
                                 <div class="form-group">
                                     <label>Password</label>
                                     <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
@@ -110,7 +114,6 @@
                                         <span class="text-danger">Password minimal 6 karakter.</span>
                                     @enderror
                                 </div>
-
                                 <div class="form-group">
                                     <label for="foto_pengajar">Foto Pengajar</label>
                                     <input type="file" name="foto_pengajar" id="foto_pengajar"
@@ -133,9 +136,10 @@
                             <button type="submit" class="btn btn-primary" style="margin-right: 10px;">Simpan</button>
                             <a href="{{ url('pengajar') }}" class="btn btn-secondary">Batal</a>
                         </div>
-
                     </form>
+
                 </div>
+                
             </div>
         </div>
     </section>
