@@ -101,23 +101,7 @@ if ($overlapTarget) {
         'tgl_mulai' => 'Tanggal mulai tidak boleh lebih besar dari tanggal target.',
     ])->withInput();
 }
-        // // Cek apakah ada target yang sama dengan id_santri, id_surat, id_group tetapi berbeda tgl_mulai dan tgl_target
-        // $existingTargetDates = Target::where('id_santri', $request->id_santri)
-        //     ->where('id_group', $request->id_group)
-        //     ->where(function ($query) use ($request) {
-        //         $query->where('tgl_mulai', '!=', $request->tgl_mulai)
-        //             ->orWhere('tgl_target', '!=', $request->tgl_target);
-        //     })
-        //     ->first();
 
-        // if ($existingTargetDates) {
-        //     return back()->withErrors([
-        //         'tgl_mulai' => 'Sudah ada target untuk santri ini dengan tanggal mulai ' . Carbon::parse($existingTargetDates->tgl_mulai)->format('d-m-Y') . '.',
-        //         'tgl_target' => 'Sudah ada target untuk santri ini dengan tanggal target ' . Carbon::parse($existingTargetDates->tgl_target)->format('d-m-Y') . '.'
-        //     ])->withInput();
-        // }
-        // Pengecekan apakah id_kelas sesuai dengan santri
-        // Pengecekan apakah id_kelas sesuai dengan santri
         $santri = Santri::findOrFail($request->id_santri);
         if ($santri->id_kelas != $request->id_kelas) {
             return back()->withErrors(['id_kelas' => 'Santri ini terdaftar di kelas ' . $santri->kelas->nama_kelas . ', bukan di kelas yang dipilih.'])->withInput();
@@ -133,9 +117,11 @@ if ($overlapTarget) {
             'jumlah_ayat_target' => $request->jumlah_ayat_target,
             'tgl_target' => $request->tgl_target,
         ]);
+$today = now();
+$tglTarget = Carbon::parse($target->tgl_target)->endOfDay();  // set ke 23:59:59 tanggal target
+$status = $today->greaterThan($tglTarget) ? 3 : 0;
 
-        $today = now(); // Mendapatkan tanggal sekarang
-        $status = ($today->greaterThan($target->tgl_target)) ? 3 : 0;  // Jika tanggal sekarang lebih besar dari tgl_target, status 3 (terlambat), jika tidak status 0 (belum mulai)
+
 
         // Simpan histori berdasarkan target
         Histori::create([

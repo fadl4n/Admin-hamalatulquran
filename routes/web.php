@@ -16,6 +16,8 @@ use App\Http\Controllers\CMS\User\NilaiController;
 use App\Http\Controllers\CMS\User\TargetController;
 use App\Http\Controllers\CMS\User\HistoriController;
 use App\Http\Controllers\CMS\User\SuratController;
+use App\Http\Controllers\CMS\User\AbsenController;
+use App\Http\Controllers\CMS\User\InfaqController;
 use App\Http\Controllers\CMS\User\RoleController;
 use App\Http\Controllers\CMS\Master\RoleController as RoleMaster;
 use App\Http\Middleware\CheckAuth;
@@ -202,6 +204,29 @@ Route::middleware([CheckAuth::class])->group(function () {
             Route::get('fn-get-data', 'fnGetData')->name('fnGetData');
         });
     });
+
+Route::prefix('absen')->name('absen.')->group(function () {
+    Route::controller(AbsenController::class)->group(function () {
+        Route::get('/', 'index')->name('index'); // Halaman utama absensi
+        Route::get('/detail/{id}', 'detail')->name('detail'); // Melihat detail absensi per kelas
+        Route::get('/create', 'create')->name('create');  // form create
+        Route::post('/store', 'store')->name('store');   // simpan data
+        Route::get('/{id}/edit', 'edit')->name('edit'); // Edit absensi untuk satu santri
+        Route::put('/{id}', 'update')->name('update'); // Simpan update absensi
+        Route::get('/get-santri-by-kelas', 'getSantriByKelas')->name('getSantriByKelas'); // ajax santri
+    });
+});
+
+Route::prefix('infaq')->name('infaq.')->group(function () {
+    Route::controller(InfaqController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{id}/edit', 'edit')->name('edit');
+        Route::put('/{id}', 'update')->name('update');
+    });
+});
+
 
     Route::prefix('setoran')->name('setoran.')->group(function () {
         Route::controller(SetoranController::class)->group(function () {

@@ -60,4 +60,9 @@ class Santri extends Model
     {
         return $this->hasMany(Setoran::class);
     }
+    public function absens()
+{
+    return $this->hasMany(Absen::class, 'id_santri');
+}
+
 }

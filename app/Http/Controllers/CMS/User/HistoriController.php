@@ -7,6 +7,7 @@ use App\Models\Histori;
 use App\Models\Santri;
 use App\Models\Setoran; // Pastikan Anda mengimpor model Setoran
 use Illuminate\Http\Request;
+use carbon\Carbon;
 
 class HistoriController extends Controller
 {
@@ -115,7 +116,7 @@ class HistoriController extends Controller
     }
 
     // Cek status otomatis dengan method determineStatus
-    $status = Histori::determineStatus($totalAyatDisetorkan, $jumlahAyatTarget, $target->tgl_target, $tglSetoranTerakhir);
+    $status = Histori::determineStatus($totalAyatDisetorkan, $jumlahAyatTarget, $tglTarget = Carbon::parse($target->tgl_target), $tglSetoranTerakhir);
 
     $persentaseBaru = number_format(($totalAyatDisetorkan / max(1, $jumlahAyatTarget)) * 100, 2);
 
@@ -123,7 +124,7 @@ class HistoriController extends Controller
     $santriId = $target->id_santri;
 
     Histori::updateOrCreate(
-        ['id_target' => $target->id_target, 'id_santri' => $santriId],
+        ['id_target' => $target->id_target],
         [
             'status' => $status,
             'persentase' => $persentaseBaru,

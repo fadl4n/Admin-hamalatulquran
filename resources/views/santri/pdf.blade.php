@@ -107,7 +107,11 @@
     <h4>Data Ayah</h4>
     <table>
         <tr><th>Nama</th><td>{{ $ayah->nama ?? '-' }}</td></tr>
-        <tr><th>Status</th><td>{{ match ($ayah->status) {1 => 'Hidup', 2 => 'Meninggal', default => '-'} }}</td></tr>
+<tr>
+    <th>Status</th>
+    <td>{{ [1 => 'Hidup', 2 => 'Meninggal'][$ayah?->status] ?? '-' }}</td>
+</tr>
+
         <tr><th>Pekerjaan</th><td>{{ $ayah->pekerjaan ?? '-' }}</td></tr>
         <tr><th>Pendidikan</th><td>{{ $ayah->pendidikan ?? '-' }}</td></tr>
         <tr><th>No. Telepon</th><td>{{ $ayah->no_telp ?? '-' }}</td></tr>
@@ -120,7 +124,11 @@
     <h4>Data Ibu</h4>
     <table>
         <tr><th>Nama</th><td>{{ $ibu->nama ?? '-' }}</td></tr>
-        <tr><th>Status</th><td>{{ match ($ibu->status) {1 => 'Hidup', 2 => 'Meninggal', default => '-'} }}</td></tr>
+<tr>
+    <th>Status</th>
+    <td>{{ [1 => 'Hidup', 2 => 'Meninggal'][$ibu?->status] ?? '-' }}</td>
+</tr>
+
         <tr><th>Pekerjaan</th><td>{{ $ibu->pekerjaan ?? '-' }}</td></tr>
         <tr><th>Pendidikan</th><td>{{ $ibu->pendidikan ?? '-' }}</td></tr>
         <tr><th>No. Telepon</th><td>{{ $ibu->no_telp ?? '-' }}</td></tr>
@@ -133,7 +141,12 @@
     <h4>Data Wali</h4>
     <table>
         <tr><th>Nama</th><td>{{ $wali->nama ?? '-' }}</td></tr>
-        <tr><th>Status</th><td>{{ match ($wali->status) {1 => 'Hidup', 2 => 'Meninggal', default => '-'} }}</td></tr>
+<tr>
+    <th>Status</th>
+    <td>{{ [1 => 'Hidup', 2 => 'Meninggal'][$wali
+    ?->status] ?? '-' }}</td>
+</tr>
+
         <tr><th>Pekerjaan</th><td>{{ $wali->pekerjaan ?? '-' }}</td></tr>
         <tr><th>Pendidikan</th><td>{{ $wali->pendidikan ?? '-' }}</td></tr>
         <tr><th>No. Telepon</th><td>{{ $wali->no_telp ?? '-' }}</td></tr>

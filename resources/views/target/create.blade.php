@@ -108,7 +108,7 @@
                                 {{-- Tombol Aksi --}}
                                 <div class="form-group mt-4 d-flex justify-content-end">
                                     <button type="submit" class="btn btn-primary" style="margin-right: 5px;">Simpan</button>
-                                    <button type="submit" class="btn btn-info" name="continue" value="true" id="btnContinue" style="margin-right: 5px;">Continue</button>
+                                    <button type="submit" class="btn btn-info" name="continue" value="true" id="btnContinue" style="margin-right: 5px;">Lanjut</button>
                                     <a href="{{ route('target.index') }}" class="btn btn-secondary" style="margin-right: 5px;">Batal</a>
                                 </div>
                             </form>
@@ -185,7 +185,7 @@
             }
         });
     });
-       
+
     </script>
 
 @endsection
