@@ -21,8 +21,10 @@ class Histori extends Model
         'id_santri',
         'id_surat',
         'id_kelas',
-        'nilai',
         'persentase',
+        'status',
+        'nilai',
+        'nilai_remedial',
     ];
 
     // Relasi ke Target

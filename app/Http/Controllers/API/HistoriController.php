@@ -24,6 +24,7 @@ class HistoriController extends Controller
             return [
                 'nama' => optional($item->santri)->nama,
                 'kelas' => optional(optional($item->santri)->kelas)->nama_kelas,
+                'id_surat' => optional($item->surat)->id_surat,
                 'nama_surat' => optional($item->surat)->nama_surat,
                 'ayat' => optional($item->surat) ? $item->surat->jumlah_ayat . ' ayat' : '-',
                 'persentase' => $item->persentase . '%',
@@ -55,11 +56,12 @@ class HistoriController extends Controller
                     'id_histori' => $h->id_histori,
                     'id_setoran' => $h->id_setoran,
                     'id_target' => $h->id_target,
+                    'id_surat' => $h->surat->id_surat,
                     'nama_surat' => $h->target->surat->nama_surat ?? '-',
                     'jumlah_ayat' => $h->target->jumlah_ayat_target,
                     'persentase' => $h->persentase,
                     'status' => $h->status,
-                    'nilai' => $h->nilai,
+                    'nilai' => $h->nilai ?? 0,
                 ];
             });
 

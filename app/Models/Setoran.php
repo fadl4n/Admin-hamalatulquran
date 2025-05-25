@@ -16,7 +16,6 @@ class Setoran extends Model
     protected $fillable = [
         'id_santri',
         'tgl_setoran',
-        'status',
         'id_kelas',
         'keterangan',
         'id_surat',
@@ -66,11 +65,10 @@ class Setoran extends Model
         return $this->hasMany(Target::class, 'id_target', 'id_target');
     }
 
-
     public function getPersentaseAttribute()
     {
         // Ambil semua target terkait dengan setoran ini
-        $target = $this->target;
+        $target = $this->target->first();
 
         if (!$target) {
             return 0; // Jika tidak ada target, persentase 0%
@@ -78,7 +76,6 @@ class Setoran extends Model
 
         // Cek semua target dengan id_santri dan id_group yang sama di tabel target
         $matchingtarget = Target::where('id_santri', $target->id_santri)
-            ->where('id_group', $target->id_group)
             ->get();
 
         // Hitung total ayat yang perlu dicapai

@@ -39,7 +39,7 @@ class SetoranController extends Controller
             $santri = $groupSetorans->first()->santri;
             $kelasList = $groupSetorans->pluck('kelas.nama_kelas')->unique()->implode(', ');
             $averagePersentase = round($groupSetorans->avg('persentase'), 2);
-            $status = $averagePersentase >= 100 ? 'Selesai' : 'Proses';
+
 
             $result[] = [
                 'id_santri' => $idSantri,
@@ -48,7 +48,6 @@ class SetoranController extends Controller
                 'nisn' => $santri->nisn,
                 'kelas' => $kelasList,
                 'target' => 'Target ' . ($groupSetorans->first()->target?->id_group ?? '-'),
-                'status' => $status,
                 'persentase' => $averagePersentase,
             ];
         }
@@ -142,7 +141,6 @@ class SetoranController extends Controller
         // Hitung persentase dan status
         $totalAyat = max(1, $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1);
         $persentase = number_format((($request->jumlah_ayat_end - $request->jumlah_ayat_start + 1) / $totalAyat) * 100, 2);
-        $status = $persentase >= 100 ? '1' : '0';
 
         $setoran = Setoran::create([
             'id_target' => $target->id_target,
@@ -153,7 +151,6 @@ class SetoranController extends Controller
             'jumlah_ayat_start' => $request->jumlah_ayat_start,
             'jumlah_ayat_end' => $request->jumlah_ayat_end,
             'tgl_setoran' => $request->tgl_setoran,
-            'status' => $status,
             'persentase' => $persentase,
             'nilai' => $request->nilai,
             'keterangan' => $request->keterangan,
@@ -162,13 +159,6 @@ class SetoranController extends Controller
         // Update status semua setoran jika sudah selesai
         $setorans = Setoran::where('id_target', $target->id_target)->get();
         $totalAyatTercapai = $setorans->sum(fn($s) => $s->jumlah_ayat_end - $s->jumlah_ayat_start + 1);
-
-        if ($totalAyatTercapai >= $target->jumlah_ayat_target) {
-            foreach ($setorans as $s) {
-                $s->status = '1';
-                $s->save();
-            }
-        }
 
         // Update atau buat histori
         $histori = Histori::firstOrNew([
@@ -182,7 +172,6 @@ class SetoranController extends Controller
         $histori->persentase = $persentaseBaru;
         $histori->id_setoran = $setoran->id_setoran;
         $histori->ayat = $totalAyatTercapai;
-
         if ($request->tgl_setoran > $target->tgl_target) {
             $histori->status = 3;
         } elseif ($persentaseBaru >= 99.99) {
@@ -289,12 +278,10 @@ class SetoranController extends Controller
 
         $totalAyat = $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal;
         $persentase = (($request->jumlah_ayat_end - $request->jumlah_ayat_start + 1) / $totalAyat) * 100;
-        $status = $persentase >= 100 ? '1' : '0';
 
         $setoran->update([
             'id_santri' => $request->id_santri,
             'tgl_setoran' => $request->tgl_setoran,
-            'status' => $status,
             'id_kelas' => $request->id_kelas,
             'id_target' => $target->id_target,
             'id_surat' => $request->id_surat,
@@ -317,18 +304,10 @@ class SetoranController extends Controller
         $totalAyatTarget = max(1, $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1);
         $persentaseBaru = number_format(($totalAyatDisetorkan / $totalAyatTarget) * 100, 2);
 
-        $statusHistori = 1;
-        if ($request->tgl_setoran > $target->tgl_target) {
-            $statusHistori = 3;
-        } elseif ($persentaseBaru >= 99.99) {
-            $statusHistori = 2;
-        }
-
         if ($histori) {
             $histori->update([
                 'persentase' => $persentaseBaru,
                 'id_setoran' => $setoran->id_setoran,
-                'status' => $statusHistori,
             ]);
         } else {
             Histori::create([
@@ -337,7 +316,6 @@ class SetoranController extends Controller
                 'id_surat' => $request->id_surat,
                 'persentase' => $persentaseBaru,
                 'id_setoran' => $setoran->id_setoran,
-                'status' => $statusHistori,
             ]);
         }
 
@@ -364,7 +342,7 @@ class SetoranController extends Controller
         }
 
         // Ambil relasi target (pakai ->first() jika relasi-nya many)
-        $target = method_exists($setoran, 'targets') ? $setoran->target->first() : $setoran->target;
+        $target = method_exists($setoran, 'target') ? $setoran->target->first() : $setoran->target;
 
         // Hapus setoran
         $setoran->delete();
@@ -377,18 +355,10 @@ class SetoranController extends Controller
             $totalAyat = max(1, $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1);
             $persentaseBaru = number_format(($totalAyatDisetorkan / $totalAyat) * 100, 2);
 
-            $statusHistori = 0;
-            if ($totalAyatDisetorkan >= $totalAyat) {
-                $statusHistori = 2;
-            } elseif ($totalAyatDisetorkan > 0) {
-                $statusHistori = 1;
-            }
-
             // Update histori jika masih ada
             if ($histori) {
                 $histori->update([
                     'persentase' => $persentaseBaru,
-                    'status' => $statusHistori,
                 ]);
             }
 
@@ -397,12 +367,6 @@ class SetoranController extends Controller
             $totalAyatTercapai = $setoransTersisa->sum(function ($item) {
                 return $item->jumlah_ayat_end - $item->jumlah_ayat_start + 1;
             });
-
-            $statusBaru = ($totalAyatTercapai >= $totalAyat) ? 1 : 0;
-
-            foreach ($setoransTersisa as $item) {
-                $item->update(['status' => $statusBaru]);
-            }
         }
 
         return response()->json(['success' => true, 'message' => 'Setoran dan histori terkait berhasil dihapus.']);
@@ -423,7 +387,7 @@ class SetoranController extends Controller
         }
 
         $setorans = Setoran::where('id_santri', $idSantri)
-            ->whereHas('targets', function ($query) use ($idGroup) {
+            ->whereHas('target', function ($query) use ($idGroup) {
                 $query->where('id_group', $idGroup);
             })->get();
 
@@ -432,7 +396,6 @@ class SetoranController extends Controller
             if ($histori) {
                 $histori->update([
                     'persentase' => 0,
-                    'status' => 0,
                     'id_setoran' => null,
                 ]);
             }
@@ -454,7 +417,7 @@ class SetoranController extends Controller
         }
 
         // Ambil data setoran berdasarkan ID Santri dan ID Group (misalnya idGroup disimpan di setoran)
-        $setorans = Setoran::with(['santri', 'kelas', 'pengajar', 'targets', 'surat'])
+        $setorans = Setoran::with(['santri', 'kelas', 'pengajar', 'target', 'surat'])
             ->whereHas('santri', function ($query) use ($idSantri) {
                 $query->where('id_santri', $idSantri);
             })
@@ -564,7 +527,6 @@ class SetoranController extends Controller
         $surats = $target->map(function ($target) use ($santri_id) {
             $setoran = Setoran::where('id_target', $target->id_target)
                 ->where('id_santri', $santri_id)
-                ->where('status', 1)
                 ->first();
 
             if (!$setoran) {

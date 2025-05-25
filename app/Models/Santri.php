@@ -16,11 +16,11 @@ class Santri extends Model
     protected $fillable = [
         'nama',
         'nisn',
+        'tgl_lahir',
         'tempat_lahir',
+        'email',
         'password',
         'foto_santri',
-        'email',
-        'tgl_lahir',
         'alamat',
         'angkatan',
         'id_kelas',
@@ -47,14 +47,17 @@ class Santri extends Model
     {
         return $this->hasMany(Target::class, 'id_santri'); // Relasi ke target berdasarkan id_santri
     }
-     public function target()
+    public function target()
     {
         return $this->hasMany(Target::class, 'id_santri'); // Relasi ke target berdasarkan id_santri
     }
-
-
     public function setoran()
     {
         return $this->hasMany(Setoran::class);
+    }
+
+    public function histori()
+    {
+        return $this->hasMany(Histori::class);
     }
 }

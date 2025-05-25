@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\SantriResource;
 use Illuminate\Http\Request;
 use App\Models\Santri;
 use App\Models\Target;
+use App\Models\Histori;
 use Exception;
 
 class SantriController extends Controller
@@ -47,7 +49,7 @@ class SantriController extends Controller
     {
         try {
             // Ambil data santri dengan relasi ke kelas dan target
-            $santri = Santri::with(['kelas', 'targets'])->get();
+            $santri = Santri::with(['kelas', 'target'])->get();
 
             // Format foto santri
             $this->formatFotoSantri($santri);
@@ -55,7 +57,7 @@ class SantriController extends Controller
             // Menambahkan id_group ke setiap santri berdasarkan target yang ada
             $santri->map(function ($item) {
                 // Ambil id_group dari target pertama yang terhubung dengan santri
-                $item->id_group = $item->targets->first()->id_group ?? null;
+                $item->id_group = $item->target->first()->id_group ?? null;
             });
 
             return response()->json([
@@ -98,7 +100,7 @@ class SantriController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Berhasil mengambil data santri',
-                'data' => $santri
+                'data' => new SantriResource($santri)
             ], 200);
         } catch (Exception $e) {
             return response()->json([
@@ -138,6 +140,49 @@ class SantriController extends Controller
             ], 500);
         }
     }
+
+    public function getLaporanDetail($id)
+    {
+        $santri = Santri::with('kelas')->findOrFail($id);
+
+        // Data target hafalan baru + nilai rata-rata setoran tiap target
+        $targets = Target::where('id_santri', $id)
+            ->with(['surat'])
+            ->withAvg('setoran as nilai', 'nilai')
+            ->get()
+            ->map(function ($target) {
+                $latestHistori = $target->histori->sortByDesc('created_at')->first();
+                $persentase = $latestHistori?->persentase ?? 0;
+                return [
+                    'id_target' => $target->id_target,
+                    'id_surat' => $target->id_surat,
+                    'nama_surat' => $target->surat->nama_surat ?? '-',
+                    'nilai' => ($persentase == 100) ? round($target->nilai ?? 0) : 0,
+                ];
+            });
+
+        // Data murajaah dari histori (anggap histori punya kolom nilai juga)
+        $murajaah = Histori::where('id_santri', $id)
+            ->with('surat')
+            ->get()
+            ->map(function ($histori) {
+                return [
+                    'id_histori' => $histori->id_histori,
+                    'id_target' => $histori->id_target,
+                    'id_surat' => $histori->id_surat,
+                    'nama_surat' => $histori->surat->nama_surat ?? '-',
+                    'persentase' => $histori->persentase,
+                    'nilai' => $histori->nilai ?? 0,
+                ];
+            });
+
+        return response()->json([
+            'santri' => new SantriResource($santri),
+            'targets' => $targets,
+            'murojaah' => $murajaah,
+        ]);
+    }
+
     public function getGroupFromTarget($id)
     {
         $target = Target::where('id_santri', $id)->first();

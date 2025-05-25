@@ -58,7 +58,7 @@ Route::controller(SantriController::class)->group(function () {
     Route::get('/santri/jumlah-aktif', 'countAktif');
     Route::get('/santri/{id}', 'getSantriById');  // Get santri by ID
     Route::get('/santri/by-kelas/{id}', 'getSantriByKelas');  // Get santri by Kelas
-    Route::get('/santri/{id}/group', 'getGroupFromTarget'); // Get TargetGroup by IdSantri
+    Route::get('/nilai-santri/{id}', 'getLaporanDetail');
 });
 
 // Route untuk get semua pengajar & pengajar berdasarkan ID

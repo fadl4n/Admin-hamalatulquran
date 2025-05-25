@@ -51,60 +51,60 @@ class NilaiController extends Controller
     /**
      * Menampilkan detail nilai hafalan dan muroja'ah untuk seorang santri berdasarkan id_target.
      */
-   public function show($idSantri, $idtarget,  Request $request)
-{
-    $santri = Santri::findOrFail($idSantri);
+    public function show($idSantri, $idtarget,  Request $request)
+    {
+        $santri = Santri::findOrFail($idSantri);
 
-  $searchSurat = $request->query('search_surat');
+        $searchSurat = $request->query('search_surat');
 
-    // Query Target berdasarkan id_santri
-    $targets = Target::where('id_santri', $idSantri)
-        ->when($searchSurat, function ($query, $searchSurat) {
-            // Filter surat dengan relasi 'surat' dan kolom 'nama_surat' LIKE search
-            $query->whereHas('surat', function($q) use ($searchSurat) {
-                $q->where('nama_surat', 'like', "%$searchSurat%");
-            });
-        })
-        ->get();
+        // Query Target berdasarkan id_santri
+        $targets = Target::where('id_santri', $idSantri)
+            ->when($searchSurat, function ($query, $searchSurat) {
+                // Filter surat dengan relasi 'surat' dan kolom 'nama_surat' LIKE search
+                $query->whereHas('surat', function ($q) use ($searchSurat) {
+                    $q->where('nama_surat', 'like', "%$searchSurat%");
+                });
+            })
+            ->get();
 
-    $hafalan = [];
-    $murojaah = [];
+        $hafalan = [];
+        $murojaah = [];
 
-    foreach ($targets as $target) {
-        $namaSurat = $target->surat->nama_surat;
+        foreach ($targets as $target) {
+            $namaSurat = $target->surat->nama_surat;
 
-        // Rata-rata nilai hafalan dari setoran
-        $nilaiHafalan = Setoran::where('id_target', $target->id_target)->avg('nilai');
+            // Rata-rata nilai hafalan dari setoran
+            $nilaiHafalan = Setoran::where('id_target', $target->id_target)->avg('nilai');
 
-        // Ambil ayat start-end dari setoran hafalan, ambil yang min dan max
-        $ayatHafalanStart = Setoran::where('id_target', $target->id_target)->min('jumlah_ayat_start');
-        $ayatHafalanEnd = Setoran::where('id_target', $target->id_target)->max('jumlah_ayat_end');
-        $ayatHafalan = ($ayatHafalanStart && $ayatHafalanEnd) ? "$ayatHafalanStart - $ayatHafalanEnd" : '-';
+            // Ambil ayat start-end dari setoran hafalan, ambil yang min dan max
+            $ayatHafalanStart = Setoran::where('id_target', $target->id_target)->min('jumlah_ayat_start');
+            $ayatHafalanEnd = Setoran::where('id_target', $target->id_target)->max('jumlah_ayat_end');
+            $ayatHafalan = ($ayatHafalanStart && $ayatHafalanEnd) ? "$ayatHafalanStart - $ayatHafalanEnd" : '-';
 
-        // Rata-rata nilai murojaah dari histori
-        $nilaiMurojaah = Histori::where('id_target', $target->id_target)->avg('nilai');
+            // Rata-rata nilai murojaah dari histori
+            $nilaiMurojaah = Histori::where('id_target', $target->id_target)->avg('nilai');
 
-        // Ayat murojaah dari target range jumlah_ayat_target_awal sampai jumlah_ayat_target
-    $ayatMurojaahStart = $target->jumlah_ayat_target_awal;
-    $ayatMurojaahEnd = $target->jumlah_ayat_target;
-    $ayatMurojaah = ($ayatMurojaahStart && $ayatMurojaahEnd) ? "$ayatMurojaahStart - $ayatMurojaahEnd" : '-';
+            // Ayat murojaah dari target range jumlah_ayat_target_awal sampai jumlah_ayat_target
+            $ayatMurojaahStart = $target->jumlah_ayat_target_awal;
+            $ayatMurojaahEnd = $target->jumlah_ayat_target;
+            $ayatMurojaah = ($ayatMurojaahStart && $ayatMurojaahEnd) ? "$ayatMurojaahStart - $ayatMurojaahEnd" : '-';
 
 
-        $hafalan[] = [
-            'surat' => $namaSurat,
-            'nilai' => number_format($nilaiHafalan ?? 0, 2),
-            'ayat'  => $ayatHafalan,
-        ];
+            $hafalan[] = [
+                'surat' => $namaSurat,
+                'nilai' => number_format($nilaiHafalan ?? 0, 2),
+                'ayat'  => $ayatHafalan,
+            ];
 
-        $murojaah[] = [
-            'surat' => $namaSurat,
-            'nilai' => number_format($nilaiMurojaah ?? 0, 2),
-            'ayat'  => $ayatMurojaah,
-        ];
+            $murojaah[] = [
+                'surat' => $namaSurat,
+                'nilai' => number_format($nilaiMurojaah ?? 0, 2),
+                'ayat'  => $ayatMurojaah,
+            ];
+        }
+
+        return view('nilai.detail', compact('hafalan', 'murojaah', 'idtarget', 'santri'));
     }
-
-    return view('nilai.detail', compact('hafalan', 'murojaah', 'idtarget', 'santri'));
-}
 
     public function fnGetData(Request $request)
     {
@@ -144,6 +144,4 @@ class NilaiController extends Controller
             'recordsFiltered' => $santris->total() // Total records after filter
         ]);
     }
-
-
 }

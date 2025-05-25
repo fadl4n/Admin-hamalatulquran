@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use \Firebase\JWT\JWT;
+use Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -58,6 +58,10 @@ class AuthController extends Controller
             ], 400);
         }
 
+        // dd(env('JWT_SECRET'));
+        // Encode token
+        $key = env('JWT_SECRET');
+        // var_dump($key);
         // TOKEN PAYLOAD
         $payload = [
             'iss' => "hamalatulquran-app",
@@ -67,9 +71,12 @@ class AuthController extends Controller
             'exp' => time() + 60 * 60 * 24,
         ];
 
-        // Encode token
-        $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
-
+        try {
+            // $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
+            $token = JWT::encode($payload, $key, 'HS256');
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'JWT encode error: ' . $e->getMessage()], 500);
+        }
         return response()->json([
             'success' => true,
             'message' => 'Login success',

@@ -90,7 +90,9 @@ class TargetController extends Controller
 
     public function getAllTargetBySantri($id_santri)
     {
-        $target = Target::with(['surat', 'santri', 'pengajar', 'histori'])->where('id_santri', $id_santri)->get();
+        $target = Target::with(['surat', 'santri', 'pengajar', 'histori', 'setoran'])
+            ->where('id_santri', $id_santri)
+            ->get();
 
         if ($target->isEmpty()) {
             return response()->json([
@@ -101,6 +103,10 @@ class TargetController extends Controller
 
         $result = $target->map(function ($target) {
             $latestHistori = $target->histori->sortByDesc('id_histori')->first(); // ambil histori terakhir
+            $persentase = $latestHistori ? $latestHistori->persentase : null;
+
+            $avgNilai = ($persentase == 100)
+                ? round($target->setoran->avg('nilai') ?? 0, 2) : 0;
 
             return [
                 'id_target' => $target->id_target,
@@ -111,14 +117,14 @@ class TargetController extends Controller
                 'nama_surat' => optional($target->surat)->nama_surat ?? 'Tidak Ditemukan',
                 'ayat_awal' => $target->jumlah_ayat_target_awal ?? '0',
                 'ayat_akhir' => $target->jumlah_ayat_target ?? '0',
-                'jumlah_ayat' => optional($target->surat)->jumlah_ayat ?? '-',
+                'jumlah_ayat' => $target->jumlah_ayat_target,
                 'tgl_mulai' => $target->tgl_mulai ?? '0',
                 'tgl_target' => $target->tgl_target ?? '0',
                 // 'persentase' => $target->histori->avg('persentase'),
-                'persentase' => $latestHistori ? $latestHistori->persentase : null,
+                'persentase' => $persentase,
+                'nilai' => $avgNilai,
             ];
         });
-
 
         return response()->json([
             'success' => true,
@@ -165,13 +171,13 @@ class TargetController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id_santri' => 'required|exists:santris,id_santri',
-            'id_surat' => 'required|exists:surats,id_surat',
             'id_kelas' => 'required|exists:kelas,id_kelas',
+            'id_surat' => 'required|exists:surats,id_surat',
             'id_pengajar' => 'required|exists:pengajars,id_pengajar',
             'tgl_mulai' => 'required|date',
+            'tgl_target' => 'required|date',
             'jumlah_ayat_target_awal' => 'required|integer|min:1',
             'jumlah_ayat_target' => 'required|integer|min:1',
-            'tgl_target' => 'required|date',
             'id_group' => 'nullable|integer'
         ]);
 
@@ -218,9 +224,9 @@ class TargetController extends Controller
             'id_kelas' => $request->id_kelas,
             'id_surat' => $request->id_surat,
             'tgl_mulai' => $request->tgl_mulai,
+            'tgl_target' => $request->tgl_target,
             'jumlah_ayat_target_awal' => $request->jumlah_ayat_target_awal,
             'jumlah_ayat_target' => $request->jumlah_ayat_target,
-            'tgl_target' => $request->tgl_target,
             'id_group' => $request->id_group,
         ]);
 
@@ -232,17 +238,17 @@ class TargetController extends Controller
 
     public function update(Request $request, $id_target)
     {
-        $authHeader = $request->header('Authorization');
-        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
-            return response()->json(['success' => false, 'message' => 'Token tidak ditemukan'], 401);
-        }
+        // $authHeader = $request->header('Authorization');
+        // if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+        //     return response()->json(['success' => false, 'message' => 'Token tidak ditemukan'], 401);
+        // }
 
-        $token = str_replace('Bearer ', '', $authHeader);
-        $user = $this->getUserFromToken($token);
+        // $token = str_replace('Bearer ', '', $authHeader);
+        // $user = $this->getUserFromToken($token);
 
-        if (!$user || $user['role'] !== 'pengajar') {
-            return response()->json(['success' => false, 'message' => 'Hanya pengajar yang dapat mengubah target'], 403);
-        }
+        // if (!$user || $user['role'] !== 'pengajar') {
+        //     return response()->json(['success' => false, 'message' => 'Hanya pengajar yang dapat mengubah target'], 403);
+        // }
 
         $target = Target::findOrFail($id_target);
 
@@ -251,9 +257,9 @@ class TargetController extends Controller
             'id_kelas' => 'required|exists:kelas,id_kelas',
             'id_surat' => 'required|exists:surats,id_surat',
             'tgl_mulai' => 'required|date',
+            'tgl_target' => 'required|date',
             'jumlah_ayat_target_awal' => 'required|integer|min:1',
             'jumlah_ayat_target' => 'required|integer|min:1',
-            'tgl_target' => 'required|date',
             'id_group' => 'nullable|integer'
         ]);
 
@@ -300,9 +306,9 @@ class TargetController extends Controller
             'id_kelas' => $request->id_kelas,
             'id_surat' => $request->id_surat,
             'tgl_mulai' => $request->tgl_mulai,
+            'tgl_target' => $request->tgl_target,
             'jumlah_ayat_target_awal' => $request->jumlah_ayat_target_awal,
             'jumlah_ayat_target' => $request->jumlah_ayat_target,
-            'tgl_target' => $request->tgl_target,
             'id_group' => $request->id_group,
         ]);
 
@@ -330,17 +336,17 @@ class TargetController extends Controller
     }
     public function destroy(Request $request, $id_target)
     {
-        $authHeader = $request->header('Authorization');
-        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
-            return response()->json(['success' => false, 'message' => 'Token tidak ditemukan'], 401);
-        }
+        // $authHeader = $request->header('Authorization');
+        // if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+        //     return response()->json(['success' => false, 'message' => 'Token tidak ditemukan'], 401);
+        // }
 
-        $token = str_replace('Bearer ', '', $authHeader);
-        $user = $this->getUserFromToken($token);
+        // $token = str_replace('Bearer ', '', $authHeader);
+        // $user = $this->getUserFromToken($token);
 
-        if (!$user || $user['role'] !== 'pengajar') {
-            return response()->json(['success' => false, 'message' => 'Hanya pengajar yang dapat menghapus target'], 403);
-        }
+        // if (!$user || $user['role'] !== 'pengajar') {
+        //     return response()->json(['success' => false, 'message' => 'Hanya pengajar yang dapat menghapus target'], 403);
+        // }
 
         try {
             $target = Target::findOrFail($id_target);
