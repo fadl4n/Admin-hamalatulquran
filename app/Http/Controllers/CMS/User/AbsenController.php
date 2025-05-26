@@ -29,6 +29,7 @@ public function index(Request $request)
             ->addColumn('action', function ($row) {
                 return '<a href="'.route('absen.detail', $row->id_kelas).'" class="btn btn-info btn-sm" title="Lihat Detail"><i class="fas fa-eye"></i></a>';
             })
+            
           ->filterColumn('jumlah_santri', function($query, $keyword) {
     if (is_numeric($keyword)) {
         $query->havingRaw("santri_count = ?", [(int)$keyword]);
@@ -51,55 +52,58 @@ public function index(Request $request)
    public function create(Request $request)
 {
     $kelasId = $request->input('id_kelas');
-    $kelas = Kelas::findOrFail($kelasId); // Pastikan kelas valid
+    $kelas = Kelas::findOrFail($kelasId); // Validasi kelas
+
+    // Ambil semua santri berdasarkan kelas
+    $santris = Santri::where('id_kelas', $kelasId)->get();
 
     return view('absen.create', [
         'kelas' => $kelas,
+        'santris' => $santris,
     ]);
 }
 
 public function store(Request $request)
 {
-    $validator = Validator::make($request->all(), [
-        'kelas_id'   => 'required|exists:kelas,id_kelas',
-        'santri_id'  => 'required|exists:santris,id_santri',
-        'tgl_absen'  => 'required|date',
-        'status'     => 'required|in:1,2,3,4',
+    $request->validate([
+        'kelas_id'    => 'required|exists:kelas,id_kelas',
+        'tgl_absen'   => 'required|date',
+        'santri_id'   => 'required|array',
+        'santri_id.*' => 'exists:santris,id_santri',
+        'status'      => 'required|array',
+        'status.*'    => 'in:1,2,3,4',
     ]);
 
-    if ($validator->fails()) {
-        return redirect()->back()->withErrors($validator)->withInput();
+    $jumlah = count($request->santri_id);
+    $berhasil = 0;
+
+    for ($i = 0; $i < $jumlah; $i++) {
+        $idSantri = $request->santri_id[$i];
+        $status = $request->status[$i];
+
+        $cek = Absen::where('id_santri', $idSantri)
+            ->whereDate('tgl_absen', $request->tgl_absen)
+            ->exists();
+
+        if (!$cek) {
+            $santri = Santri::find($idSantri);
+
+            Absen::create([
+                'id_kelas'  => $request->kelas_id,
+                'id_santri' => $santri->id_santri,
+                'nisn'      => $santri->nisn,
+                'tgl_absen' => $request->tgl_absen,
+                'status'    => $status,
+            ]);
+
+            $berhasil++;
+        }
     }
 
-    // Cek apakah sudah ada absensi pada tanggal tersebut
-    $exists = Absen::where('id_santri', $request->santri_id)
-        ->whereDate('tgl_absen', $request->tgl_absen)
-        ->exists();
-
-    if ($exists) {
-        return redirect()->back()->with('error', 'Absensi sudah ada untuk tanggal tersebut.')->withInput();
-    }
-
-    $santri = Santri::findOrFail($request->santri_id);
-
-    Absen::create([
-        'id_kelas'  => $request->kelas_id,
-        'id_santri' => $santri->id_santri,
-        'nisn'      => $santri->nisn,
-        'tgl_absen' => $request->tgl_absen,
-        'status'    => $request->status,
-    ]);
-
-    if ($request->action === 'continue') {
-        return redirect()
-            ->route('absen.create', ['id_kelas' => $request->kelas_id])
-            ->with('success', 'Absensi disimpan. Tambah lagi.');
-    }
-
-   return redirect()->route('absen.detail', ['id' => $request->kelas_id])
-    ->with('success', 'Absensi berhasil disimpan.');
-
+    return redirect()->route('absen.detail', ['id' => $request->kelas_id])
+        ->with('success', "$berhasil absensi berhasil disimpan.");
 }
+
 
 public function edit($id)
 {
