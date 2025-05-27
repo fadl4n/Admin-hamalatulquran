@@ -51,7 +51,9 @@
                                     <td>{{ $i + 1 }}</td>
                                     <td>{{ $santri->nama }}</td>
                                     <td>{{ $santri->nisn }}</td>
-                                    <td>{{ $absen?->tgl_absen ? \Carbon\Carbon::parse($absen->tgl_absen)->format('d-m-Y') : '-' }}</td>
+ <td>
+                {{ $absen ? \Carbon\Carbon::parse($absen->tgl_absen)->format('d-m-Y') : \Carbon\Carbon::parse($tanggal)->format('d-m-Y') }}
+            </td>
                                     <td>{{ $statusText }}</td>
                                     <td>
                                         <a href="{{ route('absen.edit', ['id' => $absen->id ?? 0]) }}"
