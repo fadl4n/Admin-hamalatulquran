@@ -7,6 +7,7 @@ use App\Models\Histori;
 use App\Models\Santri;
 use App\Models\Setoran; // Pastikan Anda mengimpor model Setoran
 use Illuminate\Http\Request;
+use carbon\Carbon;
 
 class HistoriController extends Controller
 {
@@ -61,15 +62,20 @@ class HistoriController extends Controller
             ->addColumn('nama', fn($histori) => $histori->santri->nama ?? '-')
             ->addColumn('kelas', fn($histori) => $histori->santri->kelas->nama_kelas ?? '-')
             ->addColumn('nama_surat', fn($histori) => $histori->surat->nama_surat ?? '-')
-            ->addColumn('jumlah_ayat_start', fn($histori) => $histori->target->setoran()->min('jumlah_ayat_start') ?? 0)
-            ->addColumn('jumlah_ayat_end', fn($histori) => $histori->target->setoran()->max('jumlah_ayat_end') ?? 0)
-            ->addColumn('ayat', fn($histori) => $histori->target->setoran()->min('jumlah_ayat_start') . ' - ' . $histori->target->setoran()->max('jumlah_ayat_end'))
+            ->addColumn('jumlah_ayat_start', fn($histori) => $histori->targets->setoran()->min('jumlah_ayat_start') ?? 0)
+            ->addColumn('jumlah_ayat_end', fn($histori) => $histori->targets->setoran()->max('jumlah_ayat_end') ?? 0)
+            ->addColumn('ayat', fn($histori) => $histori->targets->setoran()->min('jumlah_ayat_start') . ' - ' . $histori->targets->setoran()->max('jumlah_ayat_end'))
             ->addColumn('status', fn($histori) => $histori->status)
             ->addColumn('persentase', function ($histori) {
-                $totalAyat = max(1, $histori->target->jumlah_ayat_target - $histori->target->jumlah_ayat_target_awal + 1);
-                $ayatEnd = $histori->target->setoran()->max('jumlah_ayat_end');
+                $totalAyat = max(1, $histori->targets->jumlah_ayat_target - $histori->targets->jumlah_ayat_target_awal + 1);
+                $ayatEnd = $histori->targets->setoran()->max('jumlah_ayat_end');
                 return round(($ayatEnd / $totalAyat) * 100) . '%';
             })
+            ->filterColumn('nama_kelas', function ($query, $keyword) {
+            $query->whereHas('kelas', function ($q) use ($keyword) {
+                $q->where('nama_kelas', 'like', "%$keyword%");
+            });
+        })
             ->addColumn('nilai', fn($histori) => $histori->nilai)
             ->addColumn('aksi', function($histori) {
                 return '<button class="btn btn-primary btn-sm edit-nilai" data-id="' . $histori->id_target . '" data-nilai="' . $histori->nilai . '"><i class="fas fa-edit"></i></button>';
@@ -88,7 +94,7 @@ class HistoriController extends Controller
     ]);
 
     $histori = Histori::findOrFail($id);
-    $target = $histori->target;
+    $target = $histori->targets;
 
     if (!$target) {
         return redirect()->back()->with('error', 'Target tidak ditemukan.');
@@ -110,7 +116,7 @@ class HistoriController extends Controller
     }
 
     // Cek status otomatis dengan method determineStatus
-    $status = Histori::determineStatus($totalAyatDisetorkan, $jumlahAyatTarget, $target->tgl_target, $tglSetoranTerakhir);
+    $status = Histori::determineStatus($totalAyatDisetorkan, $jumlahAyatTarget, $tglTarget = Carbon::parse($target->tgl_target), $tglSetoranTerakhir);
 
     $persentaseBaru = number_format(($totalAyatDisetorkan / max(1, $jumlahAyatTarget)) * 100, 2);
 
@@ -118,7 +124,7 @@ class HistoriController extends Controller
     $santriId = $target->id_santri;
 
     Histori::updateOrCreate(
-        ['id_target' => $target->id_target, 'id_santri' => $santriId],
+        ['id_target' => $target->id_target],
         [
             'status' => $status,
             'persentase' => $persentaseBaru,

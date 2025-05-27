@@ -48,7 +48,7 @@ class HistoriController extends Controller
 
     public function showBySantri($id_santri)
     {
-        $histori = Histori::with(['target.surat'])
+        $histori = Histori::with(['targets.surat'])
             ->where('id_santri', $id_santri)
             ->get()
             ->map(function ($h) {
@@ -57,36 +57,45 @@ class HistoriController extends Controller
                     'id_setoran' => $h->id_setoran,
                     'id_target' => $h->id_target,
                     'id_surat' => $h->surat->id_surat,
-                    'nama_surat' => $h->target->surat->nama_surat ?? '-',
-                    'jumlah_ayat' => $h->target->jumlah_ayat_target,
+                    'nama_surat' => $h->targets->surat->nama_surat ?? '-',
+                    'jumlah_ayat' => $h->targets->jumlah_ayat_target,
                     'persentase' => $h->persentase,
+                    'tgl_target' => $h->targets->tgl_target,
                     'status' => $h->status,
                     'nilai' => $h->nilai ?? 0,
+                    'nilai_remedial' => $h->nilai_remedial ?? 0,
                 ];
             });
 
         return response()->json($histori);
     }
 
-    public function updateNilai(Request $request, $id_target)
+    public function inputNilai(Request $request, $id_histori)
     {
         $request->validate([
-            'nilai' => 'required|numeric|min:0',
+            'nilai' => 'required|numeric|min:0|max:100',
+            'nilai_remedial' => 'nullable|numeric|min:0|max:100',
         ]);
 
-        $lastHistori = Histori::where('id_target', $id_target)->orderBy('updated_at', 'desc')->first();
+        $histori = Histori::findOrFail($id_histori);
 
-        $histori = new Histori();
-        $histori->id_target = $id_target;
         $histori->nilai = $request->nilai;
-        $histori->persentase = $lastHistori->persentase ?? 0;
-        $histori->santri_id = $lastHistori->santri_id ?? null;
-        $histori->id_surat = $lastHistori->id_surat ?? null;
-        $histori->id_kelas = $lastHistori->id_kelas ?? null;
-        $histori->id_setoran = $lastHistori->id_setoran ?? null;
-        $histori->status = $lastHistori->status ?? 0;
-        
+
+        // Cuma update remedial kalau nilai di bawah KKM
+        if ($request->nilai <= 75) {
+            $histori->nilai_remedial = $request->nilai_remedial ?? null;
+        } else {
+            $histori->nilai_remedial = null; // Reset kalau sebelumnya ada nilai remedial
+        }
+
         $histori->save();
+
+        if ($request->has('nilai_remedial') && $request->nilai_remedial !== null) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Nilai remedial berhasil ditambahkan ke histori!'
+            ]);
+        }
 
         return response()->json(['success' => true, 'message' => 'Nilai berhasil ditambahkan ke histori!']);
     }
@@ -122,7 +131,7 @@ class HistoriController extends Controller
         ]);
 
         $histori = Histori::findOrFail($id);
-        $target = $histori->target;
+        $target = $histori->targets;
 
         if (!$target) {
             return response()->json(['success' => false, 'message' => 'Target tidak ditemukan.'], 404);

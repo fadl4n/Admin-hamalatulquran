@@ -10,6 +10,8 @@ use App\Http\Controllers\API\SetoranController;
 use App\Http\Controllers\API\HistoriController;
 use App\Http\Controllers\API\NilaiController;
 use App\Http\Controllers\API\ArtikelController;
+use App\Http\Controllers\API\AbsenController;
+use App\Http\Controllers\API\InfaqController;
 use App\Http\Middleware\CheckAuthFrontend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -103,8 +105,8 @@ Route::middleware([])->group(function () {
 Route::middleware([])->group(function () {
     Route::get('/histori', [HistoriController::class, 'index']);
     Route::get('/histori/santri/{id_santri}', [HistoriController::class, 'showBySantri']);
-    Route::post('/histori/update-nilai/{id_target}', [HistoriController::class, 'updateNilai']);
     Route::get('/histori/get-preview/{id_target}', [HistoriController::class, 'getPreview']);
+    Route::put('/histori/input-nilai/{id_histori}', [HistoriController::class, 'inputNilai']);
     Route::post('/histori/update/{id}', [HistoriController::class, 'updateHistori']);
 });
 
@@ -119,4 +121,21 @@ Route::middleware([])->group(function () {
     Route::get('/artikel', [ArtikelController::class, 'index']);
 });
 
+Route::middleware([])->group(function () {
+    Route::get('/absen', [AbsenController::class, 'index']);
+    Route::get('/absen/detail/{id_kelas}', [AbsenController::class, 'detail']);
+    Route::get('/absen/santri', [AbsenController::class, 'getSantriByKelas']);
+    Route::post('/absen', [AbsenController::class, 'store']);
+    Route::post('/absen/simpan', [AbsenController::class, 'simpan']);
+    Route::put('/absen/{id}', [AbsenController::class, 'update']);
+    Route::delete('/absen/{id}', [AbsenController::class, 'destroy']);
+});
+
+Route::middleware([])->group(function () {
+    Route::post('/infaq', [InfaqController::class, 'store']);
+    Route::get('/infaq', [InfaqController::class, 'index']);
+    Route::get('/infaq/{id}', [InfaqController::class, 'show']);
+    Route::put('/infaq/{id}', [InfaqController::class, 'update']);
+    Route::delete('/infaq/{id}', [InfaqController::class, 'destroy']);
+});
 // end checking auth

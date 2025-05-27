@@ -8,7 +8,7 @@
     <section class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-10 offset-md-1">
                     <div class="card">
                         <div class="card-body">
                             <form action="{{ route('artikel.store') }}" method="POST" enctype="multipart/form-data">
@@ -48,14 +48,17 @@
                                     <!-- Pratinjau Gambar -->
                                     <div class="mt-2">
                                         <img id="preview" src="{{ asset('assets/image/default-user.png') }}"
-                                            alt="Gambar Artikel" class="img-thumbnail" width="150"
+                                            alt="Gambar Artikel" class="img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;"
                                             onerror="this.onerror=null;this.src='{{ asset('assets/image/default.png') }}'">
                                     </div>
 
                                 </div>
 
-                                <button type="submit" class="btn btn-primary">Simpan</button>
-                                <a href="{{ route('artikel.index') }}" class="btn btn-secondary">Batal</a>
+                                {{-- Tombol Aksi --}}
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">Simpan</button>
+                                    <a href="{{ route('artikel.index') }}" class="btn btn-secondary ml-2">Batal</a>
+                                </div>
                             </form>
                         </div>
                     </div>

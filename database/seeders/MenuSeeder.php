@@ -75,40 +75,53 @@ class MenuSeeder extends Seeder
                 'sequence' => 5
             ],
             [
+                'group_menu_id' => 2,
+                'name' => 'Data Absen',
+                'url' => '/absen',
+                'sequence' => 6
+            ],
+             [
+                'group_menu_id' => 2,
+                'name' => 'Data Infaq',
+                'url' => '/infaq',
+                'sequence' => 7
+             ],
+
+            [
                 'group_menu_id' => 3,
                 'name' => 'Target',
                 'url' => '/target',
-                'sequence' =>  6
+                'sequence' =>  8
             ],
             [
                 'group_menu_id' => 3,
                 'name' => 'Setoran hafalan',
                 'url' => '/setoran',
-                'sequence' => 7
+                'sequence' => 9
             ],
             [
                 'group_menu_id' => 3,
-                'name' => 'Hisotri',
+                'name' => "Muroja'ah",
                 'url' => '/histori',
-                'sequence' =>  8
+                'sequence' =>  10
             ],
             [
                 'group_menu_id' => 3,
                 'name' => 'Nilai',
                 'url' => '/nilai',
-                'sequence' =>  9
+                'sequence' =>  11
             ],
             [
                 'group_menu_id' => 4,
                 'name' => 'Data Surat',
                 'url' => '/surat',
-                'sequence' => 11
+                'sequence' => 13
             ],
             [
                 'group_menu_id' => 5,
                 'name' => 'Artikel',
                 'url' => '/artikel',
-                'sequence' => 10
+                'sequence' => 12
             ],
 
 

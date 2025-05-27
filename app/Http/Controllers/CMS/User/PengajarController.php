@@ -48,7 +48,7 @@ class PengajarController extends Controller
             'tgl_lahir' => 'required|date',
             'foto_pengajar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'no_telp' => 'required|string|max:20',
-            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+            'jenis_kelamin' => 'required',
             'alamat' => 'required|string|max:255',
             'password' => 'required|string|min:6'
         ]);
@@ -127,7 +127,7 @@ class PengajarController extends Controller
             'tempat_lahir' => 'required|string|max:255',
             'tgl_lahir' => 'required|date',
             'foto_pengajar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+            'jenis_kelamin' => 'required',
             'alamat' => 'required|string|max:255',
             'password' => 'nullable|string|min:6',
         ]);
@@ -143,11 +143,8 @@ class PengajarController extends Controller
             return back()->withInput()->with('error', 'Email sudah digunakan oleh pengajar lain.');
         }
 
-        // Mapping jenis kelamin string ke integer
-        $jenisKelaminMap = [
-            'Laki-laki' => 1,
-            'Perempuan' => 2,
-        ];
+
+
 
         $data = $request->only([
             'nama',
@@ -160,7 +157,7 @@ class PengajarController extends Controller
             'alamat'
         ]);
 
-        $data['jenis_kelamin'] = $jenisKelaminMap[$request->jenis_kelamin] ?? null;
+   
 
         // Cek dan simpan foto baru kalau ada
         if ($request->hasFile('foto_pengajar')) {

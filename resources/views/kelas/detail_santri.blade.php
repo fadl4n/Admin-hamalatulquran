@@ -14,15 +14,16 @@
                         <div class="card-body">
                             <div class="mt-4 d-flex align-items-center justify-content-between">
                                 <div></div> <!-- kosong di kiri supaya judul bisa tepat di tengah -->
+
                                 <h4 class="mb-0">Data Santri</h4>
+
                                 <div>
                                     <a href="{{ route('santri.downloadPdf', $santri->id_santri) }}"
                                         class="btn btn-danger me-2">
                                         <i class="fas fa-print"></i> Cetak PDF
                                     </a>
-                                    <a href="{{ route('santri.index') }}" class="btn btn-outline-secondary">
-                                        Kembali
-                                    </a>
+                                    <a href="{{ url('kelas/' . $kelas->id_kelas . '/santri') }}"
+                                        class="btn btn-outline-secondary"> Kembali </a>
                                 </div>
                             </div>
                             <div class="row mt-4">
@@ -84,8 +85,6 @@
                                     </table>
                                 </div>
                             </div>
-
-
                             @php
                                 $ayah = $santri->keluarga->firstWhere('hubungan', 1);
                                 $ibu = $santri->keluarga->firstWhere('hubungan', 2);
@@ -109,7 +108,6 @@
                                         {{ [1 => 'Hidup', 2 => 'Meninggal'][$ayah?->status] ?? '-' }}
                                     </td>
                                 </tr>
-
                                 <tr>
                                     <th>Pekerjaan </th>
                                     <td>{{ $ayah->pekerjaan ?? '' }}</td>
@@ -140,7 +138,6 @@
                                 <div class="mt-4 d-flex justify-content-between align-items-center">
                                     <h4>Data Ibu:</h4>
                                 </div>
-
                                 <tr>
                                     <th width="40%">Nama Ibu</th>
                                     <td>{{ $ibu->nama ?? '' }}</td>
@@ -150,9 +147,7 @@
                                     <td>
                                         {{ [1 => 'Hidup', 2 => 'Meninggal'][$ibu?->status] ?? '-' }}
                                     </td>
-
                                 </tr>
-
                                 <tr>
                                     <th>Pekerjaan </th>
                                     <td>{{ $ibu->pekerjaan ?? '' }}</td>
@@ -222,15 +217,14 @@
                             </table>
 
                             <!-- Tombol Kembali di Bawah
-                                        <div class="mt-4">
-                                            <a href="{{ route('santri.index') }}" class="btn btn-outline-secondary"> Kembali
-                                            </a>
-                                        </div> -->
+                                <div class="mt-4">
+                                    <a href="{{ route('santri.index') }}" class="btn btn-outline-secondary"> Kembali
+                                    </a>
+                                </div> -->
                         </div>
                     </div>
                 </div>
             </div>
-
             <!-- Tabel Detail Nilai Santri -->
             <div class="row mt-5">
                 <div class="col-md-10 offset-md-1">
@@ -333,8 +327,6 @@
                     </div>
                 </div>
             </div>
-
-
 
 
         </div>

@@ -6,7 +6,7 @@
 @endsection
 
 @section('title page')
-    Histori Santri
+    Muroja'ah 
 @endsection
 
 @section('content')
@@ -17,7 +17,7 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="d-flex justify-content-between pb-2">
-                                <h5>Histori Santri</h5>
+                                <h5>Muroja'ah</h5>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-hover histori-list w-100">

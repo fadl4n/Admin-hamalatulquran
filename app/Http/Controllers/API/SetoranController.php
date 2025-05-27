@@ -26,7 +26,7 @@ class SetoranController extends Controller
     }
     public function index(Request $request)
     {
-        $setorans = Setoran::with(['santri', 'kelas', 'target'])
+        $setorans = Setoran::with(['santri', 'kelas', 'targets'])
             ->get()
             ->groupBy(function ($item) {
                 return $item->id_santri . '-' . $item->id_target;
@@ -47,7 +47,7 @@ class SetoranController extends Controller
                 'nama_santri' => $santri->nama,
                 'nisn' => $santri->nisn,
                 'kelas' => $kelasList,
-                'target' => 'Target ' . ($groupSetorans->first()->target?->id_group ?? '-'),
+                'target' => 'Target ' . ($groupSetorans->first()->targets?->id_group ?? '-'),
                 'persentase' => $averagePersentase,
             ];
         }
@@ -228,7 +228,7 @@ class SetoranController extends Controller
             ['id_santri', '=', $request->id_santri],
             ['id_kelas', '=', $request->id_kelas],
             ['id_surat', '=', $request->id_surat],
-            ['id_group', '=', $request->id_group ?? $setoran->target->id_group]
+            ['id_group', '=', $request->id_group ?? $setoran->targets->id_group]
         ])->first();
 
         if (!$target) {
@@ -342,7 +342,7 @@ class SetoranController extends Controller
         }
 
         // Ambil relasi target (pakai ->first() jika relasi-nya many)
-        $target = method_exists($setoran, 'target') ? $setoran->target->first() : $setoran->target;
+        $target = method_exists($setoran, 'target') ? $setoran->targets->first() : $setoran->targets;
 
         // Hapus setoran
         $setoran->delete();

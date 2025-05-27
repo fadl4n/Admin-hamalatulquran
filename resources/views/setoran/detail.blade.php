@@ -8,14 +8,20 @@
     <style>
         table.table {
             background-color: white;
-            color: black; /* Warna teks tabel hitam */
+            color: black;
         }
         table.table, table.table th, table.table td {
-            border: 1px solid black;
+            border: 1px solid #ccc;
         }
         thead.bg-navy {
-            background-color: white !important;
-            color: black !important; /* Warna teks pada thead hitam */
+            background-color: #f4f6f9 !important;
+            color: black !important;
+        }
+        td.keterangan {
+            max-width: 250px;
+            white-space: normal !important;
+            word-break: break-word;
+            vertical-align: top;
         }
     </style>
 @endsection
@@ -23,50 +29,76 @@
 @section('content')
 <section class="content">
     <div class="container-fluid">
+        <!-- Informasi Santri -->
         <div class="row">
-            <div class="col-12">
+            <div class="col-md-10 offset-md-1">
                 <div class="card">
                     <div class="card-body">
-                        <!-- Menampilkan informasi santri -->
-                        <h4>Santri: {{ optional($setorans->first()->santri)->nama }} | NISN: {{ optional($setorans->first()->santri)->nisn }}</h4>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>Detail Setoran Santri</h4>
+                            <a href="{{ route('setoran.index') }}" class="btn btn-outline-secondary">Kembali</a>
+                        </div>
 
-                        @php
-                            // Mengelompokkan setoran berdasarkan id_surat
-                            $setoransBySurat = $setorans->groupBy('id_surat');
-                        @endphp
+                        <!-- Data Santri -->
+                        <table class="table table-striped">
+                            <tr>
+                                <th width="30%">Nama</th>
+                                <td>{{ optional($setorans->first()->santri)->nama ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>NISN</th>
+                                <td>{{ optional($setorans->first()->santri)->nisn ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Kelas</th>
+                                <td>{{ optional($setorans->first()->santri?->kelas)->nama_kelas ?? '-' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        @foreach ($setoransBySurat as $idSurat => $setoranGroup)
-                            @php
-                                $surat = $setoranGroup->first()->surat;
-                            @endphp
+        <!-- Daftar Setoran -->
+        @php
+            $setoransBySurat = $setorans->groupBy('id_surat');
+        @endphp
 
-                            <h5 class="mt-4">Surah: {{ optional($surat)->nama_surat ?? 'Tidak Diketahui' }}</h5>
+        @foreach ($setoransBySurat as $idSurat => $setoranGroup)
+        <div class="row mt-4">
+            <div class="col-md-10 offset-md-1">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="mb-3">Surah: {{ optional($setoranGroup->first()->surat)->nama_surat ?? 'Tidak Diketahui' }}</h5>
 
-                            <!-- Tabel Setoran Detail berdasarkan id_surat -->
+                        <div class="table-responsive">
                             <table class="table table-bordered">
                                 <thead class="bg-navy disabled">
                                     <tr>
                                         <th>Ayat</th>
                                         <th>Nilai</th>
                                         <th>Pengajar</th>
+                                        <th>Tanggal</th>
                                         <th>Keterangan</th>
-                                        <th>Aksi</th>
+                                        <th class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($setoranGroup as $setoran)
                                         <tr>
                                             <td>
-                                                {{ $setoran->jumlah_ayat_start == $setoran->jumlah_ayat_end ? $setoran->jumlah_ayat_start : $setoran->jumlah_ayat_start . ' - ' . $setoran->jumlah_ayat_end }}
+                                                {{ $setoran->jumlah_ayat_start == $setoran->jumlah_ayat_end
+                                                    ? $setoran->jumlah_ayat_start
+                                                    : $setoran->jumlah_ayat_start . ' - ' . $setoran->jumlah_ayat_end }}
                                             </td>
                                             <td>{{ number_format($setoran->nilai) }}</td>
-                                            <td>{{$setoran->pengajar->nama}}</td>
-                                            <td>{{ $setoran->keterangan }}</td>
+                                            <td>{{ $setoran->pengajar->nama }}</td>
+                                            <td>{{ $setoran->tgl_setoran }}</td>
+                                            <td class="keterangan" title="{{ $setoran->keterangan }}">{{ $setoran->keterangan }}</td>
                                             <td class="text-center">
                                                 <a href="{{ url('setoran/edit/' . $setoran->id_setoran) }}" class="btn btn-warning btn-sm">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <!-- Tombol Hapus -->
                                                 <button class="btn btn-danger btn-sm btnDelete" data-id_setoran="{{ $setoran->id_setoran }}">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>
@@ -75,54 +107,50 @@
                                     @endforeach
                                 </tbody>
                             </table>
-                        @endforeach
-
-                        <!-- Tombol Kembali -->
-                        <div class="mt-4">
-                            <a href="{{ route('setoran.index') }}"  class="btn btn-secondary"> Kembali
-                            </a>
                         </div>
+
                     </div>
                 </div>
             </div>
         </div>
+        @endforeach
+
     </div>
 </section>
+@endsection
 
 @section('script')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-   $(document).on('click', '.btnDelete', function () {
-    let id_setoran = $(this).data('id_setoran'); // Ambil id_setoran dari tombol delete
-    let row = $(this).closest('tr'); // Ambil baris yang terkait dengan tombol delete
+    $(document).on('click', '.btnDelete', function () {
+        let id_setoran = $(this).data('id_setoran');
+        let row = $(this).closest('tr');
 
-    Swal.fire({
-        title: "Konfirmasi",
-        text: "Apakah Anda yakin ingin menghapus setoran ?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Ya, hapus!",
-        cancelButtonText: "Batal"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: "{{ route('setoran.destroy', ':idSetoran') }}".replace(':idSetoran', id_setoran),
-                type: "DELETE",
-                headers: {
-                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                },
-                success: function(response) {
-                    Swal.fire("Berhasil!", response.success, "success");
-                    row.remove(); // Hapus baris dari tabel setelah berhasil dihapus
-                },
-                error: function(xhr) {
-                    Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus data!", "error");
-                }
-            });
-        }
+        Swal.fire({
+            title: "Konfirmasi",
+            text: "Apakah Anda yakin ingin menghapus setoran?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya, hapus!",
+            cancelButtonText: "Batal"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{ route('setoran.destroy', ':idSetoran') }}".replace(':idSetoran', id_setoran),
+                    type: "DELETE",
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        Swal.fire("Berhasil!", response.success, "success");
+                        row.remove();
+                    },
+                    error: function(xhr) {
+                        Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus data!", "error");
+                    }
+                });
+            }
+        });
     });
-});
 </script>
-@endsection
-
 @endsection

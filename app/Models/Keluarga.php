@@ -15,7 +15,7 @@ class Keluarga extends Model
 
     protected $fillable = [
         'nama', 'pekerjaan', 'pendidikan', 'hubungan', 'no_telp',
-        'id_santri', 'alamat', 'email', 'tempat_lahir', 'tgl_lahir'
+        'id_santri', 'alamat', 'email', 'tempat_lahir', 'tgl_lahir','status',
     ];
 
     /**

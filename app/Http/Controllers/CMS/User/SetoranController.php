@@ -91,7 +91,7 @@ class SetoranController extends Controller
         // Setelah setoran dihapus, kita perlu menghitung ulang status dan persentase histori
         if ($histori) {
             // Cari target terkait histori
-            $target = $histori->target;
+            $target = $histori->targets;
 
             // Hitung total ayat yang disetorkan setelah penghapusan
             $totalAyatDisetorkan = Setoran::where('id_target', $target->id_target)
@@ -315,6 +315,8 @@ class SetoranController extends Controller
     public function store(Request $request)
     {
         // Validasi input
+
+
         $request->validate([
             'id_santri' => 'required|exists:santris,id_santri',
             'tgl_setoran' => 'required|date',
@@ -342,7 +344,6 @@ class SetoranController extends Controller
             ['id_santri', '=', $request->id_santri],
             ['id_kelas', '=', $request->id_kelas],
             ['id_surat', '=', $request->id_surat],
-            ['id_target', '=', $request->id_target]
         ])->first();
 
         // Validasi jika jumlah_ayat_start lebih besar dari jumlah_ayat_end
@@ -446,7 +447,6 @@ class SetoranController extends Controller
         }
         // Periksa apakah histori sudah ada
         $histori = Histori::where('id_santri', $request->id_santri)
-            ->where('id_target', $target->id_target)
             ->where('id_surat', $request->id_surat)
             ->first();
 
@@ -499,6 +499,7 @@ class SetoranController extends Controller
                 'id_santri' => $request->id_santri,
                 'id_target' => $target->id_target,
                 'id_surat' => $request->id_surat,
+                'id_kelas' => $request->id_kelas,
                 'persentase' => $persentaseBaru,
                 'id_setoran' => $setoran->id_setoran,
                 'status' => $statusHistori,
@@ -553,7 +554,6 @@ class SetoranController extends Controller
             ['id_santri', '=', $request->id_santri],
             ['id_kelas', '=', $request->id_kelas],
             ['id_surat', '=', $request->id_surat],
-            ['id_target', '=', $request->id_target ?? $setoran->target->id_target] // Jika id_target tidak ada, gunakan grup yang lama
         ])->first();
 
         // Validasi jika jumlah_ayat_start lebih besar dari jumlah_ayat_end
@@ -650,7 +650,6 @@ class SetoranController extends Controller
 
         // Ambil histori yang terkait dengan setoran yang baru dimasukkan
         $histori = Histori::where('id_santri', $request->id_santri)
-            ->where('id_target', $target->id_target)
             ->where('id_surat', $request->id_surat)
             ->first();
 
@@ -715,7 +714,7 @@ class SetoranController extends Controller
 
     public function fnGetData()
     {
-        $setorans = Setoran::with(['santri', 'kelas', 'target', 'pengajar'])->get();
+        $setorans = Setoran::with(['santri', 'kelas', 'targets', 'pengajar'])->get();
         return DataTables::of($setorans)
             ->addIndexColumn()
             ->addColumn('santri', function ($row) {
@@ -724,19 +723,19 @@ class SetoranController extends Controller
             ->addColumn('kelas', function ($row) {
                 return $row->kelas->nama_kelas ?? '-';
             })
-            ->addColumn('target', function ($row) {
+            ->addColumn('targets', function ($row) {
                 // Menggunakan nama_surat dan jumlah_ayat dari relasi surat
-                return $row->target->surat->nama_surat ?? '-';  // Menggunakan hanya nama_surat saja
+                return $row->targets->surat->nama_surat ?? '-';  // Menggunakan hanya nama_surat saja
             })
             ->addColumn('pengajar', function ($row) {
                 return $row->pengajar->nama ?? '-';
             })
-            ->addColumn('target', function ($row) {
-                return $row->target->keterangan ?? '-';
+            ->addColumn('targets', function ($row) {
+                return $row->targets->keterangan ?? '-';
             })
             ->addColumn('jumlah_ayat', function ($row) {
                 // Menampilkan jumlah_ayat dari relasi surat
-                return $row->target->jumlah_ayat_target ?? '-';
+                return $row->targets->jumlah_ayat_target ?? '-';
             })
             ->addColumn('nilai', function ($row) {
                 return $row->nilai ?? '-';
@@ -753,6 +752,11 @@ class SetoranController extends Controller
             ->addColumn('status', function ($row) {
                 return $row->status == 1 ? 'Selesai' : 'Proses';  // Ganti dengan status sesuai kebutuhan
             })
+            ->filterColumn('nama_kelas', function ($query, $keyword) {
+            $query->whereHas('kelas', function ($q) use ($keyword) {
+                $q->where('nama_kelas', 'like', "%$keyword%");
+            });
+        })
             ->addColumn('action', function ($row) {
                 return '<a href="' . route('setoran.edit', $row->id_setoran) . '" class="btn btn-sm btn-warning">Edit</a>
                         <button class="btn btn-sm btn-danger btnDelete" data-id="' . $row->id_setoran . '">Hapus</button>';

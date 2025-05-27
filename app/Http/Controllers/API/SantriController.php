@@ -49,7 +49,7 @@ class SantriController extends Controller
     {
         try {
             // Ambil data santri dengan relasi ke kelas dan target
-            $santri = Santri::with(['kelas', 'target'])->get();
+            $santri = Santri::with(['kelas', 'targets'])->get();
 
             // Format foto santri
             $this->formatFotoSantri($santri);
@@ -57,7 +57,7 @@ class SantriController extends Controller
             // Menambahkan id_group ke setiap santri berdasarkan target yang ada
             $santri->map(function ($item) {
                 // Ambil id_group dari target pertama yang terhubung dengan santri
-                $item->id_group = $item->target->first()->id_group ?? null;
+                $item->id_group = $item->targets->first()->id_group ?? null;
             });
 
             return response()->json([
@@ -85,7 +85,7 @@ class SantriController extends Controller
                 ], 400);
             }
 
-            $santri = Santri::with('kelas', 'target')->find($id);
+            $santri = Santri::with('kelas', 'targets')->find($id);
 
             if (!$santri) {
                 return response()->json([
@@ -173,6 +173,7 @@ class SantriController extends Controller
                     'nama_surat' => $histori->surat->nama_surat ?? '-',
                     'persentase' => $histori->persentase,
                     'nilai' => $histori->nilai ?? 0,
+                    'nilai_remedial' => $histori->nilai_remedial ?? 0,
                 ];
             });
 

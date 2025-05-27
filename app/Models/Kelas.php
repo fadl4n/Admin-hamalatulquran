@@ -21,4 +21,5 @@ class Kelas extends Model
     {
         return $this->hasMany(Santri::class, 'id_kelas', 'id_kelas');
     }
+    
 }
