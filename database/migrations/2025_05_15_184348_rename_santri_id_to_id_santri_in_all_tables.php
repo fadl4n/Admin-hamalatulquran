@@ -30,14 +30,14 @@ return new class extends Migration
         });
 
         // TARGETS
-        Schema::table('target', function (Blueprint $table) {
+        Schema::table('targets', function (Blueprint $table) {
             $table->dropForeign(['santri_id']);
             $table->renameColumn('santri_id', 'id_santri');
         });
-        Schema::table('target', function (Blueprint $table) {
+        Schema::table('targets', function (Blueprint $table) {
             $table->foreign('id_santri')->references('id_santri')->on('santris')->onDelete('cascade');
         });
-        
+
     }
 
     public function down(): void
@@ -61,11 +61,11 @@ return new class extends Migration
         });
 
         // TARGETS
-        Schema::table('target', function (Blueprint $table) {
+        Schema::table('targets', function (Blueprint $table) {
             $table->dropForeign(['id_santri']);
             $table->renameColumn('id_santri', 'santri_id');
         });
-        Schema::table('target', function (Blueprint $table) {
+        Schema::table('targets', function (Blueprint $table) {
             $table->foreign('santri_id')->references('id_santri')->on('santris')->onDelete('cascade');
         });
     }
