@@ -83,14 +83,10 @@ class SetoranController extends Controller
             ], 422);
         }
 
-        $target = Target::where([
-            ['id_santri', '=', $request->id_santri],
-            ['id_kelas', '=', $request->id_kelas],
-            ['id_surat', '=', $request->id_surat],
-        ])->first();
+        $target = Target::find($request->id_target);
 
-        if (!$target) {
-            return response()->json(['message' => 'Target tidak ditemukan.'], 404);
+        if (!$target || $target->id_santri != $request->id_santri || $target->id_kelas != $request->id_kelas || $target->id_surat != $request->id_surat) {
+            return response()->json(['message' => 'Target tidak ditemukan atau tidak sesuai dengan data santri/kelas/surat'], 404);
         }
 
         // Validasi ayat

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Target;
+use App\Models\Setoran;
 use App\Models\Santri;
 use App\Models\Surat;
 use App\Models\Histori;
@@ -104,7 +105,7 @@ class TargetController extends Controller
         $result = $target->map(function ($target) {
             $ayatAwalTarget = (int) $target->jumlah_ayat_target_awal;
             $ayatAkhirTarget = (int) $target->jumlah_ayat_target;
-            $jumlahAyat = ($ayatAkhirTarget >= $ayatAwalTarget) ? $ayatAkhirTarget - $ayatAwalTarget + 1 : 0;
+            $jumlahAyat = $target->jumlah_ayat;
 
             $jumlahSetoran = $target->setoran->reduce(function ($carry, $item) {
                 $ayatAwal = (int) $item->jumlah_ayat_start;
@@ -328,27 +329,30 @@ class TargetController extends Controller
         ]);
 
         // Update histori
-        $histori = Histori::where('id_target', $target->id_target)->first();
-        if ($histori) {
-            $totalAyatDisetorkan = \App\Models\Setoran::where('id_target', $target->id_target)
+        $histories = Histori::where('id_target', $target->id_target)->get();
+        foreach ($histories as $histori) {
+            $histori->updatePersentase();
+            $totalAyatDisetorkan = Setoran::where('id_target', $target->id_target)
                 ->sum(DB::raw('jumlah_ayat_end - jumlah_ayat_start + 1'));
 
-            $persentaseBaru = number_format(($totalAyatDisetorkan / max(1, $request->jumlah_ayat_target)) * 100, 2);
+            $jumlahAyatTarget = $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1;
+            $persentaseBaru = number_format(($totalAyatDisetorkan / max(1, $jumlahAyatTarget)) * 100, 2);
 
-            $status = Histori::determineStatus($totalAyatDisetorkan, $request->jumlah_ayat_target, $request->tgl_target, $histori->tgl_setoran);
+            $status = Histori::determineStatus($totalAyatDisetorkan, $jumlahAyatTarget, $request->tgl_target, $histori->tgl_setoran);
 
             $histori->update([
                 'id_santri' => $target->id_santri,
                 'id_surat' => $target->id_surat,
                 'id_kelas' => $target->id_kelas,
+                'ayat' => $jumlahAyatTarget,
                 'persentase' => $persentaseBaru,
                 'status' => $status,
                 'tgl_target' => $target->tgl_target,
             ]);
         }
-
         return response()->json(['success' => true, 'message' => 'Target berhasil diperbarui', 'data' => $target]);
     }
+
     public function destroy(Request $request, $id_target)
     {
         // $authHeader = $request->header('Authorization');

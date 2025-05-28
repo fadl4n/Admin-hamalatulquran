@@ -25,6 +25,11 @@ class Target extends Model
         'id_pengajar',
 
     ];
+
+    public function getJumlahAyatAttribute()
+    {
+        return max(0, $this->jumlah_ayat_target - $this->jumlah_ayat_target_awal + 1);
+    }
     public function santri()
     {
         return $this->belongsTo(Santri::class, 'id_santri', 'id_santri');

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class Histori extends Model
 {
@@ -55,6 +56,29 @@ class Histori extends Model
     {
         return $this->belongsTo(Setoran::class, 'id_setoran', 'id_setoran');
     }
+
+    public function updatePersentase()
+    {
+        $target = $this->targets;
+
+        if (!$target) return;
+
+        $ayatAwal = $target->jumlah_ayat_target_awal;
+        $ayatAkhir = $target->jumlah_ayat_target;
+
+        // Total ayat target
+        $totalTarget = max(1, $ayatAkhir - $ayatAwal + 1);
+
+        // Hitung total ayat yang sudah disetor
+        $totalDisetor = Setoran::where('id_target', $target->id_target)
+            ->where('id_santri', $this->id_santri)
+            ->sum(DB::raw('jumlah_ayat_end - jumlah_ayat_start + 1'));
+
+        // Update field persentase
+        $this->persentase = round(($totalDisetor / $totalTarget) * 100, 2);
+        $this->save();
+    }
+
     public static function determineStatus($totalAyatDisetorkan, $jumlahAyatTarget, $tglTarget, $tglSetoranTerakhir)
     {
         if ($tglTarget instanceof \Carbon\Carbon) {

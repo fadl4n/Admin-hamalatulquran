@@ -58,7 +58,7 @@ class HistoriController extends Controller
                     'id_target' => $h->id_target,
                     'id_surat' => $h->surat->id_surat,
                     'nama_surat' => $h->targets->surat->nama_surat ?? '-',
-                    'jumlah_ayat' => $h->targets->jumlah_ayat_target,
+                    'jumlah_ayat' => $h->targets->jumlah_ayat,
                     'persentase' => $h->persentase,
                     'tgl_target' => $h->targets->tgl_target,
                     'status' => $h->status,
