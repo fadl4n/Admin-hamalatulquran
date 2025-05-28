@@ -137,6 +137,7 @@ class SetoranController extends Controller
         // Hitung persentase dan status
         $totalAyat = max(1, $target->jumlah_ayat_target - $target->jumlah_ayat_target_awal + 1);
         $persentase = number_format((($request->jumlah_ayat_end - $request->jumlah_ayat_start + 1) / $totalAyat) * 100, 2);
+        $status = $persentase >= 100 ? 1 : 0; // 1 untuk selesai, 0 untuk proses
 
         $setoran = Setoran::create([
             'id_target' => $target->id_target,
@@ -149,6 +150,7 @@ class SetoranController extends Controller
             'tgl_setoran' => $request->tgl_setoran,
             'persentase' => $persentase,
             'nilai' => $request->nilai,
+            'status' => $status, // Status ditentukan otomatis
             'keterangan' => $request->keterangan,
         ]);
 
