@@ -25,6 +25,7 @@ class Setoran extends Model
         'jumlah_ayat_start',
         'jumlah_ayat_end',
         'nilai',
+        'status'
     ];
 
     // Relasi ke Santri
@@ -52,6 +53,10 @@ class Setoran extends Model
     }
 
     // Relasi ke Targets (menggunakan `hasMany` karena satu setoran bisa memiliki banyak target)
+    public function target()
+    {
+        return $this->hasMany(Target::class, 'id_target', 'id_target');
+    }
     public function targets()
     {
         return $this->hasMany(Target::class, 'id_target', 'id_target');

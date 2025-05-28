@@ -44,7 +44,7 @@
                                                 <option value="">Pilih Pengajar</option>
                                                 @foreach ($pengajars as $pengajar)
                                                     <option value="{{ $pengajar->id_pengajar }}">{{ $pengajar->nama }}
-                                                    </option>
+                                          <div class=""></div>           </option>
                                                 @endforeach
                                             </select>
                                         </div>
