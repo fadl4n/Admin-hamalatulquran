@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('persentase', 5, 2);
 
 
-            $table->foreign('id_target')->references('id_target')->on('target')->onDelete('cascade'); //
+            $table->foreign('id_target')->references('id_target')->on('targets')->onDelete('cascade'); //
             $table->foreign('id_setoran')->references('id_setoran')->on('setorans')->onDelete('set null'); //
             $table->foreign('id_santri')->references('id_santri')->on('santris')->onDelete('cascade'); //
             $table->foreign('id_surat')->references('id_surat')->on('surats')->onDelete('cascade'); //

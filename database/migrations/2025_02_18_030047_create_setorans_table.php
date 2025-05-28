@@ -30,7 +30,7 @@ return new class extends Migration
             $table->foreign('id_kelas')->references('id_kelas')->on('kelas')->onDelete('cascade');
             $table->foreign('id_surat')->references('id_surat')->on('surats')->onDelete('set null');
             $table->foreign('id_pengajar')->references('id_pengajar')->on('pengajars')->onDelete('cascade');
-            $table->foreign('id_target')->references('id_target')->on('target')->onDelete('cascade'); //
+            $table->foreign('id_target')->references('id_target')->on('targets')->onDelete('cascade'); //
         });
     }
 

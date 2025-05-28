@@ -39,11 +39,11 @@ return new class extends Migration
         });
 
         // TARGETS
-        Schema::table('target', function (Blueprint $table) {
+        Schema::table('targets', function (Blueprint $table) {
             $table->dropForeign(['id_santri']);
             $table->renameColumn('id_santri', 'santri_id');
         });
-        Schema::table('target', function (Blueprint $table) {
+        Schema::table('targets', function (Blueprint $table) {
             $table->foreign('santri_id')->references('id')->on('santris')->onDelete('cascade');
         });
     }
@@ -83,11 +83,11 @@ return new class extends Migration
         });
 
         // TARGETS
-        Schema::table('target', function (Blueprint $table) {
+        Schema::table('targets', function (Blueprint $table) {
             $table->dropForeign(['santri_id']);
             $table->renameColumn('santri_id', 'id_santri');
         });
-        Schema::table('target', function (Blueprint $table) {
+        Schema::table('targets', function (Blueprint $table) {
             $table->foreign('id_santri')->references('id')->on('santris')->onDelete('cascade');
         });
     }
