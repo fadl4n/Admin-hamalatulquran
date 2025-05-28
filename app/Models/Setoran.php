@@ -25,6 +25,7 @@ class Setoran extends Model
         'jumlah_ayat_start',
         'jumlah_ayat_end',
         'nilai',
+        'status'
     ];
 
     // Relasi ke Santri

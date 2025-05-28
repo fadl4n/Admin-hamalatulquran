@@ -44,7 +44,7 @@
                                                 <option value="">Pilih Pengajar</option>
                                                 @foreach ($pengajars as $pengajar)
                                                     <option value="{{ $pengajar->id_pengajar }}">{{ $pengajar->nama }}
-                                                    </option>
+                                          <div class=""></div>           </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -146,135 +146,174 @@
 
 
 
+
 @section('script')
-<script src="{{ asset('/bower_components/admin-lte/plugins/select2/js/select2.full.min.js') }}"></script>
-<script>
-    $(document).ready(function() {
-        // Inisialisasi Select2
-        $('.select2').select2();
+    <script src="{{ asset('/bower_components/admin-lte/plugins/select2/js/select2.full.min.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            $('#id_santri').on('change', function() {
+                var selectedOption = $(this).find('option:selected');
+                var idKelas = selectedOption.data('id_kelas');
 
-        // Saat Santri dipilih
-        $('#id_santri').on('change', function() {
-            var santriId = $(this).val();
+                // Set value dropdown kelas
+                $('#id_kelas').val(idKelas);
+            });
 
-            // Kosongkan dropdown target, surat, dan kelas
-            $('#id_target').empty().append('<option value="">- Pilih Target -</option>');
-            $('#id_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
-            $('#id_kelas').val(null).trigger('change.select2');
+            // Inisialisasi Select2
+            $('.select2').select2();
+            $('#id_santri').on('change', function() {
+                var santriId = $(this).val();
 
-            if (santriId) {
-                // Ambil target
-                $.ajax({
-                    url: "{{ route('setoran.gettargetsBySantri', ':santri_id') }}".replace(':santri_id', santriId),
-                    type: 'GET',
-                    success: function(data) {
-                        if (data.target.length > 0) {
-                            data.target.forEach(function(target, index) {
+                // Reset dropdown target, surat, dan kelas dulu
+                $('#id_target').empty().append('<option value="">- Pilih Target -</option>');
+                $('#id_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
+                $('#id_kelas').val(null).trigger('change.select2');
+
+                if (santriId) {
+                    // Ambil target
+                    $.ajax({
+                        url: "{{ route('setoran.gettargetsBySantri', ':santri_id') }}".replace(
+                            ':santri_id', santriId),
+                        type: 'GET',
+                        success: function(data) {
+                            if (data.target.length > 0) {
+                                data.target.forEach(function(target, index) {
+                                    $('#id_target').append(
+                                        '<option value="' + target.id_target +
+                                        '">Target ' + (index + 1) + '</option>'
+                                    );
+                                });
+                            } else {
                                 $('#id_target').append(
-                                    '<option value="' + target.id_target + '">Target ' + (index + 1) + '</option>'
-                                );
-                            });
-                        } else {
-                            $('#id_target').append('<option value="">- Tidak ada target -</option>');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Error mengambil target:", error);
-                    }
-                });
+                                    '<option value="">- Tidak ada target -</option>');
+                            }
 
-                // Ambil kelas
-                $.ajax({
-                    url: "{{ route('setoran.getKelasBySantri', ':id') }}".replace(':id', santriId),
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success && response.id_kelas) {
-                            $('#id_kelas').val(response.id_kelas).trigger('change.select2');
-                        } else {
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error mengambil target:", error);
+                        }
+                    });
+
+                    // Ambil kelas
+                    $.ajax({
+                        url: "{{ route('setoran.getKelasBySantri', ':id') }}".replace(':id',
+                            santriId),
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success && response.id_kelas) {
+                                $('#id_kelas').val(response.id_kelas).trigger('change.select2');
+                            } else {
+                                $('#id_kelas').val(null).trigger('change.select2');
+                            }
+                        },
+                        error: function() {
                             $('#id_kelas').val(null).trigger('change.select2');
                         }
-                    },
-                    error: function() {
-                        $('#id_kelas').val(null).trigger('change.select2');
-                    }
-                });
-            }
-        });
+                    });
+                }
+            });
 
-        // Saat Target dipilih
-        $('#id_target').on('change', function() {
-            var targetId = $(this).val();
-            $('#id_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
 
-            if (targetId) {
-                $.ajax({
-                    url: "{{ url('get-nama-surat') }}",
-                    type: 'GET',
-                    data: {
-                        group_id: targetId // hanya kirim id_target, sesuai permintaan
-                    },
-                    success: function(data) {
-                        if (data.surats && data.surats.length > 0) {
-                            data.surats.forEach(function(surat) {
-                                $('#id_surat').append('<option value="' + surat.id_surat + '">' + surat.nama_surat + '</option>');
-                            });
-                        } else {
-                            $('#id_surat').append('<option value="">- Tidak ada surat -</option>');
+
+            // Ketika target dipilih, update nama surat yang terkait
+            $('#id_target').on('change', function() {
+                var groupId = $(this).val();
+                var santriId = $('#id_santri').val(); // Ambil ID Santri yang dipilih
+
+                // Kosongkan dropdown id_surat (bukan nama_surat lagi)
+                $('#id_surat').empty().append('<option value="">- Pilih Nama Surat -</option>');
+
+                if (groupId && santriId) {
+                    $.ajax({
+                        url: "{{ url('get-nama-surat') }}",
+                        type: 'GET',
+                        data: {
+                            group_id: groupId,
+                            santri_id: santriId
+                        },
+                        success: function(data) {
+                            console.log("Surat yang diterima:", data); // Debugging
+
+                            let uniqueSurats = new Set();
+
+                            if (data.surats && data.surats.length > 0) {
+                                data.surats.forEach(function(surat) {
+                                    if (surat.id_surat && !uniqueSurats.has(surat
+                                            .id_surat)) {
+                                        uniqueSurats.add(surat.id_surat);
+                                        $('#id_surat').append('<option value="' + surat
+                                            .id_surat + '">' + surat.nama_surat +
+                                            '</option>');
+                                    }
+                                });
+                            } else {
+                                $('#id_surat').append(
+                                    '<option value="">- Tidak ada surat -</option>');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error mengambil surat:", error);
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Error mengambil surat:", error);
-                    }
-                });
-            }
-        });
+                    });
+                }
+            });
 
-        // Validasi jumlah ayat saat nama surat dipilih
-        $('#id_surat').on('change', function() {
-            var idSurat = $(this).val();
-            var idSantri = $('#id_santri').val();
-            var idTarget = $('#id_target').val();
+            // Ketika nama surat dipilih, lakukan validasi jumlah ayat
+            $('#nama_surat').on('change', function() {
+                var idSurat = $(this).val();
+                var idSantri = $('#id_santri').val();
+                var idGroup = $('#id_target').val();
 
-            if (idSurat && idSantri && idTarget) {
-                $.ajax({
-                    url: "{{ url('get-ayats-validation') }}",
-                    type: 'GET',
-                    data: {
-                        id_surat: idSurat,
-                        id_santri: idSantri,
-                        id_target: idTarget
-                    },
-                    success: function(data) {
-                        if (data.success) {
-                            var jumlahAwal = data.jumlah_ayat_target_awal;
-                            var jumlahAkhir = data.jumlah_ayat_target;
+                if (idSurat && idSantri && idGroup) {
+                    $.ajax({
+                        url: "{{ url('get-ayats-validation') }}",
+                        type: 'GET',
+                        data: {
+                            id_surat: idSurat,
+                            id_santri: idSantri,
+                            id_target: idGroup
+                        },
+                        success: function(data) {
+                            console.log("Validasi target diterima:", data); // Debugging
 
-                            // Validasi jumlah ayat start
-                            $('#jumlah_ayat_start').off('input').on('input', function() {
-                                var start = parseInt($(this).val());
-                                if (start < jumlahAwal || start > jumlahAkhir) {
-                                    alert('Jumlah ayat start harus antara ' + jumlahAwal + ' dan ' + jumlahAkhir);
-                                }
-                            });
+                            if (data.success) {
+                                var jumlahAyatTargetAwal = data.jumlah_ayat_target_awal;
+                                var jumlahAyatTarget = data.jumlah_ayat_target;
 
-                            // Validasi jumlah ayat end
-                            $('#jumlah_ayat_end').off('input').on('input', function() {
-                                var end = parseInt($(this).val());
-                                if (end < jumlahAwal || end > jumlahAkhir) {
-                                    alert('Jumlah ayat end harus antara ' + jumlahAwal + ' dan ' + jumlahAkhir);
-                                }
-                            });
-                        } else {
-                            alert(data.message);
+                                // Validasi input jumlah ayat start
+                                $('#jumlah_ayat_start').on('input', function() {
+                                    var jumlahAyatStart = $(this).val();
+                                    if (jumlahAyatStart < jumlahAyatTargetAwal ||
+                                        jumlahAyatStart > jumlahAyatTarget) {
+                                        alert('Jumlah ayat start tidak boleh lebih kecil dari ' +
+                                            jumlahAyatTargetAwal +
+                                            ' dan tidak boleh lebih besar dari ' +
+                                            jumlahAyatTarget + '.');
+                                    }
+                                });
+
+                                // Validasi input jumlah ayat end
+                                $('#jumlah_ayat_end').on('input', function() {
+                                    var jumlahAyatEnd = $(this).val();
+                                    if (jumlahAyatEnd < jumlahAyatTargetAwal ||
+                                        jumlahAyatEnd > jumlahAyatTarget) {
+                                        alert('Jumlah ayat end tidak boleh lebih kecil dari ' +
+                                            jumlahAyatTargetAwal +
+                                            ' dan tidak boleh lebih besar dari ' +
+                                            jumlahAyatTarget + '.');
+                                    }
+                                });
+                            } else {
+                                alert(data.message); // Menampilkan pesan kesalahan dari server
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error validasi target:", error);
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Error validasi target:", error);
-                    }
-                });
-            }
+                    });
+                }
+            });
         });
-    });
-</script>
+    </script>
 @endsection
