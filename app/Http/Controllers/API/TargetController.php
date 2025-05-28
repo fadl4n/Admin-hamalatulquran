@@ -102,11 +102,25 @@ class TargetController extends Controller
         }
 
         $result = $target->map(function ($target) {
-            $latestHistori = $target->histori->sortByDesc('id_histori')->first(); // ambil histori terakhir
-            $persentase = $latestHistori ? $latestHistori->persentase : null;
+            $ayatAwalTarget = (int) $target->jumlah_ayat_target_awal;
+            $ayatAkhirTarget = (int) $target->jumlah_ayat_target;
+            $jumlahAyat = ($ayatAkhirTarget >= $ayatAwalTarget) ? $ayatAkhirTarget - $ayatAwalTarget + 1 : 0;
+
+            $jumlahSetoran = $target->setoran->reduce(function ($carry, $item) {
+                $ayatAwal = (int) $item->jumlah_ayat_start;
+                $ayatAkhir = (int) $item->jumlah_ayat_end;
+                return $carry + ($ayatAkhir - $ayatAwal + 1); // hitung jumlah ayat tiap record
+            }, 0);
+
+            $persentase = ($jumlahAyat > 0)
+                ? round(($jumlahSetoran / $jumlahAyat) * 100, 1)
+                : 0;
 
             $avgNilai = ($persentase == 100)
-                ? round($target->setoran->avg('nilai') ?? 0, 2) : 0;
+                ? round($target->setoran->avg('nilai') ?? 0, 2)
+                : 0;
+
+            // $persentase = $latestHistori ? $latestHistori->persentase : null;
 
             return [
                 'id_target' => $target->id_target,
@@ -115,13 +129,14 @@ class TargetController extends Controller
                 'nama_pengajar' => optional($target->pengajar)->nama ?? '-',
                 'jenis_kelamin_pengajar' => optional($target->pengajar)->jenis_kelamin ?? '-',
                 'nama_surat' => optional($target->surat)->nama_surat ?? 'Tidak Ditemukan',
-                'ayat_awal' => $target->jumlah_ayat_target_awal ?? '0',
-                'ayat_akhir' => $target->jumlah_ayat_target ?? '0',
-                'jumlah_ayat' => $target->jumlah_ayat_target,
+                'ayat_awal' => $ayatAwalTarget,
+                'ayat_akhir' => $ayatAkhirTarget,
+                'jumlah_ayat' => $jumlahAyat,
                 'tgl_mulai' => $target->tgl_mulai ?? '0',
                 'tgl_target' => $target->tgl_target ?? '0',
-                // 'persentase' => $target->histori->avg('persentase'),
                 'persentase' => $persentase,
+                'jumlah_setoran' => $jumlahSetoran,
+                'sisa_ayat' => $jumlahAyat - $jumlahSetoran,
                 'nilai' => $avgNilai,
             ];
         });

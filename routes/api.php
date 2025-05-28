@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Pengajar;
 use App\Models\Santri;
+use Firebase\JWT\JWT;
+use \Firebase\JWT\Key;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +42,17 @@ Route::get('/health-check', function (Request $request) {
         'message' => 'OK',
     ], 200);
 });
+
+Route::get('/debug-token', function (Request $request) {
+    try {
+        $token = str_replace("Bearer ", "", $request->header('Authorization'));
+        $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
+        return response()->json(['decoded' => $decoded]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()]);
+    }
+});
+
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'doLogin');
