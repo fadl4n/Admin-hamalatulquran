@@ -168,6 +168,7 @@ class AuthController extends Controller
                 'message' => 'User tidak ditemukan'
             ], 404);
         } catch (\Exception $e) {
+            Log::error('JWT decode error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token tidak valid: ' . $e->getMessage()

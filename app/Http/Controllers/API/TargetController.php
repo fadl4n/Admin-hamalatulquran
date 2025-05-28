@@ -120,7 +120,6 @@ class TargetController extends Controller
                 'jumlah_ayat' => $target->jumlah_ayat_target,
                 'tgl_mulai' => $target->tgl_mulai ?? '0',
                 'tgl_target' => $target->tgl_target ?? '0',
-                // 'persentase' => $target->histori->avg('persentase'),
                 'persentase' => $persentase,
                 'nilai' => $avgNilai,
             ];
