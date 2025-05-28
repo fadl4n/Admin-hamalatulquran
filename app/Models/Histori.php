@@ -37,6 +37,10 @@ class Histori extends Model
     {
         return $this->belongsTo(Santri::class, 'id_santri');
     }
+     public function target()
+    {
+        return $this->hasMany(Target::class, 'id_target', 'id_target');
+    }
 
     // Relasi ke Kelas
     public function kelas()
